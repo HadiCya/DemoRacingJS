@@ -34,12 +34,17 @@ var active = true
 
 function preload() {
   this.load.image('car', 'static/assets/car.png')
+  
 }
+
+var newvectors = new Vector3();
 
 function create() {
   var self = this
   this.socket = io()
-  this.otherPlayers = this.add.group() //fix
+  this.otherPlayers = this.add.group()
+
+  
 
   this.socket.on('currentPlayers', function (players) {
     Object.keys(players).forEach(function (id) {
@@ -67,35 +72,15 @@ function create() {
 
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-
       if (playerInfo.playerId === otherPlayer.playerId) {
-        
-        //GET CURRENT POSITION AND ROTATION, AND LERP TOWARDS NEW ONE
-      var timeDifference = new Date().getTime() - oldTime;
-      // Percentage of time passed since update was received (I use 100ms gaps)
-      var interPercent = (timeDifference) / 100;
-      // Need to lerp between values provided in latest update and older one
-      // var p = (new Vector3(playerInfo.x, playerInfo.y)).subtract(new Vector3(otherPlayer.position));
-
-      // p = p.timesScalar(interPercent);
-
-      // New position is the older lerped toward newer position where lerp 
-      //percentage is the time passed 
-      otherPlayer.position = lerp(new Vector3(playerInfo.x, playerInfo.y), new Vector3(otherPlayer.position));
-
-      // Now update rotation in a smooth manner
-      var rotationDifference = (playerInfo.rotation - otherPlayer.rotation);
-      if (rotationDifference && rotationDifference != 0) {
-          otherPlayer.rotation = (otherPlayer.rotation + (rotationDifference * interPercent));
-      }
-      oldTime = playerInfo.time;
-      console.log(oldTime);
-        // otherPlayer.setRotation(playerInfo.rotation)
-        // otherPlayer.setPosition(playerInfo.x, playerInfo.y)
-      }
+        otherPlayer.setRotation(playerInfo.rotation)
+        otherPlayer.setPosition(playerInfo.x, playerInfo.y)
+    }
     })
   })
 }
+
+
 
 function addPlayer(self, playerInfo) {
   self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
@@ -127,7 +112,7 @@ function update() {
   //   } else {
   //     this.car.setAngularVelocity(0)
   //   }
-
+      //var temp = add.group();
   //   const velX = Math.cos((this.car.angle - 360) * 0.01745)
   //   const velY = Math.sin((this.car.angle - 360) * 0.01745)
   //   if (this.cursors.up.isDown) {
