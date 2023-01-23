@@ -76,17 +76,17 @@ function create() {
       var interPercent = (timeDifference) / 100;
       // Need to lerp between values provided in latest update and older one
       var p = (new Vector3(playerInfo.x, playerInfo.y)).subtract(new Vector3(otherPlayer.position));
-      
+
       p = p.timesScalar(interPercent);
 
       // New position is the older lerped toward newer position where lerp 
       //percentage is the time passed 
-      otherPlayer.setPosition(new Vector3(otherPlayer.position).add(p));
+      otherPlayer.position = (new Vector3(otherPlayer.position).add(p));
 
       // Now update rotation in a smooth manner
       var rotationDifference = (playerInfo.rotation - otherPlayer.rotation);
       if (rotationDifference && rotationDifference != 0) {
-          otherPlayer.setRotation(otherPlayer.rotation + (rotationDifference * interPercent));
+          otherPlayer.rotation = (otherPlayer.rotation + (rotationDifference * interPercent));
       }
       oldTime = playerInfo.time;
         // otherPlayer.setRotation(playerInfo.rotation)
