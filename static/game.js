@@ -80,7 +80,7 @@ function addPlayer(self, playerInfo) {
     .setDisplaySize(50, 50)
 
   //self.car.setCollideWorldBounds(true)
-  //self.car.setTint(playerInfo.color)
+  self.car.setTint(playerInfo.color)
   //self.car.setDrag(1000)
 }
 
@@ -91,7 +91,7 @@ function addOtherPlayers(self, playerInfo) {
     .setRotation(playerInfo.rotation)
     
   otherPlayer.playerId = playerInfo.playerId
-  //otherPlayer.setTint(playerInfo.color)
+  otherPlayer.setTint(playerInfo.color)
   self.otherPlayers.add(otherPlayer)
 }
 
