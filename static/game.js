@@ -29,7 +29,6 @@ var speed = 0.0;
 var accel = 0.2;
 var maxspeed = 10.0;
 var decay = 0.05;
-var deltaTime=0;
 var active = true
 
 function preload() {
@@ -68,8 +67,26 @@ function create() {
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
-        otherPlayer.setRotation(playerInfo.rotation)
-        otherPlayer.setPosition(playerInfo.x, playerInfo.y)
+        //GET CURRENT POSITION AND ROTATION, AND LERP TOWARDS NEW ONE
+      var timeDifference = new Date().getTime() - this.serverUpdates[1].time;
+      // Percentage of time passed since update was received (I use 100ms gaps)
+      var interPercent = (timeDifference) / 100;
+      // Need to lerp between values provided in latest update and older one
+      var p = (new Vector3(playerInfo.x, playerInfo.y)).subtract(new Vector3(otherPlayer.position));
+      p = p.timesScalar(interPercent);
+
+      // New position is the older lerped toward newer position where lerp 
+      //percentage is the time passed 
+      otherPlayer.setPosition(new Vector3(otherPlayer.position).add(p));
+
+      // Now update rotation in a smooth manner
+      var rotationDifference = (playerInfo.rotation - otherPlayer.rotation);
+      if (rotationDifference && rotationDifference != 0) {
+          otherPlayer.setRotation(otherPlayer.rotation + (rotationDifference * interPercent));
+      }
+      
+        // otherPlayer.setRotation(playerInfo.rotation)
+        // otherPlayer.setPosition(playerInfo.x, playerInfo.y)
       }
     })
   })
@@ -97,7 +114,6 @@ function addOtherPlayers(self, playerInfo) {
 }
 
 function update() {
-  deltaTime = game.time.elapsed/1000;
   // if (this.car) {
   //   if (this.cursors.left.isDown && (this.cursors.up.isDown || this.cursors.down.isDown)) {
   //     this.car.setAngularVelocity(-100)
@@ -166,7 +182,7 @@ function update() {
     if (this.cursors.left.isDown) {
         this.car.angle -= 3.0;
     }
-    this.car.setVelocity(speed * deltaTime * Math.cos(this.car.rotation), speed * deltaTime * Math.sin(this.car.rotation));
+    this.car.setVelocity(speed * Math.cos(this.car.rotation), speed * Math.sin(this.car.rotation));
     this.car.setAngularVelocity(0);
   
       var x = this.car.x
