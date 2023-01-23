@@ -68,7 +68,7 @@ function create() {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
         //GET CURRENT POSITION AND ROTATION, AND LERP TOWARDS NEW ONE
-      var timeDifference = new Date().getTime() - this.serverUpdates[1].time;
+      var timeDifference = new Date().getTime() - playerInfo.time;
       // Percentage of time passed since update was received (I use 100ms gaps)
       var interPercent = (timeDifference) / 100;
       // Need to lerp between values provided in latest update and older one
@@ -84,7 +84,7 @@ function create() {
       if (rotationDifference && rotationDifference != 0) {
           otherPlayer.setRotation(otherPlayer.rotation + (rotationDifference * interPercent));
       }
-      
+
         // otherPlayer.setRotation(playerInfo.rotation)
         // otherPlayer.setPosition(playerInfo.x, playerInfo.y)
       }
