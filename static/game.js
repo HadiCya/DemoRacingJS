@@ -1,16 +1,21 @@
 var config = {
   type: Phaser.AUTO,
   parent: 'phaser-example',
-  width: 800,
-  height: 600,
-  backgroundColor: '#ffffff',
-  physics: {
-    default: 'matter',
-    matter: {
-      debug: true,
-      gravity: { y: 0 }
-    }
-  },
+width: 1280,
+            height: 720,
+            physics: {
+                default: "matter",
+                matter: {
+                    gravity: {
+                        y: 0
+                    },
+                    setBounds: {
+                        width: 1280,
+                        height: 720
+                    },
+                    debug: true
+                }
+            },
   scene: {
     preload: preload,
     create: create,
@@ -21,8 +26,8 @@ var config = {
 var game = new Phaser.Game(config)
 
 var speed = 0.0;
-var accel = 0.2;
-var maxspeed = 10.0
+var accel = 0.1;
+var maxspeed = 5.0
 var decay = 0.05
 var active = true
 
