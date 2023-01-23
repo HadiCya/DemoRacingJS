@@ -29,6 +29,7 @@ var speed = 0.0;
 var accel = 0.2;
 var maxspeed = 10.0;
 var decay = 0.05;
+var oldTime = new Date().getTime();
 var active = true
 
 function preload() {
@@ -66,13 +67,16 @@ function create() {
 
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+
       if (playerInfo.playerId === otherPlayer.playerId) {
+        
         //GET CURRENT POSITION AND ROTATION, AND LERP TOWARDS NEW ONE
-      var timeDifference = new Date().getTime() - playerInfo.time;
+      var timeDifference = new Date().getTime() - oldTime;
       // Percentage of time passed since update was received (I use 100ms gaps)
       var interPercent = (timeDifference) / 100;
       // Need to lerp between values provided in latest update and older one
       var p = (new Vector3(playerInfo.x, playerInfo.y)).subtract(new Vector3(otherPlayer.position));
+      
       p = p.timesScalar(interPercent);
 
       // New position is the older lerped toward newer position where lerp 
@@ -84,7 +88,7 @@ function create() {
       if (rotationDifference && rotationDifference != 0) {
           otherPlayer.setRotation(otherPlayer.rotation + (rotationDifference * interPercent));
       }
-
+      oldTime = playerInfo.time;
         // otherPlayer.setRotation(playerInfo.rotation)
         // otherPlayer.setPosition(playerInfo.x, playerInfo.y)
       }
