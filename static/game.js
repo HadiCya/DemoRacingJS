@@ -26,9 +26,10 @@ width: 1280,
 var game = new Phaser.Game(config)
 
 var speed = 0.0;
-var accel = 0.1;
-var maxspeed = 5.0
-var decay = 0.05
+var accel = 0.2;
+var maxspeed = 10.0;
+var decay = 0.05;
+var deltaTime=0;
 var active = true
 
 function preload() {
@@ -96,6 +97,7 @@ function addOtherPlayers(self, playerInfo) {
 }
 
 function update() {
+  deltaTime = game.time.elapsed/1000;
   // if (this.car) {
   //   if (this.cursors.left.isDown && (this.cursors.up.isDown || this.cursors.down.isDown)) {
   //     this.car.setAngularVelocity(-100)
@@ -164,7 +166,7 @@ function update() {
     if (this.cursors.left.isDown) {
         this.car.angle -= 3.0;
     }
-    this.car.setVelocity(speed * Math.cos(this.car.rotation), speed * Math.sin(this.car.rotation));
+    this.car.setVelocity(speed * deltaTime * Math.cos(this.car.rotation), speed * deltaTime * Math.sin(this.car.rotation));
     this.car.setAngularVelocity(0);
   
       var x = this.car.x
