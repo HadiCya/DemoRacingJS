@@ -75,13 +75,13 @@ function create() {
       // Percentage of time passed since update was received (I use 100ms gaps)
       var interPercent = (timeDifference) / 100;
       // Need to lerp between values provided in latest update and older one
-      var p = (new Vector3(playerInfo.x, playerInfo.y)).subtract(new Vector3(otherPlayer.position));
+      // var p = (new Vector3(playerInfo.x, playerInfo.y)).subtract(new Vector3(otherPlayer.position));
 
-      p = p.timesScalar(interPercent);
+      // p = p.timesScalar(interPercent);
 
       // New position is the older lerped toward newer position where lerp 
       //percentage is the time passed 
-      otherPlayer.position = (new Vector3(otherPlayer.position).add(p));
+      otherPlayer.position = lerp(new Vector3(playerInfo.x, playerInfo.y), new Vector3(otherPlayer.position));
 
       // Now update rotation in a smooth manner
       var rotationDifference = (playerInfo.rotation - otherPlayer.rotation);
