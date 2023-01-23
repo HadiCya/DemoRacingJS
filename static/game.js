@@ -89,6 +89,7 @@ function create() {
           otherPlayer.rotation = (otherPlayer.rotation + (rotationDifference * interPercent));
       }
       oldTime = playerInfo.time;
+      console.log(oldTime);
         // otherPlayer.setRotation(playerInfo.rotation)
         // otherPlayer.setPosition(playerInfo.x, playerInfo.y)
       }
