@@ -44,7 +44,7 @@ io.on('connection', function (socket) {
 
   socket.on('playerMovement', function (movementData) {
 
-      players[socket.id].x = movementData.x
+    players[socket.id].x = movementData.x
     players[socket.id].y = movementData.y
     players[socket.id].rotation = movementData.rotation
 
