@@ -143,7 +143,6 @@ function update(time, delta) {
   //     rotation: this.car.rotation
   //   }
   // }
-  elapsedTime += delta;
   console.log(delta)
 
   if (this.car) {
