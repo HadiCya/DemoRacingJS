@@ -33,9 +33,9 @@ var oldTime = new Date().getTime();
 var active = true
 
 function preload() {
-   this.load.image('car', 'static/assets/car.png')
+ 
 
-    this.load.image('basemap', 'assets/TestTrack.tmj')
+    this.load.image('base_tiles', 'assets/TestTrack.png')
   this.load.tilemapTiledJSON('tilemap','assets/Track.json')
 
 
@@ -46,7 +46,17 @@ var newvectors = new Vector3();
 
 function create() {
 
-    this.add.image(0,0, 'basemap')
+
+    const map = this.make.tilemap({key: 'tilemap'})
+
+    const tileset = map.addTilesetImage('Tile_layer_1','base_tiles')
+
+    map.createStaticLayer('Background', tileset)
+
+    map.createStaticLayer('Ground',tileset)
+
+
+   const map 
 
   var self = this
   this.socket = io()
