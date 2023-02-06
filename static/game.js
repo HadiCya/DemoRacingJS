@@ -1,3 +1,6 @@
+import {Player} from "./Player.js"
+
+
 var config = {
   type: Phaser.AUTO,
   parent: 'phaser-example',
@@ -25,15 +28,6 @@ var config = {
 
 var game = new Phaser.Game(config)
 
-var speed = 0.0;
-var accel = 0.2;
-var maxspeed = 10.0;
-var decay = 0.05;
-var oldTime = new Date().getTime();
-var active = true
-
-var labelOffsetX = -20
-var labelOffsetY = -40
 
 var pointer; //variable for mouse's location
 var line1;
@@ -43,46 +37,54 @@ function preload() {
   this.load.image('car', 'static/assets/car.png')
 }
 
-var newvectors = new Vector3();
-
 function create() {
-  var self = this
+
+  //connect to server
   this.socket = io()
+
+  //define current scene
+  var self = this
+
+  //array to store other players
   this.otherPlayers = this.add.group()
 
+  //input system for player control (CursorKeys is arrow keys)
+  this.cursors = this.input.keyboard.createCursorKeys()
+
+  //check list of players connected and identify us from other players
   this.socket.on('currentPlayers', function (players) {
     Object.keys(players).forEach(function (id) {
       if (players[id].playerId === self.socket.id) {
-        addPlayer(self, players[id]) //adds the player for this client
+        //call to Player object to create car controlled by this client
+        Player.addPlayer(self, players[id])
       } else {
-        addOtherPlayers(self, players[id]) //creates objects for the other clients
+        //call to Player object to create other player's cars
+        Player.addOtherPlayers(self, players[id])
       }
     })
   })
 
   this.socket.on('newPlayer', function (playerInfo) {
-    addOtherPlayers(self, playerInfo)
+    Player.addOtherPlayers(self, playerInfo)
   })
 
+  //delete objects for other players when they disconnect
   this.socket.on('playerDisconnected', function (playerId) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerId === otherPlayer.playerId) {
         otherPlayer.destroy()
+        otherPlayer.label.destroy()
       }
     })
   })
 
-  this.cursors = this.input.keyboard.createCursorKeys()
-
-  //this updates other players movements on our display
+  //update car positions when other clients move their cars
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
-        otherPlayer.setRotation(playerInfo.rotation)
-        otherPlayer.setPosition(playerInfo.x, playerInfo.y)
-        otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
-    }
-
+        //call to Player object to update position of other cars
+        Player.updateOtherPlayerMovement(playerInfo, otherPlayer)
+      }
     })
   })
 
@@ -90,136 +92,10 @@ function create() {
 
 
 
-function addPlayer(self, playerInfo) { //sets up player object for this client
-  self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
-  .setOrigin(0.5, 0.5)
-  .setDisplaySize(50, 50)
-
-  self.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerId);
-
-  //self.car.setCollideWorldBounds(true)
-  self.car.setTint(playerInfo.color)
-  //self.car.setDrag(1000)
-  
-}
-
-function addOtherPlayers(self, playerInfo) { //sets up other client's player objects
-  const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
-    .setOrigin(0.5, 0.5)
-    .setDisplaySize(50, 50)
-    .setRotation(playerInfo.rotation)
-
-  otherPlayer.playerId = playerInfo.playerId
-  otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerId)
-  otherPlayer.setTint(playerInfo.color)
-  self.otherPlayers.add(otherPlayer)
-  
-}
-
 function update(time, delta) {
-  // if (this.car) {
-  //   if (this.cursors.left.isDown && (this.cursors.up.isDown || this.cursors.down.isDown)) {
-  //     this.car.setAngularVelocity(-100)
-  //   } else if (this.cursors.right.isDown && (this.cursors.up.isDown || this.cursors.down.isDown)) {
-  //     this.car.setAngularVelocity(100)
-  //   } else {
-  //     this.car.setAngularVelocity(0)
-  //   }
-  //var temp = add.group();
-  //   const velX = Math.cos((this.car.angle - 360) * 0.01745)
-  //   const velY = Math.sin((this.car.angle - 360) * 0.01745)
-  //   if (this.cursors.up.isDown) {
-  //     this.car.setVelocityX(200 * velX)
-  //     this.car.setVelocityY(200 * velY)
-  //   } else if (this.cursors.down.isDown) {
-  //     this.car.setVelocityX(-100 * velX)
-  //     this.car.setVelocityY(-100 * velY)
-  //   } else {
-  //     //this.car.setAcceleration(0)
-  //   }
 
-  //   var x = this.car.x
-  //   var y = this.car.y
-  //   var r = this.car.rotation
-  //   if (this.car.oldPosition && (x !== this.car.oldPosition.x || y !== this.car.oldPosition.y || r !== this.car.oldPosition.rotation)) {
-  //     this.socket.emit('playerMovement', { x: this.car.x, y: this.car.y, rotation: this.car.rotation })
-  //   }
-
-  //   this.car.oldPosition = {
-  //     x: this.car.x,
-  //     y: this.car.y,
-  //     rotation: this.car.rotation
-  //   }
-  // }
-  console.log(delta)
-
+  //Make sure car has been instantiated correctly
   if (this.car) {
-
-    /*
-      all changes to movement variables (speed, accel, angle) 
-      are scaled by delta factor which yields frame independent movement
-    */
-
-    //accelerate car if below max speed
-    if (speed < maxspeed) {
-      if (this.cursors.up.isDown) {
-        speed = speed + (accel * (delta / 10))
-      }
-    }
-
-    else {
-      //car is at max speed
-      speed = maxspeed
-    }
-
-
-    //reverse car if below max speed (in reverse)
-    if (speed > -maxspeed) {
-      if (this.cursors.down.isDown) {
-        speed = speed - (accel * (delta / 10))
-      }
-    }
-
-    else {
-      //car is at max speed in reverse
-      speed = -maxspeed
-    }
-
-
-    //turn car left or right
-    if (this.cursors.right.isDown) {
-      this.car.angle += 3.0 * (delta / 10);
-    }
-    if (this.cursors.left.isDown) {
-      this.car.angle -= 3.0 * (delta / 10);
-    }
-
-    //move car based on new speed and rotation 
-    //delta factor makes movement frame rate independent
-    this.car.setX(this.car.x + (speed * Math.cos(this.car.rotation) * (delta / 10)))
-    this.car.setY(this.car.y + (speed * Math.sin(this.car.rotation) * (delta / 10)))
-
-    this.car.setAngularVelocity(0);
-
-    var x = this.car.x
-    var y = this.car.y
-    var r = this.car.rotation
-    
-    //update position of label. offset from car to position correctly 
-      this.label.x = x - labelOffsetX;
-      this.label.y = y - labelOffsetY;
-    
-    //checks if this client has moved this frame 
-    if (this.car.oldPosition && (x !== this.car.oldPosition.x || y !== this.car.oldPosition.y || r !== this.car.oldPosition.rotation)) {
-      //if the client has moved emit(send) it to the server
-      this.socket.emit('playerMovement', { x: this.car.x, y: this.car.y, rotation: this.car.rotation })
-    }
-
-    this.car.oldPosition = {
-      x: this.car.x,
-      y: this.car.y,
-      rotation: this.car.rotation
-    }
 
     if (line1)
       graphics.destroy(line1);
@@ -228,5 +104,9 @@ function update(time, delta) {
     graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
     graphics.strokeLineShape(line1); //draws the line
     
+    //Drive according to logic in player object
+    //function takes: car object, label object, input system, time delta, and socket object
+    //objects passed in are all defined in create()
+    Player.drive(this.car, this.label, this.cursors, delta, this.socket)
   }
 }
