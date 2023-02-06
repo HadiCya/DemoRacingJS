@@ -56,7 +56,7 @@ function create() {
     map.createStaticLayer('Ground',tileset)
 
 
-   const map 
+
 
   var self = this
   this.socket = io()
