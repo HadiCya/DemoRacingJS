@@ -25,7 +25,7 @@ var players = {}
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
-  players[socket.id] = {
+  players[socket.id] = { //player object prototype
     rotation: 0,
     x: 30,
     y: 30,
@@ -42,12 +42,13 @@ io.on('connection', function (socket) {
     io.emit('playerDisconnected', socket.id)
   })
 
-  socket.on('playerMovement', function (movementData) {
-
+  socket.on('playerMovement', function (movementData) { //this function listens for socket.emit('playerMovment')
+    //update server values to match client movement
     players[socket.id].x = movementData.x
     players[socket.id].y = movementData.y
     players[socket.id].rotation = movementData.rotation
 
+    //let other clients know change
     socket.broadcast.emit('playerMoved', players[socket.id])
 
     

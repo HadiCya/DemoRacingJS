@@ -35,6 +35,10 @@ var active = true
 var labelOffsetX = -20
 var labelOffsetY = -40
 
+var pointer; //variable for mouse's location
+var line1;
+var graphics;
+
 function preload() {
   this.load.image('car', 'static/assets/car.png')
 }
@@ -49,9 +53,9 @@ function create() {
   this.socket.on('currentPlayers', function (players) {
     Object.keys(players).forEach(function (id) {
       if (players[id].playerId === self.socket.id) {
-        addPlayer(self, players[id])
+        addPlayer(self, players[id]) //adds the player for this client
       } else {
-        addOtherPlayers(self, players[id])
+        addOtherPlayers(self, players[id]) //creates objects for the other clients
       }
     })
   })
@@ -70,6 +74,7 @@ function create() {
 
   this.cursors = this.input.keyboard.createCursorKeys()
 
+  //this updates other players movements on our display
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
@@ -80,11 +85,12 @@ function create() {
 
     })
   })
+
 }
 
 
 
-function addPlayer(self, playerInfo) {
+function addPlayer(self, playerInfo) { //sets up player object for this client
   self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
   .setOrigin(0.5, 0.5)
   .setDisplaySize(50, 50)
@@ -94,9 +100,10 @@ function addPlayer(self, playerInfo) {
   //self.car.setCollideWorldBounds(true)
   self.car.setTint(playerInfo.color)
   //self.car.setDrag(1000)
+  
 }
 
-function addOtherPlayers(self, playerInfo) {
+function addOtherPlayers(self, playerInfo) { //sets up other client's player objects
   const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
     .setOrigin(0.5, 0.5)
     .setDisplaySize(50, 50)
@@ -106,6 +113,7 @@ function addOtherPlayers(self, playerInfo) {
   otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerId)
   otherPlayer.setTint(playerInfo.color)
   self.otherPlayers.add(otherPlayer)
+  
 }
 
 function update(time, delta) {
@@ -201,7 +209,9 @@ function update(time, delta) {
       this.label.x = x - labelOffsetX;
       this.label.y = y - labelOffsetY;
     
+    //checks if this client has moved this frame 
     if (this.car.oldPosition && (x !== this.car.oldPosition.x || y !== this.car.oldPosition.y || r !== this.car.oldPosition.rotation)) {
+      //if the client has moved emit(send) it to the server
       this.socket.emit('playerMovement', { x: this.car.x, y: this.car.y, rotation: this.car.rotation })
     }
 
@@ -211,7 +221,12 @@ function update(time, delta) {
       rotation: this.car.rotation
     }
 
+    if (line1)
+      graphics.destroy(line1);
+    pointer = this.input.activePointer; //sets pointer to user's mouse
+    line1 = new Phaser.Geom.Line(this.car.x, this.car.y, pointer.worldX, pointer.worldY);
+    graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+    graphics.strokeLineShape(line1); //draws the line
+    
   }
 }
-
-
