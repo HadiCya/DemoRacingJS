@@ -33,13 +33,21 @@ var oldTime = new Date().getTime();
 var active = true
 
 function preload() {
-  this.load.image('car', 'static/assets/car.png')
-  
+   this.load.image('car', 'static/assets/car.png')
+
+    this.load.image('basemap', 'assets/TestTrack.tmj')
+  this.load.tilemapTiledJSON('tilemap','assets/Track.json')
+
+
+
 }
 
 var newvectors = new Vector3();
 
 function create() {
+
+    this.add.image(0,0, 'basemap')
+
   var self = this
   this.socket = io()
   this.otherPlayers = this.add.group()
