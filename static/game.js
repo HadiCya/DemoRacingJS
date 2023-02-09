@@ -34,7 +34,7 @@ function preload() {
 
     this.load.image('base_tiles', 'assets/TestTrack.png')
   this.load.tilemapTiledJSON('tilemap','assets/Track.json')
-
+  
 
 
   this.load.image('car', 'static/assets/car.png')
@@ -45,11 +45,9 @@ function create() {
 
     const map = this.make.tilemap({key: 'tilemap'})
 
-    const tileset = map.addTilesetImage('Tile_layer_1','base_tiles')
+    const tileset = map.addTilesetImage('Track','base_tiles')
 
-    map.createStaticLayer('Background', tileset)
-
-    map.createStaticLayer('Ground',tileset)
+    map.createStaticLayer('Tile_layer_1', tileset)
 
 
 
