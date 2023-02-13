@@ -27,7 +27,25 @@ export const Player = {
       //self.car.setDrag(1000)
     
     }, 
-    
+
+    updateCarMovementWithDrift(car, speed, wasd, delta){
+
+        if(wasd.SHIFT.isDown){
+            
+
+            
+            car.setVelocity(car.body.velocity.x + (speed * Math.cos(car.rotation) * (delta / 10)), car.body.velocity.y +(speed * Math.sin(car.rotation) * (delta / 10)))
+            console.log("drifting")
+            
+        }
+        else{
+            car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
+            car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
+        }
+
+
+    },
+
     //function to instantiate cars of other players
     addOtherPlayers(self, playerInfo) {
       const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
@@ -47,6 +65,7 @@ export const Player = {
     //function to handle input and logic for moving the car this client controls. modify this function to modify driving behavior
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
     drive(car, label, cursors, delta, socket, wasd) {
+        
         
         //accelerate car if below max speed
         if (speed < maxspeed) {
@@ -85,9 +104,11 @@ export const Player = {
     
         //move car based on new speed and rotation 
         //delta factor makes movement frame rate independent
-        car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
-        car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
+        //car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
+        //car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
     
+        this.updateCarMovementWithDrift(car, speed, wasd, delta)
+
         car.setAngularVelocity(0);
     
         //update position of label. offset from car to position correctly 
@@ -100,7 +121,7 @@ export const Player = {
         
         if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation)) {
             socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation })
-            console.log("moving")
+            //console.log("moving")
         }
         
         car.oldPosition = {
@@ -117,6 +138,8 @@ export const Player = {
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
     },
+
+
 
     
 }

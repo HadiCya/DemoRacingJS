@@ -46,7 +46,9 @@ function create() {
 
   //input system for player control (CursorKeys is arrow keys)
   this.cursors = this.input.keyboard.createCursorKeys()
-  this.wasd = this.input.keyboard.addKeys('W,S,A,D')
+
+  //input system for player controls for misc keys: SHIFT is for drifting
+  this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
 
   //check list of players connected and identify us from other players
   this.socket.on('currentPlayers', function (players) {
