@@ -33,7 +33,7 @@ function preload() {
  
 
   this.load.image('base_tiles', 'assets/TestTrack.png')
-  this.load.tilemapTiledJSON('tilemap','assets/Track.json')
+  this.load.tilemapTiledJSON('tilemap','assets/TestTrack.json')
   
 
 
