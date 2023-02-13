@@ -33,9 +33,14 @@ var pointer; //variable for mouse's location
 var line1;
 var graphics;
 
+//image preloads for car and gun
 function preload() {
   this.load.image('car', 'static/assets/car.png')
+  this.load.image('gun', 'static/assets/gun.png') 
 }
+
+
+
 
 function create() {
 
@@ -110,3 +115,5 @@ function update(time, delta) {
     Player.drive(this.car, this.label, this.cursors, delta, this.socket)
   }
 }
+
+
