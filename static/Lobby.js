@@ -9,13 +9,12 @@ export default class Lobby extends Phaser.Scene {
     }
 
     create() {
+        //reference html form
         var element = this.add.dom(640, 360).createFromCache('form');
-        var switchScene = false
 
         element.addListener('click')
 
-    
-
+        //switch to next scene with entered player name once submit is clicked
         element.on('click', function (event) {
 
             if (event.target.name === 'connect') {
