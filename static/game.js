@@ -46,6 +46,7 @@ function create() {
 
   //input system for player control (CursorKeys is arrow keys)
   this.cursors = this.input.keyboard.createCursorKeys()
+  this.wasd = this.input.keyboard.addKeys('W,S,A,D')
 
   //check list of players connected and identify us from other players
   this.socket.on('currentPlayers', function (players) {
@@ -96,7 +97,9 @@ function update(time, delta) {
     //Drive according to logic in player object
     //function takes: car object, label object, input system, time delta, and socket object
     //objects passed in are all defined in create()
-    Player.drive(this.car, this.label, this.cursors, delta, this.socket)
+    Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
+
+    
   }
 }
 

@@ -46,14 +46,15 @@ export const Player = {
 
     //function to handle input and logic for moving the car this client controls. modify this function to modify driving behavior
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
-    drive(car, label, cursors, delta, socket) {
+    drive(car, label, cursors, delta, socket, wasd) {
         
         //accelerate car if below max speed
         if (speed < maxspeed) {
-            if (cursors.up.isDown) {
+            if (cursors.up.isDown || wasd.W.isDown ) {
             speed = speed + (accel * (delta / 10))
             }
         }
+
     
         else {
             //car is at max speed
@@ -63,7 +64,7 @@ export const Player = {
     
         //reverse car if below max speed (in reverse)
         if (speed > -maxspeed) {
-            if (cursors.down.isDown) {
+            if (cursors.down.isDown|| wasd.S.isDown) {
             speed = speed - (accel * (delta / 10))
             }
         }
@@ -75,10 +76,10 @@ export const Player = {
     
     
         //turn car left or right
-        if (cursors.right.isDown) {
+        if (cursors.right.isDown|| wasd.D.isDown) {
             car.angle += 3.0 * (delta / 10);
         }
-        if (cursors.left.isDown) {
+        if (cursors.left.isDown|| wasd.A.isDown) {
             car.angle -= 3.0 * (delta / 10);
         }
     
@@ -115,5 +116,7 @@ export const Player = {
         otherPlayer.setRotation(playerInfo.rotation)
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
-    }
+    },
+
+    
 }
