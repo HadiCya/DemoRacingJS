@@ -32,8 +32,8 @@ var game = new Phaser.Game(config)
 function preload() {
  
 
-  this.load.image('base_tiles', 'assets/TestTrack.png')
-  this.load.tilemapTiledJSON('tilemap','assets/TestTrack.json')
+    this.load.image('base_tiles', 'static/assets/TestTrack.png')
+    this.load.tilemapTiledJSON('tilemap','static/assets/TestTrack.json')
   
 
 
