@@ -32,6 +32,9 @@ var game = new Phaser.Game(config)
 var pointer; //variable for mouse's location
 var line1;
 var graphics;
+var laserLength; //length of the Laser
+var laserX; //X coordinate for the end of the laser
+var laserY; //Y coordinate for the end of the laser
 
 //image preloads for car and gun
 function preload() {
@@ -103,12 +106,16 @@ function update(time, delta) {
   if (this.car) {
 
     if (line1)
-      graphics.destroy(line1);
+      graphics.destroy(line1);//deletes the line, so that they don't build up
     pointer = this.input.activePointer; //sets pointer to user's mouse
-    line1 = new Phaser.Geom.Line(this.car.x, this.car.y, pointer.worldX, pointer.worldY);
+    laserLength = Math.sqrt((pointer.worldY - this.car.y)**2 + (pointer.worldX - this.car.x)**2);
+    laserY = laserLength * (pointer.worldY - this.car.y);
+    laserX = laserLength * (pointer.worldX - this.car.x);
+    line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
     graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
     graphics.strokeLineShape(line1); //draws the line
     
+
     //Drive according to logic in player object
     //function takes: car object, label object, input system, time delta, and socket object
     //objects passed in are all defined in create()
