@@ -14,7 +14,8 @@ export const Player = {
     
     //function to instantiate car of current player
     addPlayer(self, playerInfo) {
-    
+      
+
       //self.car = matter.add.existing(new Car(this, playerInfo))
       self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
       .setOrigin(0.5, 0.5)
@@ -25,7 +26,7 @@ export const Player = {
       .setOrigin(0.5, 0.5)
       .setDisplaySize(50, 50)
     
-      self.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerId);
+      self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
     
       //self.car.setCollideWorldBounds(true)
       self.car.setTint(playerInfo.color)
@@ -41,7 +42,7 @@ export const Player = {
         .setRotation(playerInfo.rotation)
     
       otherPlayer.playerId = playerInfo.playerId
-      otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerId)
+      otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
       otherPlayer.setTint(playerInfo.color)
 
       //add this car to array storing other players in game.js

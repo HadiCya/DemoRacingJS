@@ -30,11 +30,21 @@ io.on('connection', function (socket) {
     x: 30,
     y: 30,
     playerId: socket.id,
+    playerName: socket.id,
     color: getRandomColor()
   }
 
+  //give new client list of players already in game
   socket.emit('currentPlayers', players)
-  socket.broadcast.emit('newPlayer', players[socket.id])
+
+  //new client has updated their playerName
+  socket.on('updateName', function (playerName) {
+    //store new playerName
+    players[socket.id].playerName = playerName
+
+    //tell clients already connected that a new player has joined
+    socket.broadcast.emit('newPlayer', players[socket.id])
+  })
  
   socket.on('disconnect', function () {
     console.log('player [' + socket.id + '] disconnected')
