@@ -4,9 +4,10 @@ var maxspeed = 10.0;
 var decay = 0.05;
 var oldTime = new Date().getTime();
 var active = true
-
+var sentinel = true
 var labelOffsetX = -20
 var labelOffsetY = -40
+var driftx
 
 //Object stores functions which are called in game.js
 
@@ -31,18 +32,61 @@ export const Player = {
     updateCarMovementWithDrift(car, speed, wasd, delta){
 
         if(wasd.SHIFT.isDown){
-            
 
+            //get the direction youre facing when you start drifting
+            if(sentinel)
+            {
+                console.log(car.rotation)
+
+                this.driftx = car.rotation;
+      
+                console.log(this.driftx)
+
+                sentinel = false
+            }
+
+            //keeps your car moving in the initial direction but weaker **problems right now: it makes you go faster when you start
+            // and then slower when you turn away from the initial direction
             
-            car.setVelocity(car.body.velocity.x + (speed * Math.cos(car.rotation) * (delta / 10)), car.body.velocity.y +(speed * Math.sin(car.rotation) * (delta / 10)))
+            car.setX(car.x + (.5*speed * Math.cos(this.driftx) * (delta / 10)))
+            car.setY(car.y + (.5*speed * Math.sin(this.driftx) * (delta / 10)))
+
+          
+            
+/*
+            if(speed >= maxspeed)
+            {
+                car.setVelocity( ( speed * Math.cos(car.rotation) * (delta / 10)), ( speed * Math.sin(car.rotation) * (delta / 10)))
+            }
+            else
+            {  
+                car.setVelocity( ( speed * Math.cos(car.rotation) * (delta / 10)), ( speed * Math.sin(car.rotation) * (delta / 10)))
+
+                //car.setVelocity(car.body.velocity.x + (speed * Math.cos(car.rotation) * (delta / 10)), car.body.velocity.y +(speed * Math.sin(car.rotation) * (delta / 10)))
+            }
+
+
+
+
+                    if(sentinel)
+        {
+
+        
+            var driftx = Math.cos(car.rotation);
+            var drifty = Math.sin(car.rotation);
+        }
+sentinel = false
+            */
+            
             console.log("drifting")
-            
         }
         else{
+            sentinel = true
+
+        }
             car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
             car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
-        }
-
+        
 
     },
 
