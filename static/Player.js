@@ -36,20 +36,39 @@ export const Player = {
             //get the direction youre facing when you start drifting
             if(sentinel)
             {
-                console.log(car.rotation)
+                //console.log(car.rotation)
 
                 this.driftx = car.rotation;
       
-                console.log(this.driftx)
+                //console.log(this.driftx)
 
                 sentinel = false
             }
-
-            //keeps your car moving in the initial direction but weaker **problems right now: it makes you go faster when you start
-            // and then slower when you turn away from the initial direction
             
-            car.setX(car.x + (.5*speed * Math.cos(this.driftx) * (delta / 10)))
-            car.setY(car.y + (.5*speed * Math.sin(this.driftx) * (delta / 10)))
+            //calculations to get the degrees then the amount of degrees youve turned from the original drift direction
+            var temp = this.driftx * 180 / 3.14159264
+            var degrerotation = car.rotation * 180 / 3.14159264
+            if(temp<0){
+                temp = temp +360
+            }
+            var calculator = degrerotation-temp
+            if(calculator<0){
+                calculator = (calculator*-1) 
+                calculator = (calculator / 360) 
+            }
+            else{
+                calculator = calculator / 360
+            }
+            if (calculator >1)
+            {
+                calculator--
+            }
+            
+            
+            console.log(calculator)//is the percentage youve spun from original drift
+            console.log(temp + " " + degrerotation) // inital angle then new angle
+            car.setX(car.x + (speed * Math.cos(this.driftx) * (delta / 10)))
+            car.setY(car.y + (speed * Math.sin(this.driftx) * (delta / 10)))
 
           
             
@@ -82,10 +101,10 @@ sentinel = false
         }
         else{
             sentinel = true
-
-        }
             car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
             car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
+        }
+
         
 
     },
