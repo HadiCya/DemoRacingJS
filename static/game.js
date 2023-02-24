@@ -7,6 +7,8 @@ var graphics;
 var laserLength; //length of the Laser
 var laserX; //X coordinate for the end of the laser
 var laserY; //Y coordinate for the end of the laser
+var gun;  //laser gun
+var input; //mouse position for sprites
 
 class gameScene extends Phaser.Scene {
 
@@ -32,11 +34,17 @@ class gameScene extends Phaser.Scene {
     //define current scene
     var self = this
 
+    //for mouse position
+    input=this.input;
+
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateName', self.playerName)
 
+    //adds gun sprite-image
+    gun=this.add.sprite(400,300,'gun');
+    
     //array to store other players
     this.otherPlayers = this.add.group()
 
@@ -86,6 +94,10 @@ class gameScene extends Phaser.Scene {
 
 
   update(time, delta) {
+
+    //sets rotation of laser gun
+    let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
+    gun.setRotation(angle);
 
     //Make sure car has been instantiated correctly
     if (this.car) {

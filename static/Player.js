@@ -21,10 +21,7 @@ export const Player = {
       .setOrigin(0.5, 0.5)
       .setDisplaySize(50, 50)
       
-      //adds gun image to game, needs attachment and rotation to be worked on
-      self.gun = self.matter.add.image(playerInfo.x, playerInfo.y, 'gun')
-      .setOrigin(0.5, 0.5)
-      .setDisplaySize(50, 50)
+
     
       self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
     
