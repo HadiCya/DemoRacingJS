@@ -103,15 +103,9 @@ class gameScene extends Phaser.Scene {
     //Make sure car has been instantiated correctly
     if (this.car) {
 
-      if (line1)
-        graphics.destroy(line1);//deletes the line, so that they don't build up
+      
       pointer = this.input.activePointer; //sets pointer to user's mouse
-      laserLength = Math.sqrt((pointer.worldY - this.car.y)**2 + (pointer.worldX - this.car.x)**2);
-      laserY = laserLength * (pointer.worldY - this.car.y);
-      laserX = laserLength * (pointer.worldX - this.car.x);
-      line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
-      graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-      graphics.strokeLineShape(line1); //draws the line
+     
       gun.x = this.car.x;
       gun.y = this.car.y;
       
