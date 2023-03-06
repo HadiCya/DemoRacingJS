@@ -112,6 +112,8 @@ class gameScene extends Phaser.Scene {
       line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
       graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
       graphics.strokeLineShape(line1); //draws the line
+      gun.x = this.car.x;
+      gun.y = this.car.y;
       
 
       //Drive according to logic in player object
