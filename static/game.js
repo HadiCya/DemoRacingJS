@@ -43,6 +43,8 @@ function preload() {
 function create() {
 
 
+  this.add.image(0,0,'base_tiles')
+
     const map = this.make.tilemap({key: 'tilemap', tileWidth: 64, tileHeight: 64})
 
     const tileset = map.addTilesetImage('Track','base_tiles')
