@@ -5,7 +5,7 @@ var config = {
   type: Phaser.AUTO,
   parent: 'phaser-example',
   width: 1280,
-  height: 720,
+  height: 704,
   physics: {
     default: "matter",
     matter: {
@@ -14,7 +14,7 @@ var config = {
       },
       setBounds: {
         width: 1280,
-        height: 720
+        height: 704
       },
       debug: true,
     }
@@ -32,8 +32,8 @@ var game = new Phaser.Game(config)
 function preload() {
  
 
-    this.load.image('base_tiles', 'static/assets/TestTrack.png')
-    this.load.tilemapTiledJSON('tilemap','static/assets/TestTrack.json')
+    this.load.image('base_tiles', 'static/assets/NewTestTrack.png')
+    this.load.tilemapTiledJSON('tilemap','static/assets/NewTestTrack.json')
   
 
 
@@ -47,7 +47,7 @@ function create() {
 
     const tileset = map.addTilesetImage('Track','base_tiles')
 
-    map.createStaticLayer('Tile_layer_1', tileset)
+    map.createStaticLayer('layer_1', tileset)
 
 
 
