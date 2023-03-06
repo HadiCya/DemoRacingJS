@@ -43,7 +43,8 @@ class gameScene extends Phaser.Scene {
     self.socket.emit('updateName', self.playerName)
 
     //adds gun sprite-image
-    gun=this.add.sprite(400,300,'gun');
+    gun=this.add.sprite(400,300,'gun'); 
+    gun.setDepth(1);
     
     //array to store other players
     this.otherPlayers = this.add.group()
