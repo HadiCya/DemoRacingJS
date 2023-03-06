@@ -32,7 +32,7 @@ var game = new Phaser.Game(config)
 function preload() {
  
 
-    this.load.image('base_tiles', 'static/assets/NewTestTrack.png')
+    this.load.image('roads2W', 'static/assets/NewTestTrack.png')
     this.load.tilemapTiledJSON('tilemap','static/assets/NewTestTrack.json')
   
 
@@ -43,13 +43,13 @@ function preload() {
 function create() {
 
 
-  this.add.image(0,0,'base_tiles')
+  //this.add.image(0,0,'base_tiles')
 
-    const map = this.make.tilemap({key: 'tilemap', tileWidth: 64, tileHeight: 64})
+    const map = this.make.tilemap({key: 'tilemap', tileWidth: 32, tileHeight: 32})
 
-    const tileset = map.addTilesetImage('Track','base_tiles')
+    const tileset = map.addTilesetImage('roads2W')
 
-    map.createStaticLayer('layer_1', tileset)
+    map.createLayer('Layer_1', tileset, 0, 0)
 
 
 
