@@ -52,16 +52,33 @@ export const Player = {
             //change in rotation compared to starting rotation
             var rotationDelta = Math.abs(this.driftX - currentRotation)
 
-            console.log(`rotation change: ${rotationDelta}`)
 
+            
+
+
+
+
+            console.log(`rotation change: ${rotationDelta}`)
+            console.log(`starting radian: ${this.driftXRadian}`)
+            console.log(`current angle: ${currentRotation}`)
+            console.log(`current radian: ${car.rotation}`)
+            console.log(`current average radian: ${(this.driftXRadian + (car.rotation)/2)}`)
+
+            //console.log(`position angle: ${this.driftXRadian + (car.rotation)/2}`)
+            
 
             //console.log(rotationChange)//is the percentage youve spun from original drift
             //console.log(speed) // inital angle then new angle
-            car.setX(car.x + (speed * Math.cos(this.driftXRadian) * (delta / 10)))
-            car.setY(car.y + (speed * Math.sin(this.driftXRadian) * (delta / 10)))
+            //car.setX(car.x + (speed * Math.cos(this.driftXRadian) * (delta / 10)))
+            //car.setY(car.y + (speed * Math.sin(this.driftXRadian) * (delta / 10)))
+            //degrees times pi over 180
+           
+                car.setX(car.x + (speed * Math.cos((this.driftXRadian + car.rotation)/2)) * (delta / 10))
+                car.setY(car.y + (speed * Math.sin((this.driftXRadian + car.rotation)/2)) * (delta / 10))
+                
 
-
-
+                //car.setX(car.x + (speed * Math.cos(2.4*Math.PI) * (delta / 10)))
+                //car.setY(car.y + (speed * Math.sin(2.4*Math.PI) * (delta / 10)))
             /*
                         if(speed >= maxspeed)
                         {
