@@ -37,6 +37,10 @@ export const Player = {
         .setOrigin(0.5, 0.5)
         .setDisplaySize(50, 50)
         .setRotation(playerInfo.rotation)
+
+      otherPlayer.gun = self.add.sprite(playerInfo.x, playerInfo.y, 'gun')
+        .setOrigin(0.5, 0.5)
+        .setDisplaySize(50, 50)
     
       otherPlayer.playerId = playerInfo.playerId
       otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
@@ -118,5 +122,8 @@ export const Player = {
         otherPlayer.setRotation(playerInfo.rotation)
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
+        otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
+        //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
+        //self.gun.setRotation(angle);
     }
 }
