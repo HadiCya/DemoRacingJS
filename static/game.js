@@ -114,6 +114,7 @@ class gameScene extends Phaser.Scene {
       graphics.strokeLineShape(line1); //draws the line
       gun.x = this.car.x;
       gun.y = this.car.y;
+      this.car.gunrotation = gun.rotation;
       
 
       //Drive according to logic in player object
