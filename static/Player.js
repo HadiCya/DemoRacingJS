@@ -1,14 +1,17 @@
 var speed = 0.0;
 var accel = 0.2;
 var maxspeed = 10.0;
+var handling = 2
+var driftHandling = 3
+var oversteer = 4
+
 var decay = 0.05;
 var oldTime = new Date().getTime();
 var active = true
 var isDriftStart = true
 var labelOffsetX = -20
 var labelOffsetY = -40
-var driftX
-var driftXRadian
+
 
 //Object stores functions which are called in game.js
 
@@ -30,86 +33,57 @@ export const Player = {
 
     },
 
-    updateCarMovementWithDrift(car, speed, wasd, delta) {
+    updateCarMovementWithDrift(car, cursors, wasd, delta) {
 
-        if (wasd.SHIFT.isDown) {
-
+        if (wasd.SHIFT.isDown && (cursors.right.isDown || wasd.D.isDown || cursors.left.isDown || wasd.A.isDown)) {
+            
             //get the direction youre facing when you start drifting
             if (isDriftStart) {
                 //console.log(car.rotation)
 
-                this.driftX = car.angle + 180;
-                this.driftXRadian = car.rotation;
-
-                //console.log(this.driftx)
-
+                this.driftAngle = car.angle;
+    
                 isDriftStart = false
             }
 
-            //direction car is pointing
-            var currentRotation = car.angle + 180
 
-            //change in rotation compared to starting rotation
-            var rotationDelta = Math.abs(this.driftX - currentRotation)
+            //console.log(this.driftAngle)
 
-
+            //turn car left or right
             
+            if (cursors.right.isDown || wasd.D.isDown) {
+                car.angle += oversteer * (delta / 10)
+                this.driftAngle = (this.driftAngle + driftHandling * (delta / 10)) % 360;
+            }
 
-
-
-
-            console.log(`rotation change: ${rotationDelta}`)
-            console.log(`starting radian: ${this.driftXRadian}`)
-            console.log(`current angle: ${currentRotation}`)
-            console.log(`current radian: ${car.rotation}`)
-            console.log(`current average radian: ${(this.driftXRadian + (car.rotation)/2)}`)
-
-            //console.log(`position angle: ${this.driftXRadian + (car.rotation)/2}`)
+            if (cursors.left.isDown || wasd.A.isDown) {
+                car.angle -= oversteer * (delta / 10)
+                this.driftAngle = (this.driftAngle - driftHandling  * (delta / 10)) % 360;
+            }
+        
+            //console.log((this.driftAngle - car.angle) * 0.05)
             
-
-            //console.log(rotationChange)//is the percentage youve spun from original drift
-            //console.log(speed) // inital angle then new angle
-            //car.setX(car.x + (speed * Math.cos(this.driftXRadian) * (delta / 10)))
-            //car.setY(car.y + (speed * Math.sin(this.driftXRadian) * (delta / 10)))
-            //degrees times pi over 180
            
-                car.setX(car.x + (speed * Math.cos((this.driftXRadian + car.rotation)/2)) * (delta / 10))
-                car.setY(car.y + (speed * Math.sin((this.driftXRadian + car.rotation)/2)) * (delta / 10))
-                
-
-                //car.setX(car.x + (speed * Math.cos(2.4*Math.PI) * (delta / 10)))
-                //car.setY(car.y + (speed * Math.sin(2.4*Math.PI) * (delta / 10)))
-            /*
-                        if(speed >= maxspeed)
-                        {
-                            car.setVelocity( ( speed * Math.cos(car.rotation) * (delta / 10)), ( speed * Math.sin(car.rotation) * (delta / 10)))
-                        }
-                        else
-                        {  
-                            car.setVelocity( ( speed * Math.cos(car.rotation) * (delta / 10)), ( speed * Math.sin(car.rotation) * (delta / 10)))
-            
-                            //car.setVelocity(car.body.velocity.x + (speed * Math.cos(car.rotation) * (delta / 10)), car.body.velocity.y +(speed * Math.sin(car.rotation) * (delta / 10)))
-                        }
-            
-            
-            
-            
-                                if(sentinel)
-                    {
-            
-                    
-                        var driftx = Math.cos(car.rotation);
-                        var drifty = Math.sin(car.rotation);
-                    }
-            sentinel = false
-                        */
-
-            console.log("drifting")
+            console.log(speed)
+            car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
+            car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
+             
         }
         else {
             isDriftStart = true
-            car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
-            car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
+
+            //turn car left or right
+            if (cursors.right.isDown || wasd.D.isDown) {
+                car.angle += handling * (delta / 10);
+            }
+            if (cursors.left.isDown || wasd.A.isDown) {
+                car.angle -= handling * (delta / 10);
+            }
+
+            //console.log(car.angle + 180)
+            console.log(speed)
+            car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
+            car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
             // console.log(speed)
         }
 
@@ -164,21 +138,20 @@ export const Player = {
             speed = -maxspeed
         }
 
+        if (speed > 0) {
+            speed = speed - decay * (delta / 10)
+        } 
+        else {
+            speed = speed + decay * (delta / 10)
+        }
 
-        //turn car left or right
-        if (cursors.right.isDown || wasd.D.isDown) {
-            car.angle += 3.0 * (delta / 10);
-        }
-        if (cursors.left.isDown || wasd.A.isDown) {
-            car.angle -= 3.0 * (delta / 10);
-        }
 
         //move car based on new speed and rotation 
         //delta factor makes movement frame rate independent
         //car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
         //car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
-
-        this.updateCarMovementWithDrift(car, speed, wasd, delta)
+        
+        this.updateCarMovementWithDrift(car, cursors, wasd, delta)
 
         car.setAngularVelocity(0);
 
