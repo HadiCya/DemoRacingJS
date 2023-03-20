@@ -9,6 +9,11 @@ var laserX; //X coordinate for the end of the laser
 var laserY; //Y coordinate for the end of the laser
 var gun;  //laser gun
 var input; //mouse position for sprites
+var point;
+var graphics
+var Slope;
+var CheckY;
+var CheckB;
 
 class gameScene extends Phaser.Scene {
 
@@ -91,15 +96,22 @@ class gameScene extends Phaser.Scene {
       })
     })
 
+    
+    graphics = this.add.graphics({ fillStyle: { color: 0x2266aa } });
+
+    point = new Phaser.Geom.Point(300, 575);
+    graphics.fillPointShape(point, 10);
+
   }
 
+  
 
   update(time, delta) {
 
     //sets rotation of laser gun
     let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
     gun.setRotation(angle);
-
+    
     //Make sure car has been instantiated correctly
     if (this.car) {
 
@@ -115,12 +127,36 @@ class gameScene extends Phaser.Scene {
       gun.x = this.car.x;
       gun.y = this.car.y;
       
+      Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
+      CheckB = this.car.y -(Slope * this.car.x)
+     CheckY = ((Slope * point.x) + CheckB);
+ 
+    // Collision detection
+    const collisionThreshold = 25;
+    if (Math.abs(CheckY - point.y) < collisionThreshold) {
+      console.log("Collision detected");
+    }
+
+
+    if(CheckY < point.y){
+      console.log("Laser above dot")
+    }
+
+    if(CheckY > point.y){
+      console.log("Laser below dot")
+    }
+
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
     }
+
+    console.log(CheckY)
+    console.log(point.y)
+    console.log(point.x)
+
   }
 
 }
