@@ -3,6 +3,7 @@ import Lobby from "./Lobby.js"
 
 class gameScene extends Phaser.Scene {
 
+
   constructor() {
     super('gameScene')
   }
@@ -12,27 +13,24 @@ class gameScene extends Phaser.Scene {
   }
 
   preload() {
- 
 
-    this.load.image('mapimage', 'static/assets/NewTestTrack.png')
-    this.load.tilemapTiledJSON('tilemap','static/assets/map1.json', 32, 32)
-  
-
-
+    this.load.image('tiles', 'static/assets/roads2w.png')
+    this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
     this.load.image('car', 'static/assets/car.png')
   }
 
+
   create() {
    
-  //this.add.image(0,0,'base_tiles')
+    //this.add.image(0,0,'base_tiles')
 
-    const map = this.make.tilemap({key: 'tilemap'})
+    const map = this.make.tilemap({ key: 'tilemap' })
 
-    const tileset = map.addTilesetImage('roads2W','mapimage')
+    const tileset = map.addTilesetImage('roads2w', 'tiles')
 
     map.createLayer('Layer_1', tileset, 0, 0)
 
-    this.add.image(0,0 ,'mapimage')
+    //this.add.image(0, 0, 'tiles')
 
     var self = this
     this.socket = io()
