@@ -126,6 +126,7 @@ class gameScene extends Phaser.Scene {
       graphics.strokeLineShape(line1); //draws the line
       gun.x = this.car.x;
       gun.y = this.car.y;
+      this.car.gunrotation = gun.rotation;
       
       Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
       CheckB = this.car.y -(Slope * this.car.x)
