@@ -12,19 +12,31 @@ class gameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('car', 'static/assets/car.png')
+ 
 
-    
+    this.load.image('mapimage', 'static/assets/NewTestTrack.png')
+    this.load.tilemapTiledJSON('tilemap','static/assets/map1.json', 32, 32)
+  
+
+
+    this.load.image('car', 'static/assets/car.png')
   }
 
   create() {
+   
+  //this.add.image(0,0,'base_tiles')
 
-    //connect to server
-    this.socket = io()
+    const map = this.make.tilemap({key: 'tilemap'})
 
-    //define current scene
+    const tileset = map.addTilesetImage('roads2W','mapimage')
+
+    map.createLayer('Layer_1', tileset, 0, 0)
+
+    this.add.image(0,0 ,'mapimage')
+
     var self = this
-
+    this.socket = io()
+    
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
