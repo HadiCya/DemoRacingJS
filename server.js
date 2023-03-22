@@ -30,6 +30,7 @@ io.on('connection', function (socket) {
     x: 30,
     y: 30,
     gunrotation: 0,
+    health: 10,
     playerId: socket.id,
     playerName: socket.id,
     color: getRandomColor()
@@ -46,7 +47,7 @@ io.on('connection', function (socket) {
     //tell clients already connected that a new player has joined
     socket.broadcast.emit('newPlayer', players[socket.id])
   })
- 
+
   socket.on('disconnect', function () {
     console.log('player [' + socket.id + '] disconnected')
     delete players[socket.id]
@@ -63,7 +64,13 @@ io.on('connection', function (socket) {
     //let other clients know change
     socket.broadcast.emit('playerMoved', players[socket.id])
 
-    
+
+  })
+
+  socket.on('healthChange', function (health) {
+    players[socket.id].health = health;
+
+    socket.broadcast.emit('healthChanged', players[socket.id]);
   })
 })
 

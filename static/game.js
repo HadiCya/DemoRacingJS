@@ -1,4 +1,4 @@
-import {Player} from "./Player.js"
+import { Player } from "./Player.js"
 import Lobby from "./Lobby.js"
 
 var pointer; //variable for mouse's location
@@ -25,10 +25,10 @@ class gameScene extends Phaser.Scene {
     this.playerName = data.playerName
   }
 
- //image preloads for car and gun
+  //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-    this.load.image('gun', 'static/assets/gun.png') 
+    this.load.image('gun', 'static/assets/gun.png')
   }
 
   create() {
@@ -40,7 +40,7 @@ class gameScene extends Phaser.Scene {
     var self = this
 
     //for mouse position
-    input=this.input;
+    input = this.input;
 
     console.log(this.playerName)
 
@@ -48,9 +48,9 @@ class gameScene extends Phaser.Scene {
     self.socket.emit('updateName', self.playerName)
 
     //adds gun sprite-image
-    gun=this.add.sprite(400,300,'gun'); 
+    gun = this.add.sprite(400, 300, 'gun');
     gun.setDepth(1);
-    
+
     //array to store other players
     this.otherPlayers = this.add.group()
 
@@ -66,7 +66,7 @@ class gameScene extends Phaser.Scene {
           Player.addPlayer(self, players[id])
         } else {
           //call to Player object to create other player's cars
-            Player.addOtherPlayers(self, players[id])
+          Player.addOtherPlayers(self, players[id])
         }
       })
     })
@@ -91,12 +91,23 @@ class gameScene extends Phaser.Scene {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerInfo.playerId === otherPlayer.playerId) {
           //call to Player object to update position of other cars
-          Player.updateOtherPlayerMovement(playerInfo, otherPlayer)
+          Player.updateOtherPlayerMovement(playerInfo, otherPlayer);
         }
+        //console.log(`Compare: ${playerInfo.playerId}, ${otherPlayer.playerId}`)
       })
     })
 
-    
+    this.socket.on('healthChanged', function (playerInfo) {
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          //call to Player object to update health of other car
+          Player.updateOtherPlayerHealth(playerInfo, otherPlayer);
+        }
+        console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
+      })
+    })
+
+
     graphics = this.add.graphics({ fillStyle: { color: 0x2266aa } });
 
     point = new Phaser.Geom.Point(300, 575);
@@ -104,21 +115,21 @@ class gameScene extends Phaser.Scene {
 
   }
 
-  
+
 
   update(time, delta) {
 
     //sets rotation of laser gun
-    let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
+    let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
     gun.setRotation(angle);
-    
+
     //Make sure car has been instantiated correctly
     if (this.car) {
 
       if (line1)
         graphics.destroy(line1);//deletes the line, so that they don't build up
       pointer = this.input.activePointer; //sets pointer to user's mouse
-      laserLength = Math.sqrt((pointer.worldY - this.car.y)**2 + (pointer.worldX - this.car.x)**2);
+      laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
       laserY = laserLength * (pointer.worldY - this.car.y);
       laserX = laserLength * (pointer.worldX - this.car.x);
       line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
@@ -127,31 +138,38 @@ class gameScene extends Phaser.Scene {
       gun.x = this.car.x;
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
-      
+
       Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
-      CheckB = this.car.y -(Slope * this.car.x)
-     CheckY = ((Slope * point.x) + CheckB);
- 
-    // Collision detection
-    const collisionThreshold = 25;
-    if (Math.abs(CheckY - point.y) < collisionThreshold) {
-      console.log("Collision detected");
-    }
+      CheckB = this.car.y - (Slope * this.car.x)
+      CheckY = ((Slope * point.x) + CheckB);
+
+      // Collision detection
+      const collisionThreshold = 25;
+      if (Math.abs(CheckY - point.y) < collisionThreshold) {
+        console.log("Collision detected");
+      }
 
 
-    if(CheckY < point.y){
-      console.log("Laser above dot")
-    }
+      if (CheckY < point.y) {
+        console.log("Laser above dot")
+      }
 
-    if(CheckY > point.y){
-      console.log("Laser below dot")
-    }
+      if (CheckY > point.y) {
+        console.log("Laser below dot")
+      }
 
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
+
+      //damage example:
+      //Player.takeDamage(this.car, 1);
+
+      //Check health every frame (do not delete)
+      Player.updateHealth(this.car, this.socket);
+
     }
 
     console.log(CheckY)
