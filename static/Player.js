@@ -21,7 +21,7 @@ export const Player = {
       .setOrigin(0.5, 0.5)
       .setDisplaySize(50, 50)
       
-
+    
     
       self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
     

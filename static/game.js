@@ -4,11 +4,9 @@ import Lobby from "./Lobby.js"
 var pointer; //variable for mouse's location
 var line1;
 var graphics;
-var laserLength; //length of the Laser
-var laserX; //X coordinate for the end of the laser
-var laserY; //Y coordinate for the end of the laser
 var gun;  //laser gun
 var input; //mouse position for sprites
+var bullets;
 
 class gameScene extends Phaser.Scene {
 
@@ -23,7 +21,8 @@ class gameScene extends Phaser.Scene {
  //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-    this.load.image('gun', 'static/assets/gun.png') 
+    this.load.image('gun', 'static/assets/gun.png')
+    this.load.image('bullet', 'static/assets/Bullet.png') 
   }
 
   create() {
@@ -45,7 +44,7 @@ class gameScene extends Phaser.Scene {
     //adds gun sprite-image
     gun=this.add.sprite(400,300,'gun'); 
     gun.setDepth(1);
-    
+
     //array to store other players
     this.otherPlayers = this.add.group()
 
@@ -91,6 +90,11 @@ class gameScene extends Phaser.Scene {
       })
     })
 
+    // Create bullet group
+    bullets = this.add.group({
+      defaultKey: 'bullet',
+      maxSize: 1000
+    });
   }
 
 
@@ -105,18 +109,35 @@ class gameScene extends Phaser.Scene {
 
       
       pointer = this.input.activePointer; //sets pointer to user's mouse
-     
       gun.x = this.car.x;
       gun.y = this.car.y;
       
-
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
     }
-  }
 
+    // Shooting
+    if (this.input.activePointer.isDown) {
+      //shootBullet();
+      const bullet = bullets.get(this.car.x, this.car.y);
+      bullet.speed = Phaser.Math.GetSpeed(400, 1);
+       if (bullet) {
+        bullet.setActive(true);
+        bullet.setVisible(true);
+        bullet.y -= bullet.speed * delta;
+        bullet.x -= bullet.speed * delta;
+
+        this.time.delayedCall(1000, () => {
+          bullet.setActive(false);
+          bullet.setVisible(false);
+          bullet.x = 0;
+          bullet.y = 0;
+        });
+        }
+      }
+  }   
 }
 
 var config = { //Keep this at the bottom of the file
