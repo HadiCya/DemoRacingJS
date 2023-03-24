@@ -123,11 +123,13 @@ class gameScene extends Phaser.Scene {
       //shootBullet();
       const bullet = bullets.get(this.car.x, this.car.y);
       bullet.speed = Phaser.Math.GetSpeed(400, 1);
+      bullet.setRotation(angle);
        if (bullet) {
         bullet.setActive(true);
         bullet.setVisible(true);
         bullet.y -= bullet.speed * delta;
         bullet.x -= bullet.speed * delta;
+        
 
         this.time.delayedCall(1000, () => {
           bullet.setActive(false);
