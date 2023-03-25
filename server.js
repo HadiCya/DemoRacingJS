@@ -59,8 +59,12 @@ io.on('connection', function (socket) {
     players[socket.id].rotation = movementData.rotation
 
     socket.broadcast.emit('playerMoved', players[socket.id])
+  })
 
-    
+  socket.on('healthChange', function (health) {
+    players[socket.id].health = health;
+
+    socket.broadcast.emit('healthChanged', players[socket.id]);
   })
 })
 

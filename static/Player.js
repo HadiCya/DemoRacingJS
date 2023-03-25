@@ -12,13 +12,27 @@ var isDriftStart = true
 var labelOffsetX = -20
 var labelOffsetY = -40
 
+var maxHealth = 10
 
 //Object stores functions which are called in game.js
 
 export const Player = {
 
+    //function to set stat variables based on selected car
+    setStats(carStats) {
+        maxspeed = carStats.maxspeed,
+        accel = carStats.accel,
+        handling = carStats.handling,
+        driftHandling = carStats.driftHandling,
+        oversteer = carStats.oversteer,
+        decay = carStats.decay
+        maxHealth = carStats.maxHealth
+    },
+
     //function to instantiate car of current player
     addPlayer(self, playerInfo) {
+
+        this.setStats(self.carStats)
 
         //self.car = matter.add.existing(new Car(this, playerInfo))
         self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
@@ -33,63 +47,6 @@ export const Player = {
 
     },
 
-    updateCarMovementWithDrift(car, cursors, wasd, delta) {
-
-        if (wasd.SHIFT.isDown && (cursors.right.isDown || wasd.D.isDown || cursors.left.isDown || wasd.A.isDown)) {
-            
-            //get the direction youre facing when you start drifting
-            if (isDriftStart) {
-                //console.log(car.rotation)
-
-                this.driftAngle = car.angle;
-    
-                isDriftStart = false
-            }
-
-
-            //console.log(this.driftAngle)
-
-            //turn car left or right
-            
-            if (cursors.right.isDown || wasd.D.isDown) {
-                car.angle += oversteer * (delta / 10)
-                this.driftAngle = (this.driftAngle + driftHandling * (delta / 10)) % 360;
-            }
-
-            if (cursors.left.isDown || wasd.A.isDown) {
-                car.angle -= oversteer * (delta / 10)
-                this.driftAngle = (this.driftAngle - driftHandling  * (delta / 10)) % 360;
-            }
-        
-            //console.log((this.driftAngle - car.angle) * 0.05)
-            
-           
-            console.log(speed)
-            car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
-            car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
-             
-        }
-        else {
-            isDriftStart = true
-
-            //turn car left or right
-            if (cursors.right.isDown || wasd.D.isDown) {
-                car.angle += handling * (delta / 10);
-            }
-            if (cursors.left.isDown || wasd.A.isDown) {
-                car.angle -= handling * (delta / 10);
-            }
-
-            //console.log(car.angle + 180)
-            console.log(speed)
-            car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
-            car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
-            // console.log(speed)
-        }
-
-
-
-    },
 
     //function to instantiate cars of other players
     addOtherPlayers(self, playerInfo) {
@@ -176,6 +133,64 @@ export const Player = {
 
     },
 
+    updateCarMovementWithDrift(car, cursors, wasd, delta) {
+
+        if (wasd.SHIFT.isDown && (cursors.right.isDown || wasd.D.isDown || cursors.left.isDown || wasd.A.isDown)) {
+            
+            //get the direction youre facing when you start drifting
+            if (isDriftStart) {
+                //console.log(car.rotation)
+
+                this.driftAngle = car.angle;
+    
+                isDriftStart = false
+            }
+
+
+            //console.log(this.driftAngle)
+
+            //turn car left or right
+            
+            if (cursors.right.isDown || wasd.D.isDown) {
+                car.angle += oversteer * (delta / 10)
+                this.driftAngle = (this.driftAngle + driftHandling * (delta / 10)) % 360;
+            }
+
+            if (cursors.left.isDown || wasd.A.isDown) {
+                car.angle -= oversteer * (delta / 10)
+                this.driftAngle = (this.driftAngle - driftHandling  * (delta / 10)) % 360;
+            }
+        
+            //console.log((this.driftAngle - car.angle) * 0.05)
+            
+           
+            console.log(speed)
+            car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
+            car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
+             
+        }
+        else {
+            isDriftStart = true
+
+            //turn car left or right
+            if (cursors.right.isDown || wasd.D.isDown) {
+                car.angle += handling * (delta / 10);
+            }
+            if (cursors.left.isDown || wasd.A.isDown) {
+                car.angle -= handling * (delta / 10);
+            }
+
+            //console.log(car.angle + 180)
+            console.log(speed)
+            car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
+            car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
+            // console.log(speed)
+        }
+
+
+
+    },
+
     //update positions of other players. function is in Player object since labelOffset variables are here
     updateOtherPlayerMovement(playerInfo, otherPlayer) {
         otherPlayer.setRotation(playerInfo.rotation)
@@ -183,7 +198,23 @@ export const Player = {
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
     },
 
+    //called once per frame in game.js update loop
+    updateHealth(car, socket) {
+        if (car.oldHealth && (car.health !== car.oldHealth)) {
+            socket.emit('healthChange', car.health);
+        }
+        car.oldHealth = car.health;
+    },
 
+    updateOtherPlayerHealth(playerInfo, otherPlayer) {
+        otherPlayer.health = playerInfo.health;
+    },
+
+    //decrement health of car by damage amount
+    //will automatically be communicated over server
+    takeDamage(car, damage) {
+        car.health -= damage;
+    },
 
 
 }

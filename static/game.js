@@ -10,6 +10,8 @@ class gameScene extends Phaser.Scene {
 
   init(data) {
     this.playerName = data.playerName
+    this.carStats = data.carStats
+    console.log(this.carStats)
   }
 
   preload() {
@@ -39,7 +41,6 @@ class gameScene extends Phaser.Scene {
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateName', self.playerName)
-
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -87,6 +88,17 @@ class gameScene extends Phaser.Scene {
         }
       })
     })
+
+    this.socket.on('healthChanged', function (playerInfo) {
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          //call to Player object to update health of other car
+          Player.updateOtherPlayerHealth(playerInfo, otherPlayer);
+        }
+        console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
+      })
+    })
+
 
   }
 
