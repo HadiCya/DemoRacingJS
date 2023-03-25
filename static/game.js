@@ -40,11 +40,13 @@ class gameScene extends Phaser.Scene {
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateName', self.playerName)
 
+
     //array to store other players
     this.otherPlayers = this.add.group()
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
+    this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
 
     //check list of players connected and identify us from other players
     this.socket.on('currentPlayers', function (players) {
@@ -58,6 +60,7 @@ class gameScene extends Phaser.Scene {
             Player.addOtherPlayers(self, players[id])
         }
       })
+
     })
 
     //render new player that has connected after this client
@@ -92,12 +95,12 @@ class gameScene extends Phaser.Scene {
 
     //Make sure car has been instantiated correctly
     if (this.car) {
-
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-      Player.drive(this.car, this.label, this.cursors, delta, this.socket)
+      Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
     }
+    
   }
 
 }
