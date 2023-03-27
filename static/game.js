@@ -14,6 +14,7 @@ var graphics
 var Slope;
 var CheckY;
 var CheckB;
+var lKey;
 
 class gameScene extends Phaser.Scene {
 
@@ -43,6 +44,9 @@ class gameScene extends Phaser.Scene {
     input = this.input;
 
     console.log(this.playerName)
+
+    // create a key to toggle the laser sprite
+   lKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateName', self.playerName)
@@ -126,7 +130,8 @@ class gameScene extends Phaser.Scene {
     //Make sure car has been instantiated correctly
     if (this.car) {
 
-      if (line1)
+
+        if (line1)
         graphics.destroy(line1);//deletes the line, so that they don't build up
       pointer = this.input.activePointer; //sets pointer to user's mouse
       laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
@@ -134,10 +139,20 @@ class gameScene extends Phaser.Scene {
       laserX = laserLength * (pointer.worldX - this.car.x);
       line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
       graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-      graphics.strokeLineShape(line1); //draws the line
+
+      if (lKey.isDown) {
+        if (!graphics)
+            graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+        graphics.strokeLineShape(line1); //draws the line
+    } else {
+        if (graphics)
+            graphics.clear();
+    }
+    
       gun.x = this.car.x;
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
+
 
       Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
       CheckB = this.car.y - (Slope * this.car.x)
@@ -147,15 +162,6 @@ class gameScene extends Phaser.Scene {
       const collisionThreshold = 25;
       if (Math.abs(CheckY - point.y) < collisionThreshold) {
         console.log("Collision detected");
-      }
-
-
-      if (CheckY < point.y) {
-        console.log("Laser above dot")
-      }
-
-      if (CheckY > point.y) {
-        console.log("Laser below dot")
       }
 
 
@@ -171,11 +177,6 @@ class gameScene extends Phaser.Scene {
       Player.updateHealth(this.car, this.socket);
 
     }
-
-    console.log(CheckY)
-    console.log(point.y)
-    console.log(point.x)
-
   }
 
 }
