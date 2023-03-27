@@ -32,6 +32,8 @@ class gameScene extends Phaser.Scene {
 
     //array to store other players
     this.otherPlayers = this.add.group()
+    console.log("this: ");
+    console.log(this);
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
@@ -65,6 +67,7 @@ class gameScene extends Phaser.Scene {
       })
     })
 
+    /*
     //update car positions when other clients move their cars
     this.socket.on('playerMoved', function (playerInfo) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
@@ -74,8 +77,34 @@ class gameScene extends Phaser.Scene {
         }
       })
     })
+    */
 
+    this.socket.on('get-update', function (playerRecvObj, callback) {
+      console.log(`Server update request received`);
+      console.log(playerRecvObj);
+      
+      /*
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        otherPlayers_recv.getChildren().forEach(function (recv_otp) {
+          if (recv_otp.playerId === otherPlayer.playerId) {
+            //call to Player object to update position of other cars
+            Player.updateOtherPlayerMovement(playerInfo, otherPlayer);
+          }
+        })
+      })
+      */
+
+      callback(`RESPONSE`);
+    })
+
+
+    this.socket.on('hello', function (callback) {
+      console.log(`Recieved hello from Server`);
+      callback(`Hi Back!`);
+    })
   }
+
+  
 
 
   update(time, delta) {

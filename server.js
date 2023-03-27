@@ -20,7 +20,7 @@ server.listen(3000, function () {
   console.log('Starting server on port 3000')
 })
 
-var players = {}
+let players = {}
 
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
@@ -31,8 +31,13 @@ io.on('connection', function (socket) {
     y: 30,
     playerId: socket.id,
     playerName: socket.id,
-    color: getRandomColor()
+    color: getRandomColor(),
+    //socketInstance: socket
   }
+
+  socket.join(socket.id);
+
+  //console.log(players);
 
   //give new client list of players already in game
   socket.emit('currentPlayers', players)
@@ -52,6 +57,7 @@ io.on('connection', function (socket) {
     io.emit('playerDisconnected', socket.id)
   })
 
+
   socket.on('playerMovement', function (movementData) {
 
     players[socket.id].x = movementData.x
@@ -59,11 +65,57 @@ io.on('connection', function (socket) {
     players[socket.id].rotation = movementData.rotation
 
     socket.broadcast.emit('playerMoved', players[socket.id])
-
-    
   })
+
+  
 })
+
+setInterval(syncGameState, 2000);
 
 function getRandomColor() {
   return '0x' + Math.floor(Math.random() * 16777215).toString(16)
+}
+
+function syncGameState() {
+  console.log(Object.keys(players));
+  console.log(`Players: ${Object.keys(players).length}`);
+  otherPlayers = {}
+
+  
+  Object.keys(players).forEach(function (id) {
+    let player = players[id];
+    let otherPlayers = Object.assign({}, players);
+    delete otherPlayers[id];
+
+    io.to(id).timeout(500).emit('hello', function(err, response) {
+      if (err) {
+        console.log(`Error: No response from player ${player.playerName}`);
+      } else {
+        console.log(`Response from player ${player.playerName}: ${response}`);
+      }
+    })
+
+    console.log(otherPlayers);
+    
+    /*
+    let playerSendObj = {
+      x: player.x,
+      y: player.y,
+      rotation: player.rotation,
+      playerId: player.playerId
+    }
+    */
+
+    io.to(id).timeout(500).emit('get-update', {otherPlayers}, function (err, response) {
+      if (err) {
+        console.log(`Error: No response from player ${player.playerName}`);
+      } 
+    })
+    
+    
+    
+    
+  })
+  
+  
 }
