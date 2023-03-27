@@ -97,10 +97,9 @@ class gameScene extends Phaser.Scene {
     });
   }
 
-
   update(time, delta) {
 
-    //sets rotation of laser gun
+    //sets rotation of gun
     let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
     gun.setRotation(angle);
 
@@ -117,28 +116,34 @@ class gameScene extends Phaser.Scene {
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
     }
-
+    
     // Shooting
     if (this.input.activePointer.isDown) {
-      //shootBullet();
-      const bullet = bullets.get(this.car.x, this.car.y);
-      bullet.speed = Phaser.Math.GetSpeed(400, 1);
-      bullet.setRotation(angle);
+      let bullet = bullets.get(this.car.x, this.car.y)
        if (bullet) {
+        bullet = this.matter.add.gameObject(bullet)
+
+        //triggers collision code but doesn't actually collide
+        //basically isTrigger from Unity
+        bullet.setSensor(true)
+
+        bullet.setRotation(angle);
+        bullet.setDepth(-1);
         bullet.setActive(true);
         bullet.setVisible(true);
-        bullet.y -= bullet.speed * delta;
-        bullet.x -= bullet.speed * delta;
+        console.log(bullet)
+        bullet.thrust(.1);
         
-
+        
         this.time.delayedCall(1000, () => {
           bullet.setActive(false);
           bullet.setVisible(false);
-          bullet.x = 0;
-          bullet.y = 0;
+          //destroy the bullet
+          bullet.destroy()
         });
         }
       }
+      
   }   
 }
 
