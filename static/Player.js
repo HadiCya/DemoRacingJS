@@ -164,7 +164,7 @@ export const Player = {
             //console.log((this.driftAngle - car.angle) * 0.05)
             
            
-            console.log(speed)
+            //console.log(speed)
             car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
             car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
              
@@ -181,7 +181,7 @@ export const Player = {
             }
 
             //console.log(car.angle + 180)
-            console.log(speed)
+            //console.log(speed)
             car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
             car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
             // console.log(speed)

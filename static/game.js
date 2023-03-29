@@ -1,6 +1,11 @@
 import {Player} from "./Player.js"
 import Lobby from "./Lobby.js"
 
+var graphics
+var line
+var line2
+var threshold
+var threshold2
 class gameScene extends Phaser.Scene {
 
 
@@ -21,6 +26,7 @@ class gameScene extends Phaser.Scene {
     this.load.image('car', 'static/assets/car.png')
   }
 
+  
 
   create() {
    
@@ -56,6 +62,11 @@ class gameScene extends Phaser.Scene {
           //call to Player object to create car controlled by this client
           players[id].playerName = self.playerName
           Player.addPlayer(self, players[id])
+          
+          
+
+
+
         } else {
           //call to Player object to create other player's cars
             Player.addOtherPlayers(self, players[id])
@@ -95,25 +106,74 @@ class gameScene extends Phaser.Scene {
           //call to Player object to update health of other car
           Player.updateOtherPlayerHealth(playerInfo, otherPlayer);
         }
-        console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
+        //console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
       })
     })
 
 
+
+
+//the width and colors of the line?
+     graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+//the lines dimensions, x1, y1, x2, and y2
+     line = new Phaser.Geom.Line(300, 300, 400, 300);
+
+//makes the line
+    graphics.strokeLineShape(line);
+    
+
+//calculates the length of the line
+    threshold =Math.sqrt(((Math.abs(line.y1 - line.y2)) * (Math.abs(line.y1 - line.y2))) + ((Math.abs(line.x1 - line.x2)) * (Math.abs(line.x1 - line.x2))))
+
+  
+
+    //the lines dimensions, x1, y1, x2, and y2
+         line2 = new Phaser.Geom.Line(100, 200, 300, 400);
+    
+    //makes the line
+        graphics.strokeLineShape(line2);
+        
+        threshold2 =Math.sqrt(((Math.abs(line2.y1 - line2.y2)) * (Math.abs(line2.y1 - line2.y2))) + ((Math.abs(line2.x1 - line2.x2)) * (Math.abs(line2.x1 - line2.x2))))
+
+      
+  
+
   }
+
+  
 
 
   update(time, delta) {
 
+    
+ 
     //Make sure car has been instantiated correctly
     if (this.car) {
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
+
+
+      const collisionThreshold = threshold/2 + 25; // 25 for half the car length, and threshold is calculated on creation, its the length of the line 
+      const collisionThreshold2 = threshold2/2 + 25;
+// checks if the car is withith the threshold from the center of the line
+        if ((Math.abs((this.car.y)-((line.y1 + line.y2) / 2))<collisionThreshold) && (Math.abs((this.car.x)-((line.x1 + line.x2) / 2))<collisionThreshold)) {
+        console.log("Collision detected");
+      }
+
+
+      if ((Math.abs((this.car.y)-((line2.y1 + line2.y2) / 2))<collisionThreshold2) && (Math.abs((this.car.x)-((line2.x1 + line2.x2) / 2))<collisionThreshold2)) {
+        console.log("Collision detected");
+      }
+
+
+      
       Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
     }
     
   }
+
+  
 
 }
 
