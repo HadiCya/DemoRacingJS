@@ -7,6 +7,7 @@ var graphics;
 var gun;  //laser gun
 var input; //mouse position for sprites
 var bullets;
+var lastFired = 0;
 
 class gameScene extends Phaser.Scene {
 
@@ -118,7 +119,7 @@ class gameScene extends Phaser.Scene {
     }
     
     // Shooting
-    if (this.input.activePointer.isDown) {
+    if (this.input.activePointer.isDown && time > lastFired) {
       let bullet = bullets.get(this.car.x, this.car.y)
        if (bullet) {
         bullet = this.matter.add.gameObject(bullet)
@@ -131,10 +132,10 @@ class gameScene extends Phaser.Scene {
         bullet.setDepth(-1);
         bullet.setActive(true);
         bullet.setVisible(true);
-        console.log(bullet)
-        bullet.thrust(.1);
-        
-        
+        console.log(bullet);
+        bullet.thrust(.2);
+        lastFired = time + 200;
+
         this.time.delayedCall(1000, () => {
           bullet.setActive(false);
           bullet.setVisible(false);
@@ -143,7 +144,6 @@ class gameScene extends Phaser.Scene {
         });
         }
       }
-      
   }   
 }
 
