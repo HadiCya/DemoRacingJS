@@ -15,6 +15,7 @@ var Slope;
 var CheckY;
 var CheckB;
 
+
 class gameScene extends Phaser.Scene {
 
   constructor() {
@@ -29,6 +30,7 @@ class gameScene extends Phaser.Scene {
   preload() {
     this.load.image('car', 'static/assets/car.png')
     this.load.image('gun', 'static/assets/gun.png')
+    this.load.image('circle', 'static/assets/circle.png')
   }
 
   create() {
@@ -50,6 +52,15 @@ class gameScene extends Phaser.Scene {
     //adds gun sprite-image
     gun = this.add.sprite(400, 300, 'gun');
     gun.setDepth(1);
+
+    var circle = this.matter.add.image(400, 300, 'circle')
+    circle.setScale(9);
+    circle.setBody({
+        type: 'circle',
+        radius: 100
+    });
+    circle.setSensor(true)
+  
 
     //array to store other players
     this.otherPlayers = this.add.group()
