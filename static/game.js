@@ -73,15 +73,16 @@ class gameScene extends Phaser.Scene {
 
     //render new player that has connected after this client
     this.socket.on('newPlayer', function (playerInfo) {
-      Player.addOtherPlayers(self, playerInfo)
+      Player.addOtherPlayers(self, playerInfo);
     })
 
     //delete objects for other players when they disconnect
     this.socket.on('playerDisconnected', function (playerId) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerId === otherPlayer.playerId) {
-          otherPlayer.destroy()
-          otherPlayer.label.destroy()
+          otherPlayer.destroy();
+          otherPlayer.label.destroy();
+          otherPlayer.gun.destroy();
         }
       })
     })
