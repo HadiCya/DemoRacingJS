@@ -15,7 +15,7 @@ class gameScene extends Phaser.Scene {
   preload() {
 
     this.load.image('tiles', 'static/assets/roads2w.png')
-    this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
+    this.load.tilemapTiledJSON('tilemap', 'static/assets/checkpointTest.json', 32, 32)
     this.load.image('car', 'static/assets/car.png')
   }
 
@@ -26,7 +26,7 @@ class gameScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: 'tilemap' })
 
-    const tileset = map.addTilesetImage('roads2w', 'tiles')
+    const tileset = map.addTilesetImage('roads2W', 'tiles')
 
     map.createLayer('Layer_1', tileset, 0, 0)
 
@@ -99,6 +99,9 @@ class gameScene extends Phaser.Scene {
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
     }
   }
+
+  //checkpoint
+  
 
 }
 
