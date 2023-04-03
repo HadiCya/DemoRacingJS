@@ -3,6 +3,7 @@ import Lobby from "./Lobby.js"
 
 var gun;
 var input; //mouse position for sprites
+var circle;
 
 
 class gameScene extends Phaser.Scene {
@@ -42,7 +43,7 @@ class gameScene extends Phaser.Scene {
     gun = this.add.sprite(400, 300, 'gun');
     gun.setDepth(1);
 
-    var circle = this.matter.add.image(400, 300, 'circle')
+    circle = this.matter.add.image(400, 300, 'circle')
     circle.setScale(9);
     circle.setBody({
         type: 'circle',
@@ -122,6 +123,8 @@ class gameScene extends Phaser.Scene {
 
       gun.x = this.car.x;
       gun.y = this.car.y;
+      circle.x = this.car.x;
+      circle.y = this.car.y;
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
