@@ -5,6 +5,10 @@ const socketIO = require('socket.io')
 
 const app = express()
 var server = http.Server(app)
+
+const interval = 2000;
+
+
 var io = socketIO(server, {
   pingTimeout: 60000,
 })
@@ -33,6 +37,7 @@ io.on('connection', function (socket) {
     playerName: socket.id,
     color: getRandomColor(),
     //socketInstance: socket
+    speed: 0
   }
 
   socket.join(socket.id);
@@ -70,15 +75,15 @@ io.on('connection', function (socket) {
   
 })
 
-setInterval(syncGameState, 2000);
+setInterval(syncGameState, interval);
 
 function getRandomColor() {
   return '0x' + Math.floor(Math.random() * 16777215).toString(16)
 }
 
 function syncGameState() {
-  console.log(Object.keys(players));
-  console.log(`Players: ${Object.keys(players).length}`);
+  //console.log(Object.keys(players));
+  //console.log(`Players: ${Object.keys(players).length}`);
   otherPlayers = {}
 
   
@@ -89,16 +94,16 @@ function syncGameState() {
 
     io.to(id).timeout(500).emit('hello', function(err, response) {
       if (err) {
-        console.log(`Error: No response from player ${player.playerName}`);
+        //console.log(`Error: No response from player ${player.playerName}`);
       } else {
-        console.log(`Response from player ${player.playerName}: ${response}`);
+        //console.log(`Response from player ${player.playerName}: ${response}`);
       }
     })
 
-    console.log(otherPlayers);
+    //console.log(otherPlayers);
     
     /*
-    let playerSendObj = {
+    let playerSendO
       x: player.x,
       y: player.y,
       rotation: player.rotation,
@@ -111,6 +116,8 @@ function syncGameState() {
         console.log(`Error: No response from player ${player.playerName}`);
       } 
     })
+
+
     
     
     

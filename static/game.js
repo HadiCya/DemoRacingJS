@@ -25,6 +25,8 @@ class gameScene extends Phaser.Scene {
     //define current scene
     var self = this
 
+    window.gameScene = this;
+
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
@@ -34,6 +36,9 @@ class gameScene extends Phaser.Scene {
     this.otherPlayers = this.add.group()
     console.log("this: ");
     console.log(this);
+
+    console.log("other players: ");
+    console.log(this.otherPlayers);
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
@@ -80,26 +85,59 @@ class gameScene extends Phaser.Scene {
     */
 
     this.socket.on('get-update', function (playerRecvObj, callback) {
-      console.log(`Server update request received`);
-      console.log(playerRecvObj);
+      console.log(`Server update request received: ${playerRecvObj}`);
       
+      console.log("other players: ");
+
+      let newOPs = playerRecvObj.otherPlayers;
+
+      //console.log(Object.keys(newOPs));
       /*
+      Object.keys(newOPs).forEach(function (newOPID) {
+        console.log(opID);
+        /*
+        self.otherPlayers.getChildren().forEach(function (OPID) {
+          if()
+        })
+        
+        if(self.otherPlayers[opID]) {
+          console.logs(self.otherPlayer[opID]);
+        }
+      })
+      */
+      
+      
+      console.log("other players (self): ");
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        otherPlayers_recv.getChildren().forEach(function (recv_otp) {
-          if (recv_otp.playerId === otherPlayer.playerId) {
+        //console.log(otherPlayer.playerId);
+        if(newOPs[otherPlayer.playerId]) {
+          console.log(newOPs[otherPlayer.playerId]);
+          Player.updateOtherPlayerMovement(newOPs[otherPlayer.playerId], otherPlayer);
+        }
+        //playerRecvObj.otherPlayers.getChildren().forEach(function (OP){})
+      })
+
+      /*
+      self.otherPlayers.getChildren().forEach(function (opID) {
+        console.log(opID);
+        playerRecvObj.getChildren().forEach(function (recvID) {
+          console.log(recvID);
+          if (playerRecvObj.otherPlayers[recvID].playerId === self.otherPlayers[opID].playerId) {
             //call to Player object to update position of other cars
-            Player.updateOtherPlayerMovement(playerInfo, otherPlayer);
+            Player.updateOtherPlayerMovement(recv_otp, otherPlayer);
+            console.log(`Updating Player: ${self.otherPlayers[opID].playerName}`);
           }
         })
       })
       */
+      
 
       callback(`RESPONSE`);
     })
 
 
     this.socket.on('hello', function (callback) {
-      console.log(`Recieved hello from Server`);
+      //console.log(`Recieved hello from Server`);
       callback(`Hi Back!`);
     })
   }
