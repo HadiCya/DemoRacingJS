@@ -25,7 +25,9 @@ export const Player = {
 
         self.car.health = maxHealth;
 
-        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
+        self.car.body.label = "player"; //player's car's collsion box label;
+
+        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
 
         //self.car.setCollideWorldBounds(true)
         self.car.setTint(playerInfo.color)
@@ -47,6 +49,7 @@ export const Player = {
         otherPlayer.playerId = playerInfo.playerId
 
         otherPlayer.health = playerInfo.health
+        otherPlayer.body.label = "otherPlayer"; //other's car's collision box label
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
         otherPlayer.setTint(playerInfo.color)
 

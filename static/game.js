@@ -49,7 +49,8 @@ class gameScene extends Phaser.Scene {
         type: 'circle',
         radius: 100
     });
-    circle.setSensor(true)
+    circle.body.label = "poisonBubble"; //label for the collsion box of the poision gas
+    circle.setSensor(true);
   
 
     //array to store other players
@@ -107,6 +108,14 @@ class gameScene extends Phaser.Scene {
         console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
       })
     })
+
+    this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
+
+      console.log(event);
+      console.log(bodyA);
+      console.log(bodyB);
+
+     });
 
   }
 
