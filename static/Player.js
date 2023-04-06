@@ -39,14 +39,19 @@ export const Player = {
             .setOrigin(0.5, 0.5)
             .setDisplaySize(50, 50)
 
-        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
+        self.car.body.label = "player"
+        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //label displays name user enters in lobby
 
         //self.car.setCollideWorldBounds(true)
-        self.car.setTint(playerInfo.color)
+        self.car.setTint(playerInfo.color);
         //self.car.setDrag(1000)
 
-    },
+        self.cameras.main.setBounds(0, 0, 7680, 4320);
+        self.cameras.main.startFollow(self.car, true);
+        self.cameras.main.setZoom(1);
 
+
+    },
 
     //function to instantiate cars of other players
     addOtherPlayers(self, playerInfo) {
@@ -75,7 +80,6 @@ export const Player = {
                 speed = speed + (accel * (delta / 10))
             }
         }
-
 
         else {
             //car is at max speed

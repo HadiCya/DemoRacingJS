@@ -1,5 +1,6 @@
-import {Player} from "./Player.js"
+import { Player } from "./Player.js"
 import Lobby from "./Lobby.js"
+import { Checkpoints } from "./Checkpoints.js"
 
 var graphics
 var line
@@ -11,6 +12,7 @@ class gameScene extends Phaser.Scene {
 
   constructor() {
     super('gameScene')
+    this.moveCam = false
   }
 
   init(data) {
@@ -22,6 +24,9 @@ class gameScene extends Phaser.Scene {
   preload() {
 
     this.load.image('tiles', 'static/assets/roads2w.png')
+    this.load.image('roadTiles', 'static/assets/track_tilemap_demo.png')
+    this.load.image('checkpointTiles', 'static/assets/checkpoint-reference.png')
+    this.load.image('tirewallImage', 'static/assets/tirewall.png')
     this.load.tilemapTiledJSON('tilemap', 'static/assets/checkpointTest.json', 32, 32)
     this.load.image('car', 'static/assets/car.png')
   }
@@ -29,24 +34,60 @@ class gameScene extends Phaser.Scene {
   
 
   create() {
-   
+
     //this.add.image(0,0,'base_tiles')
 
-    const map = this.make.tilemap({ key: 'tilemap' })
+    //const map = this.make.tilemap({ key: 'tilemap' })
 
-    const tileset = map.addTilesetImage('roads2W', 'tiles')
+    //const tileset = map.addTilesetImage('roads2W', 'tiles')
 
-    map.createLayer('Layer_1', tileset, 0, 0)
+    //var layer = map.createLayer('Layer_1', tileset, 0, 0)
 
-    //this.add.image(0, 0, 'tiles')
+    //this.add.image(20, 20, 'tirewallImage')
 
     var self = this
     this.socket = io()
-    
+
     console.log(this.playerName)
 
+    // layer.setCollisionByProperty({ checkpoint: true })
+
+    // this.matter.world.convertTilemapLayer(layer)
+
+    // layer.forEachTile((tile) => {
+    //   if (tile.properties.checkpoint == true) {
+    //     console.log(tile)
+    //     tile.physics.matterBody.body.isSensor = true;
+    //   }
+    // })
+
+    Checkpoints.initializeMap(self);
+
+    this.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
+      //detect player passing checkpoint
+      if ((bodyA.label === 'player' && bodyB.label === 'checkpoint')) {
+        Checkpoints.incrementCheckpoint(self, this.car, bodyB.checkpointNumber);
+      }
+
+      if ((bodyB.label === 'player') && (bodyA.label === 'checkpoint')) {
+        Checkpoints.incrementCheckpoint(self, this.car, bodyA.checkpointNumber);
+      }
+
+      //if car hits barrier, bounce car back. prevents car from getting stuck in barrier
+      if ((bodyA.label === 'player') && (bodyB.label === 'barrier')) {
+        this.car.setX(this.car.x - (20 * Math.cos(this.car.rotation)));
+        this.car.setY(this.car.y - (20 * Math.sin(this.car.rotation)));
+      }
+      if ((bodyB.label === 'player') && (bodyA.label === 'barrier')) {
+        this.car.setX(this.car.x - (20 * Math.cos(this.car.rotation)));
+        this.car.setY(this.car.y - (20 * Math.sin(this.car.rotation)));
+      }
+
+
+    })
+
     //sends the enetered player name of this client to server so that it can be stored in array
-    self.socket.emit('updateName', self.playerName)
+    self.socket.emit('updateName', self.playerName);
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -69,7 +110,7 @@ class gameScene extends Phaser.Scene {
 
         } else {
           //call to Player object to create other player's cars
-            Player.addOtherPlayers(self, players[id])
+          Player.addOtherPlayers(self, players[id])
         }
       })
 
@@ -145,8 +186,27 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
-    
- 
+    //dynamic camera 
+    //TODO: add wasd to scroll
+
+    const cam = this.cameras.main;
+
+    if (this.moveCam) {
+      if (this.cursors.left.isDown) {
+        cam.scrollX -= 4
+      }
+      else if (this.cursors.right.isDown) {
+        cam.scrollX += 4
+      }
+      if (this.cursors.up.isDown) {
+        cam.scrollY -= 4
+      }
+      else if (this.cursors.down.isDown) {
+        cam.scrollY += 4
+      }
+    }
+
+
     //Make sure car has been instantiated correctly
     if (this.car) {
       //Drive according to logic in player object
@@ -191,8 +251,8 @@ var config = {
         y: 0
       },
       setBounds: {
-        width: 1280,
-        height: 720
+        width: 7680,
+        height: 4320
       },
       debug: true,
     }
