@@ -31,35 +31,15 @@ class gameScene extends Phaser.Scene {
     this.load.image('car', 'static/assets/car.png')
   }
 
-  
+
 
   create() {
 
-    //this.add.image(0,0,'base_tiles')
-
-    //const map = this.make.tilemap({ key: 'tilemap' })
-
-    //const tileset = map.addTilesetImage('roads2W', 'tiles')
-
-    //var layer = map.createLayer('Layer_1', tileset, 0, 0)
-
-    //this.add.image(20, 20, 'tirewallImage')
 
     var self = this
     this.socket = io()
 
     console.log(this.playerName)
-
-    // layer.setCollisionByProperty({ checkpoint: true })
-
-    // this.matter.world.convertTilemapLayer(layer)
-
-    // layer.forEachTile((tile) => {
-    //   if (tile.properties.checkpoint == true) {
-    //     console.log(tile)
-    //     tile.physics.matterBody.body.isSensor = true;
-    //   }
-    // })
 
     Checkpoints.initializeMap(self);
 
@@ -103,10 +83,6 @@ class gameScene extends Phaser.Scene {
           //call to Player object to create car controlled by this client
           players[id].playerName = self.playerName
           Player.addPlayer(self, players[id])
-          
-          
-
-
 
         } else {
           //call to Player object to create other player's cars
@@ -152,36 +128,9 @@ class gameScene extends Phaser.Scene {
     })
 
 
-
-
-//the width and colors of the line?
-     graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-//the lines dimensions, x1, y1, x2, and y2
-     line = new Phaser.Geom.Line(300, 300, 400, 300);
-
-//makes the line
-    graphics.strokeLineShape(line);
-    
-
-//calculates the length of the line
-    threshold =Math.sqrt(((Math.abs(line.y1 - line.y2)) * (Math.abs(line.y1 - line.y2))) + ((Math.abs(line.x1 - line.x2)) * (Math.abs(line.x1 - line.x2))))
-
-  
-
-    //the lines dimensions, x1, y1, x2, and y2
-         line2 = new Phaser.Geom.Line(100, 200, 300, 400);
-    
-    //makes the line
-        graphics.strokeLineShape(line2);
-        
-        threshold2 =Math.sqrt(((Math.abs(line2.y1 - line2.y2)) * (Math.abs(line2.y1 - line2.y2))) + ((Math.abs(line2.x1 - line2.x2)) * (Math.abs(line2.x1 - line2.x2))))
-
-      
-  
-
   }
 
-  
+
 
 
   update(time, delta) {
@@ -192,16 +141,16 @@ class gameScene extends Phaser.Scene {
     const cam = this.cameras.main;
 
     if (this.moveCam) {
-      if (this.cursors.left.isDown) {
+      if (this.cursors.left.isDown || this.wasd.A.isDown) {
         cam.scrollX -= 4
       }
-      else if (this.cursors.right.isDown) {
+      else if (this.cursors.right.isDown || this.wasd.D.isDown) {
         cam.scrollX += 4
       }
-      if (this.cursors.up.isDown) {
+      if (this.cursors.up.isDown || this.wasd.W.isDown) {
         cam.scrollY -= 4
       }
-      else if (this.cursors.down.isDown) {
+      else if (this.cursors.down.isDown || this.wasd.S.isDown) {
         cam.scrollY += 4
       }
     }
@@ -209,31 +158,20 @@ class gameScene extends Phaser.Scene {
 
     //Make sure car has been instantiated correctly
     if (this.car) {
+
+      //check if car has passed lap line
+      Checkpoints.detectLap(this.car);
+
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
 
-
-      const collisionThreshold = threshold/2 + 25; // 25 for half the car length, and threshold is calculated on creation, its the length of the line 
-      const collisionThreshold2 = threshold2/2 + 25;
-// checks if the car is withith the threshold from the center of the line
-        if ((Math.abs((this.car.y)-((line.y1 + line.y2) / 2))<collisionThreshold) && (Math.abs((this.car.x)-((line.x1 + line.x2) / 2))<collisionThreshold)) {
-        console.log("Collision detected");
-      }
-
-
-      if ((Math.abs((this.car.y)-((line2.y1 + line2.y2) / 2))<collisionThreshold2) && (Math.abs((this.car.x)-((line2.x1 + line2.x2) / 2))<collisionThreshold2)) {
-        console.log("Collision detected");
-      }
-
-
-      
       Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
     }
-    
+
   }
 
-  
+
 
 }
 

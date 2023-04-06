@@ -4,6 +4,11 @@ let lapNumber = 0;
 const checkpointsPerLap = 4;
 const lapsPerRace = 3;
 
+var graphics
+var line
+var threshold
+var collisionThreshold
+
 
 export const Checkpoints = {
     initializeMap(self) {
@@ -40,16 +45,46 @@ export const Checkpoints = {
                 tile.physics.matterBody.body.checkpointNumber = tile.properties.CheckpointNumber;
             }
         })
+
+        graphics = self.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+
+
+        line = new Phaser.Geom.Line(650, 375, 650, 550);
+
+        //draws the line
+        graphics.strokeLineShape(line);
+
+        //calculates the length of the line
+        threshold = Math.sqrt(((Math.abs(line.y1 - line.y2)) * (Math.abs(line.y1 - line.y2))) + ((Math.abs(line.x1 - line.x2)) * (Math.abs(line.x1 - line.x2))))
+        collisionThreshold = threshold / 2 + 25;
     },
 
     incrementCheckpoint(self, car, checkpointNumber) {
         if (lastCheckpointPassed + 1 == checkpointNumber) {
             lastCheckpointPassed = checkpointNumber
+            console.log(lastCheckpointPassed)
         }
 
     },
 
-    declareWon() {
+    detectLap(car) {
+        const collisionThreshold = threshold / 2 + 25; // 25 for half the car length, and threshold is calculated on creation, its the length of the line 
 
+        // checks if the car is withith the threshold from the center of the line
+        if ((Math.abs((car.y) - ((line.y1 + line.y2) / 2)) < collisionThreshold) && (Math.abs((car.x) - ((line.x1 + line.x2) / 2)) < collisionThreshold)) {
+            if (lastCheckpointPassed == checkpointsPerLap) {
+                lastCheckpointPassed = 0;
+                lapNumber += 1;
+                console.log(lapNumber);
+            }
+
+            if (lapNumber > lapsPerRace) {
+                this.declareFinished()
+            }
+        }
+    },
+
+    declareFinished() {
+        console.log("finished")
     }
 }
