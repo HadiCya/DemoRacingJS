@@ -11,70 +11,76 @@ var labelOffsetY = -40
 //Object stores functions which are called in game.js
 
 export const Player = {
-    
+
     //function to instantiate car of current player
     addPlayer(self, playerInfo) {
-      
 
-      //self.car = matter.add.existing(new Car(this, playerInfo))
-      self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
-      .setOrigin(0.5, 0.5)
-      .setDisplaySize(50, 50)
-    
-      self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
-    
-      //self.car.setCollideWorldBounds(true)
-      self.car.setTint(playerInfo.color)
-      //self.car.setDrag(1000)
-    
-    }, 
-    
+
+        //self.car = matter.add.existing(new Car(this, playerInfo))
+        self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
+            .setOrigin(0.5, 0.5)
+            .setDisplaySize(50, 50)
+
+        self.car.body.label = "player"
+        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //label displays name user enters in lobby
+
+        //self.car.setCollideWorldBounds(true)
+        self.car.setTint(playerInfo.color);
+        //self.car.setDrag(1000)
+
+        self.cameras.main.setBounds(0, 0, 7680, 4320);
+        self.cameras.main.startFollow(self.car, true);
+        self.cameras.main.setZoom(1);
+
+
+    },
+
     //function to instantiate cars of other players
     addOtherPlayers(self, playerInfo) {
-      const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
-        .setOrigin(0.5, 0.5)
-        .setDisplaySize(50, 50)
-        .setRotation(playerInfo.rotation)
-    
-      otherPlayer.playerId = playerInfo.playerId
-      otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
-      otherPlayer.setTint(playerInfo.color)
+        const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
+            .setOrigin(0.5, 0.5)
+            .setDisplaySize(50, 50)
+            .setRotation(playerInfo.rotation)
 
-      //add this car to array storing other players in game.js
-      self.otherPlayers.add(otherPlayer)
-    }, 
+        otherPlayer.playerId = playerInfo.playerId
+        otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
+        otherPlayer.setTint(playerInfo.color)
+
+        //add this car to array storing other players in game.js
+        self.otherPlayers.add(otherPlayer)
+    },
 
 
     //function to handle input and logic for moving the car this client controls. modify this function to modify driving behavior
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
     drive(car, label, cursors, delta, socket) {
-        
+
         //accelerate car if below max speed
         if (speed < maxspeed) {
             if (cursors.up.isDown) {
-            speed = speed + (accel * (delta / 10))
+                speed = speed + (accel * (delta / 10))
             }
         }
-    
+
         else {
             //car is at max speed
             speed = maxspeed
         }
-    
-    
+
+
         //reverse car if below max speed (in reverse)
         if (speed > -maxspeed) {
             if (cursors.down.isDown) {
-            speed = speed - (accel * (delta / 10))
+                speed = speed - (accel * (delta / 10))
             }
         }
-    
+
         else {
             //car is at max speed in reverse
             speed = -maxspeed
         }
-    
-    
+
+
         //turn car left or right
         if (cursors.right.isDown) {
             car.angle += 3.0 * (delta / 10);
@@ -82,27 +88,27 @@ export const Player = {
         if (cursors.left.isDown) {
             car.angle -= 3.0 * (delta / 10);
         }
-    
+
         //move car based on new speed and rotation 
         //delta factor makes movement frame rate independent
         car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
         car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
-    
+
         car.setAngularVelocity(0);
-    
+
         //update position of label. offset from car to position correctly 
         label.x = car.x - labelOffsetX;
-        label.y = car.y- labelOffsetY;
+        label.y = car.y - labelOffsetY;
 
         var x = car.x
         var y = car.y
         var r = car.rotation
-        
+
         if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation)) {
             socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation })
             console.log("moving")
         }
-        
+
         car.oldPosition = {
             x: car.x,
             y: car.y,
