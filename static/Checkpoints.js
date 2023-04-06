@@ -48,7 +48,8 @@ export const Checkpoints = {
 
         graphics = self.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
 
-
+        //Lap Line, set position of the lap line here
+        //Line parameters: (x1, y1, x2, y2)
         line = new Phaser.Geom.Line(650, 375, 650, 550);
 
         //draws the line
@@ -62,7 +63,7 @@ export const Checkpoints = {
     incrementCheckpoint(self, car, checkpointNumber) {
         if (lastCheckpointPassed + 1 == checkpointNumber) {
             lastCheckpointPassed = checkpointNumber
-            console.log(lastCheckpointPassed)
+            console.log(`Current Checkpoint: ${lastCheckpointPassed}`)
         }
 
     },
@@ -75,7 +76,7 @@ export const Checkpoints = {
             if (lastCheckpointPassed == checkpointsPerLap) {
                 lastCheckpointPassed = 0;
                 lapNumber += 1;
-                console.log(lapNumber);
+                console.log(`Current Lap: ${lapNumber}`);
             }
 
             if (lapNumber > lapsPerRace) {

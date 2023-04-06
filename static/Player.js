@@ -21,11 +21,11 @@ export const Player = {
     //function to set stat variables based on selected car
     setStats(carStats) {
         maxspeed = carStats.maxspeed,
-        accel = carStats.accel,
-        handling = carStats.handling,
-        driftHandling = carStats.driftHandling,
-        oversteer = carStats.oversteer,
-        decay = carStats.decay
+            accel = carStats.accel,
+            handling = carStats.handling,
+            driftHandling = carStats.driftHandling,
+            oversteer = carStats.oversteer,
+            decay = carStats.decay
         maxHealth = carStats.maxHealth
     },
 
@@ -101,7 +101,7 @@ export const Player = {
 
         if (speed > 0) {
             speed = speed - decay * (delta / 10)
-        } 
+        }
         else {
             speed = speed + decay * (delta / 10)
         }
@@ -111,7 +111,7 @@ export const Player = {
         //delta factor makes movement frame rate independent
         //car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
         //car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
-        
+
         this.updateCarMovementWithDrift(car, cursors, wasd, delta)
 
         car.setAngularVelocity(0);
@@ -140,13 +140,13 @@ export const Player = {
     updateCarMovementWithDrift(car, cursors, wasd, delta) {
 
         if (wasd.SHIFT.isDown && (cursors.right.isDown || wasd.D.isDown || cursors.left.isDown || wasd.A.isDown)) {
-            
+
             //get the direction youre facing when you start drifting
             if (isDriftStart) {
                 //console.log(car.rotation)
 
                 this.driftAngle = car.angle;
-    
+
                 isDriftStart = false
             }
 
@@ -154,7 +154,7 @@ export const Player = {
             //console.log(this.driftAngle)
 
             //turn car left or right
-            
+
             if (cursors.right.isDown || wasd.D.isDown) {
                 car.angle += oversteer * (delta / 10)
                 this.driftAngle = (this.driftAngle + driftHandling * (delta / 10)) % 360;
@@ -162,16 +162,16 @@ export const Player = {
 
             if (cursors.left.isDown || wasd.A.isDown) {
                 car.angle -= oversteer * (delta / 10)
-                this.driftAngle = (this.driftAngle - driftHandling  * (delta / 10)) % 360;
+                this.driftAngle = (this.driftAngle - driftHandling * (delta / 10)) % 360;
             }
-        
+
             //console.log((this.driftAngle - car.angle) * 0.05)
-            
-           
+
+
             //console.log(speed)
-            car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
-            car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
-             
+            car.setX(car.x + (speed * (Math.cos(this.driftAngle * Math.PI / 180))) * (delta / 10))
+            car.setY(car.y + (speed * (Math.sin(this.driftAngle * Math.PI / 180))) * (delta / 10))
+
         }
         else {
             isDriftStart = true
@@ -186,8 +186,8 @@ export const Player = {
 
             //console.log(car.angle + 180)
             //console.log(speed)
-            car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
-            car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
+            car.setX(car.x + (speed * Math.cos(car.angle * Math.PI / 180) * (delta / 10)))
+            car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
             // console.log(speed)
         }
 
