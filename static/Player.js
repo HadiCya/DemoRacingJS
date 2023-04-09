@@ -118,5 +118,11 @@ export const Player = {
         otherPlayer.setRotation(playerInfo.rotation)
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
+    },
+
+    //Get method to access speed in game.js
+    GetSpeed()
+    {
+        return speed
     }
 }
