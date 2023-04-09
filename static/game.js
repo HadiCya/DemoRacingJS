@@ -7,6 +7,8 @@ var line
 var line2
 var threshold
 var threshold2
+var istrue = true
+
 class gameScene extends Phaser.Scene {
 
 
@@ -82,7 +84,9 @@ class gameScene extends Phaser.Scene {
         if (players[id].playerId === self.socket.id) {
           //call to Player object to create car controlled by this client
           players[id].playerName = self.playerName
-          Player.addPlayer(self, players[id])
+          //added in the position you are in lineup to this
+          Player.addPlayer(self, players[id],players[id].numberconnected)
+          
 
         } else {
           //call to Player object to create other player's cars
@@ -135,6 +139,8 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
+
+    
     //dynamic camera 
     //TODO: add wasd to scroll
 
