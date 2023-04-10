@@ -1,7 +1,7 @@
 import { Player } from "./Player.js"
 import Lobby from "./Lobby.js"
 
-var gun;
+var poisongun;
 var input; //mouse position for sprites
 var circle;
 
@@ -19,7 +19,7 @@ class gameScene extends Phaser.Scene {
   //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-    this.load.image('gun', 'static/assets/gun.png')
+    this.load.image('poisongun', 'static/assets/posiongun.png')
     this.load.image('circle', 'static/assets/circle.png')
   }
 
@@ -40,8 +40,8 @@ class gameScene extends Phaser.Scene {
     self.socket.emit('updateName', self.playerName)
 
     //adds gun sprite-image
-    gun = this.add.sprite(400, 300, 'gun');
-    gun.setDepth(1);
+    poisongun = this.add.sprite(400, 300, 'poisongun');
+    poisongun.setDepth(1);
 
     circle = this.matter.add.image(400, 300, 'circle')
     circle.setScale(9);
@@ -49,8 +49,8 @@ class gameScene extends Phaser.Scene {
         type: 'circle',
         radius: 100
     });
-    circle.body.label = "poisonBubble"; //label for the collsion box of the poision gas
-    circle.setSensor(true);
+    circle.setSensor(true)
+    circle.body.label = "poisonArea"
   
 
     //array to store other players
@@ -111,9 +111,17 @@ class gameScene extends Phaser.Scene {
 
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
 
-      console.log(event);
-      console.log(bodyA);
-      console.log(bodyB);
+      //console.log(bodyA, bodyB);
+
+      if (bodyA.label == "player" && bodyB.label == "poisonArea") {
+        console.log(bodyA.gameObject)
+        Player.takeDamage(bodyA.gameObject, 1)
+      }
+      
+      if (bodyB.label == "player" && bodyA.label == "poisonArea") {
+        console.log('damage')
+        Player.takeDamage(bodyB.gameObject, 1)
+      }
 
      });
 
@@ -124,14 +132,14 @@ class gameScene extends Phaser.Scene {
   update(time, delta) {
 
     //sets rotation of laser gun
-    let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
-    gun.setRotation(angle);
+    let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, input.x, input.y);
+    poisongun.setRotation(angle);
 
     //Make sure car has been instantiated correctly
     if (this.car) {
 
-      gun.x = this.car.x;
-      gun.y = this.car.y;
+      poisongun.x = this.car.x;
+      poisongun.y = this.car.y;
       circle.x = this.car.x;
       circle.y = this.car.y;
 
@@ -145,6 +153,7 @@ class gameScene extends Phaser.Scene {
 
       //Check health every frame (do not delete)
       Player.updateHealth(this.car, this.socket);
+      //console.log(this.car.health);
 
     }
 

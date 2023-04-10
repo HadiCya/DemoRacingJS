@@ -42,9 +42,23 @@ export const Player = {
             .setDisplaySize(50, 50)
             .setRotation(playerInfo.rotation)
 
-        otherPlayer.gun = self.add.sprite(playerInfo.x, playerInfo.y, 'gun')
+        otherPlayer.gun = self.add.sprite(playerInfo.x, playerInfo.y, 'poisongun')
             .setOrigin(0.5, 0.5)
             .setDisplaySize(50, 50)
+            .setDepth(1)
+
+            // otherPlayer.circle = self.add.sprite(playerInfo.x, playerInfo.y, 'circle')
+            // .setOrigin(0.5, 0.5)
+            // .setDisplaySize(50, 50)
+
+        otherPlayer.circle = self.matter.add.image(playerInfo.x, playerInfo.y, 'circle')
+        otherPlayer.circle.setScale(9);
+        otherPlayer.circle.setBody({
+            type: 'circle',
+            radius: 100
+        });
+        otherPlayer.circle.setSensor(true)
+        otherPlayer.circle.body.label = "poisonArea"
 
         otherPlayer.playerId = playerInfo.playerId
 
@@ -114,7 +128,7 @@ export const Player = {
 
         if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation || gr !== car.oldPosition.gunrotation)) {
             socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation, gunrotation: car.gunrotation })
-            console.log("moving")
+            //console.log("moving")
         }
 
         car.oldPosition = {
@@ -133,6 +147,7 @@ export const Player = {
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
         otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
+        otherPlayer.circle.setPosition(playerInfo.x, playerInfo.y)
         //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
         //self.gun.setRotation(angle);
 
@@ -140,10 +155,13 @@ export const Player = {
 
     //called once per frame in game.js update loop
     updateHealth(car, socket) {
+        console.log(car.health)
         if (car.oldHealth && (car.health !== car.oldHealth)) {
+            console.log("health difference")
             socket.emit('healthChange', car.health);
         }
         car.oldHealth = car.health;
+
     },
 
     updateOtherPlayerHealth(playerInfo, otherPlayer) {
@@ -153,7 +171,9 @@ export const Player = {
     //decrement health of car by damage amount
     //will automatically be communicated over server
     takeDamage(car, damage) {
+        console.log(`takeDamage()`)
         car.health -= damage;
+        console.log(car)
     },
 
 
