@@ -22,7 +22,7 @@ export const Player = {
       .setDisplaySize(50, 50)
       
     
-    
+      self.car.body.label = "player";
       self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
     
       //self.car.setCollideWorldBounds(true)
@@ -38,7 +38,8 @@ export const Player = {
         .setDisplaySize(50, 50)
         .setRotation(playerInfo.rotation)
     
-      otherPlayer.playerId = playerInfo.playerId
+      otherPlayer.playerId = playerInfo.playerId;
+      otherPlayer.body.label = "otherPlayer";
       otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
       otherPlayer.setTint(playerInfo.color)
 

@@ -91,11 +91,29 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    // Create bullet group
+    function getRootBody(body) {
+      while (body.parent !== body) body = body.parent;
+      return body;
+    }
+    // Create bullet group for machine gun
     bullets = this.add.group({
       defaultKey: 'bullet',
       maxSize: 1000
     });
+    //collision detection for machine gun
+    this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
+      if ((bodyA.label != 'player') && (bodyB.label == 'shootingBullet')) {
+        console.log(bodyB);
+        const rootBodyB = getRootBody(bodyB)
+        rootBodyB.gameObject.destroy();
+      }
+      if ((bodyA.label == 'shootingBullet') && (bodyB.label != 'player')) {
+        console.log(bodyA)
+        const rootBodyA = getRootBody(bodyA)
+        rootBodyA.gameObject.destroy();
+      }
+     });
+     
   }
 
   update(time, delta) {
@@ -126,22 +144,15 @@ class gameScene extends Phaser.Scene {
 
         //triggers collision code but doesn't actually collide
         //basically isTrigger from Unity
+        bullet.body.label = "shootingBullet";
         bullet.setSensor(true)
-
         bullet.setRotation(angle);
         bullet.setDepth(-1);
         bullet.setActive(true);
         bullet.setVisible(true);
-        console.log(bullet);
-        bullet.thrust(.2);
+        //console.log(bullet);
+        bullet.thrust(.3);
         lastFired = time + 200;
-
-        this.time.delayedCall(1000, () => {
-          bullet.setActive(false);
-          bullet.setVisible(false);
-          //destroy the bullet
-          bullet.destroy()
-        });
         }
       }
   }   
