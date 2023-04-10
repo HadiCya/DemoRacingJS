@@ -105,6 +105,9 @@ class gameScene extends Phaser.Scene {
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
     }
+
+    //Prints players speed
+    console.log(Player.GetSpeed())
   }
 
 }
