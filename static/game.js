@@ -127,62 +127,72 @@ class gameScene extends Phaser.Scene {
     //sets rotation of laser gun
     let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
     gun.setRotation(angle);
-
+  
     //Make sure car has been instantiated correctly
     if (this.car) {
-
-
+  
+      // Set cooldown and duration values
+      const cooldown = 5000; // in milliseconds
+      const duration = 3000; // in milliseconds
+  
+      if (!this.laserOnCooldown) {
         if (line1)
-        graphics.destroy(line1);//deletes the line, so that they don't build up
-      pointer = this.input.activePointer; //sets pointer to user's mouse
-      laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
-      laserY = laserLength * (pointer.worldY - this.car.y);
-      laserX = laserLength * (pointer.worldX - this.car.x);
-      line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
-      graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-
-      if (lKey.isDown) {
-        if (!graphics)
+          graphics.destroy(line1); //deletes the line, so that they don't build up
+        pointer = this.input.activePointer; //sets pointer to user's mouse
+        laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
+        laserY = laserLength * (pointer.worldY - this.car.y);
+        laserX = laserLength * (pointer.worldX - this.car.x);
+        line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
+        graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+  
+        if (lKey.isDown) {
+          if (!graphics)
             graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-        graphics.strokeLineShape(line1); //draws the line
-    } else {
-        if (graphics)
+          graphics.strokeLineShape(line1); //draws the line
+  
+          // Turn off the laser after duration
+          this.time.delayedCall(duration, () => {
             graphics.clear();
-    }
-    
+          });
+          
+          // Set laser on cooldown
+          this.laserOnCooldown = true;
+          this.time.delayedCall(cooldown, () => {
+            this.laserOnCooldown = false;
+          });
+        }
+      }
+  
       gun.x = this.car.x;
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
-
-
+  
       Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
       CheckB = this.car.y - (Slope * this.car.x)
       CheckY = ((Slope * point.x) + CheckB);
-
+  
       // Collision detection
       const collisionThreshold = 25;
-      if (Math.abs(CheckY - point.y) < collisionThreshold) {
+      if (this.laserOnCooldown && lKey.isDown && Math.abs(CheckY - point.y) < collisionThreshold) {
         console.log("Collision detected");
       }
-
-
+  
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket)
-
+  
       //damage example:
       //Player.takeDamage(this.car, 1);
-
+  
       //Check health every frame (do not delete)
       Player.updateHealth(this.car, this.socket);
-
+  
     }
   }
-
 }
 
-var config = { //Keep this at the bottom of the file
+ var config = { //Keep this at the bottom of the file
   type: Phaser.AUTO,
   parent: 'phaser-example',
   width: 1280,
