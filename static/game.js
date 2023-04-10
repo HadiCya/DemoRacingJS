@@ -13,8 +13,6 @@ class gameScene extends Phaser.Scene {
 
   preload() {
     this.load.image('car', 'static/assets/car.png')
-
-    
   }
 
   create() {
@@ -72,79 +70,31 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    /*
-    //update car positions when other clients move their cars
-    this.socket.on('playerMoved', function (playerInfo) {
-      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerInfo.playerId === otherPlayer.playerId) {
-          //call to Player object to update position of other cars
-          Player.updateOtherPlayerMovement(playerInfo, otherPlayer)
-        }
-      })
-    })
-    */
-
+    // This function handles the client-side response from the server's 
+    // syncGameState() funciton call
+    // 
+    // The function updates the position of each other player
+    // and then sends back the client player's own position that 
+    // the client has calculated
     this.socket.on('get-update', function (playerRecvObj, callback) {
-      console.log(`Server update request received: ${playerRecvObj}`);
-      
-      console.log("other players: ");
-
+      // newOPs stores the result of unpacking the data recieved from the server
       let newOPs = playerRecvObj.otherPlayers;
 
-      //console.log(Object.keys(newOPs));
-      /*
-      Object.keys(newOPs).forEach(function (newOPID) {
-        console.log(opID);
-        /*
-        self.otherPlayers.getChildren().forEach(function (OPID) {
-          if()
-        })
-        
-        if(self.otherPlayers[opID]) {
-          console.logs(self.otherPlayer[opID]);
-        }
-      })
-      */
-      
-      
-      console.log("other players (self): ");
+      // Check through each player in the otherPlayers stored locally
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        //console.log(otherPlayer.playerId);
-        if(newOPs[otherPlayer.playerId]) {
-          console.log(newOPs[otherPlayer.playerId]);
+        if(newOPs[otherPlayer.playerId]) { // if a player matching that id exists, then
+          // Update the position based on the new data 
+          // the client received from the server
           Player.updateOtherPlayerMovement(newOPs[otherPlayer.playerId], otherPlayer);
         }
-        //playerRecvObj.otherPlayers.getChildren().forEach(function (OP){})
       })
-
-      /*
-      self.otherPlayers.getChildren().forEach(function (opID) {
-        console.log(opID);
-        playerRecvObj.getChildren().forEach(function (recvID) {
-          console.log(recvID);
-          if (playerRecvObj.otherPlayers[recvID].playerId === self.otherPlayers[opID].playerId) {
-            //call to Player object to update position of other cars
-            Player.updateOtherPlayerMovement(recv_otp, otherPlayer);
-            console.log(`Updating Player: ${self.otherPlayers[opID].playerName}`);
-          }
-        })
-      })
-      */
-      
-
-      callback(`RESPONSE`);
-    })
-
-
-    this.socket.on('hello', function (callback) {
-      //console.log(`Recieved hello from Server`);
-      callback(`Hi Back!`);
+      // Send the posiiton data for the client's player object
+      // This is very similar to a return but for sockets
+      callback({ x: self.car.x, y: self.car.y, rotation: self.car.rotation });
     })
   }
 
   
-
-
   update(time, delta) {
 
     //Make sure car has been instantiated correctly
@@ -158,7 +108,6 @@ class gameScene extends Phaser.Scene {
   }
 
 }
-
 
 
 var config = {

@@ -6,7 +6,7 @@ const socketIO = require('socket.io')
 const app = express()
 var server = http.Server(app)
 
-const interval = 2000;
+const interval = 15;
 
 
 var io = socketIO(server, {
@@ -24,6 +24,9 @@ server.listen(3000, function () {
   console.log('Starting server on port 3000')
 })
 
+// This is the master players object
+// This is the object that the server uses to synchronize 
+// all of the data for each player in the game
 let players = {}
 
 io.on('connection', function (socket) {
@@ -36,13 +39,9 @@ io.on('connection', function (socket) {
     playerId: socket.id,
     playerName: socket.id,
     color: getRandomColor(),
-    //socketInstance: socket
-    speed: 0
   }
 
   socket.join(socket.id);
-
-  //console.log(players);
 
   //give new client list of players already in game
   socket.emit('currentPlayers', players)
@@ -61,68 +60,55 @@ io.on('connection', function (socket) {
     delete players[socket.id]
     io.emit('playerDisconnected', socket.id)
   })
-
-
-  socket.on('playerMovement', function (movementData) {
-
-    players[socket.id].x = movementData.x
-    players[socket.id].y = movementData.y
-    players[socket.id].rotation = movementData.rotation
-
-    socket.broadcast.emit('playerMoved', players[socket.id])
-  })
-
-  
 })
 
+// Sets the interval for which we want to synchronize the game state 
+// for each player
 setInterval(syncGameState, interval);
 
+// Gets a random color for the car when it connects
 function getRandomColor() {
   return '0x' + Math.floor(Math.random() * 16777215).toString(16)
 }
 
+// This function synchronizes the status of each player with the server
+//
+// It first sends the target client an object containing the other players 
+// in the server
+//
+// The server then expects a response from the player in the form of its 
+// position and rotation
 function syncGameState() {
-  //console.log(Object.keys(players));
-  //console.log(`Players: ${Object.keys(players).length}`);
   otherPlayers = {}
 
-  
+  // Access each player's id in the players object and ping them for an update
   Object.keys(players).forEach(function (id) {
+
+    // This is the current player to be pinged (target player)
     let player = players[id];
+
+    // Adds all the players to the otherPlayers object 
+    // and then deletes target player
     let otherPlayers = Object.assign({}, players);
     delete otherPlayers[id];
 
-    io.to(id).timeout(500).emit('hello', function(err, response) {
-      if (err) {
-        //console.log(`Error: No response from player ${player.playerName}`);
-      } else {
-        //console.log(`Response from player ${player.playerName}: ${response}`);
-      }
-    })
-
-    //console.log(otherPlayers);
-    
-    /*
-    let playerSendO
-      x: player.x,
-      y: player.y,
-      rotation: player.rotation,
-      playerId: player.playerId
-    }
-    */
-
+    // This funciton call sends the data to the player and handles the value returned
     io.to(id).timeout(500).emit('get-update', {otherPlayers}, function (err, response) {
       if (err) {
+        // If the ping returns an error, display an error notification to the console
         console.log(`Error: No response from player ${player.playerName}`);
       } 
-    })
 
+      // The response data is sent back as an array with 1 element
+      // We need to unpack the response from the client in order to get the 
+      // data from the client
+      let movementData = response[0];
 
-    
-    
-    
-    
-  })
-  
-  
+      // From here we individually assign the values for the 
+      // x, y, and rotation for the player we just pinged
+      players[id].x = movementData.x;
+      players[id].y = movementData.y;
+      players[id].rotation = movementData.rotation;
+    }) 
+  }) 
 }
