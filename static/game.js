@@ -90,7 +90,7 @@ class gameScene extends Phaser.Scene {
         }
       })
     })
-
+    //helps destroy bullet sprite
     function getRootBody(body) {
       while (body.parent !== body) body = body.parent;
       return body;
@@ -104,7 +104,7 @@ class gameScene extends Phaser.Scene {
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
       if ((bodyA.label != 'player') && (bodyB.label == 'shootingBullet')) {
         console.log(bodyB);
-        const rootBodyB = getRootBody(bodyB)
+        const rootBodyB = getRootBody(bodyB);
         rootBodyB.gameObject.destroy();
       }
       if ((bodyA.label == 'shootingBullet') && (bodyB.label != 'player')) {
@@ -144,14 +144,15 @@ class gameScene extends Phaser.Scene {
 
         //triggers collision code but doesn't actually collide
         //basically isTrigger from Unity
+        bullet.setRectangle(20,20);
         bullet.body.label = "shootingBullet";
-        bullet.setSensor(true)
+        bullet.setSensor(true);
         bullet.setRotation(angle);
         bullet.setDepth(-1);
         bullet.setActive(true);
         bullet.setVisible(true);
         //console.log(bullet);
-        bullet.thrust(.3);
+        bullet.thrust(.03);
         lastFired = time + 200;
         }
       }
