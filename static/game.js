@@ -68,7 +68,7 @@ class gameScene extends Phaser.Scene {
 
     //render new player that has connected after this client
     this.socket.on('newPlayer', function (playerInfo) {
-      Player.addOtherPlayers(self, playerInfo)
+      Player.addOtherPlayers(self, playerInfo);
     })
 
     //delete objects for other players when they disconnect
@@ -77,6 +77,7 @@ class gameScene extends Phaser.Scene {
         if (playerId === otherPlayer.playerId) {
           otherPlayer.destroy()
           otherPlayer.label.destroy()
+          otherPlayer.gun.destroy();
         }
       })
     })
@@ -129,6 +130,7 @@ class gameScene extends Phaser.Scene {
       pointer = this.input.activePointer; //sets pointer to user's mouse
       gun.x = this.car.x;
       gun.y = this.car.y;
+      this.car.gunrotation = gun.rotation;
       
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object

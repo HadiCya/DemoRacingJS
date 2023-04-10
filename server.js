@@ -29,6 +29,7 @@ io.on('connection', function (socket) {
     rotation: 0,
     x: 30,
     y: 30,
+    gunrotation: 0,
     playerId: socket.id,
     playerName: socket.id,
     color: getRandomColor()
@@ -57,7 +58,8 @@ io.on('connection', function (socket) {
     players[socket.id].x = movementData.x
     players[socket.id].y = movementData.y
     players[socket.id].rotation = movementData.rotation
-
+    players[socket.id].gunrotation = movementData.gunrotation
+    
     //let other clients know change
     socket.broadcast.emit('playerMoved', players[socket.id])
 
