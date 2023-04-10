@@ -30,7 +30,6 @@ export const Player = {
         //self.car.setCollideWorldBounds(true)
         self.car.setTint(playerInfo.color)
         //self.car.setDrag(1000)
-
     },
 
     //function to instantiate cars of other players
