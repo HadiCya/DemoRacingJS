@@ -23,7 +23,7 @@ class gameScene extends Phaser.Scene {
 
   init(data) {
     this.playerName = data.playerName
-    this.gunChoice = "lasergun"
+    this.gunSelection = data.gunSelection
     this.carStats = data.carStats
     console.log(this.carStats)
   }
@@ -204,7 +204,7 @@ class gameScene extends Phaser.Scene {
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
       Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
-      Gun.calculate(this, this.gun, this.car, this.input)
+      Gun.calculate(this, gun, this.car, this.input)
 
       //damage example:
       //Player.takeDamage(this.car, 1);

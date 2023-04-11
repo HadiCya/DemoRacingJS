@@ -65,6 +65,7 @@ export default class Lobby extends Phaser.Scene {
         ]
 
         var carChoice = carChoices.at(0)
+        var gunChoice = "lasergun"
 
         //reference html form
         var element = this.add.dom(640, 325).createFromCache('form');
@@ -90,6 +91,18 @@ export default class Lobby extends Phaser.Scene {
                 event.target.style.backgroundColor = "rgb(223, 55, 55)"
             }
 
+            if (event.target.parentElement.id == 'gun-choice') {
+                gunChoice = event.target.id
+
+                //reset color of previous elements
+                for (let i = 0; i < event.target.parentElement.children.length; i++) {
+                    event.target.parentElement.children[i].style.backgroundColor = "rgba(255, 255, 255, 0)"
+                }
+
+                //change color of this element to signal selection to user
+                event.target.style.backgroundColor = "rgb(223, 55, 55)"
+            }
+
             if (event.target.id === 'connect') {
                 //find textbox so that we can get it's value later
                 var textInput = element.getChildByID('name')
@@ -99,7 +112,7 @@ export default class Lobby extends Phaser.Scene {
 
                 var enteredName = textInput.value
 
-                this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice })
+                this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice})
             }
         }, this)
     }
