@@ -107,7 +107,7 @@ class gameScene extends Phaser.Scene {
     }
 
     //Prints players speed
-    console.log(Player.GetSpeed())
+    //console.log(Player.GetSpeed())
   }
 
 }
