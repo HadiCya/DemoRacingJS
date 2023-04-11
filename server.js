@@ -65,6 +65,9 @@ io.on('connection', function (socket) {
 
     
   })
+  socket.on('gunFiring', function() {
+    socket.broadcast.emit('gunFired', players[socket.id])
+  })
 })
 
 function getRandomColor() {

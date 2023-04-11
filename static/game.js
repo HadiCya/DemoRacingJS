@@ -91,6 +91,38 @@ class gameScene extends Phaser.Scene {
         }
       })
     })
+
+  
+
+    this.socket.on('gunFired', function (playerInfo) {
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        console.log(otherPlayer)
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          let bullet = bullets.get(0, 0)
+          if (bullet) {
+            bullet = self.matter.add.gameObject(bullet)
+
+            //triggers collision code but doesn't actually collide
+            //basically isTrigger from Unity
+            bullet.setRectangle(20,20);
+            bullet.body.label = "shotBullet"; //shotBullet is bullet shot by another player. this avoids bullet deleting itself when hitting other car 
+            bullet.setSensor(true);
+            bullet.setRotation(otherPlayer.gun.rotation);
+            bullet.setDepth(-1);
+            bullet.setActive(true);
+            bullet.setVisible(true);
+            //console.log(bullet);
+            bullet.thrust(.03);
+            
+            bullet.x = otherPlayer.x 
+            bullet.y = otherPlayer.y
+            console.log(otherPlayer.x, otherPlayer.y)
+            console.log(playerInfo.playerId)
+          }
+        }
+      })
+    })
+
     //helps destroy bullet sprite
     function getRootBody(body) {
       while (body.parent !== body) body = body.parent;
@@ -113,6 +145,18 @@ class gameScene extends Phaser.Scene {
         const rootBodyA = getRootBody(bodyA)
         rootBodyA.gameObject.destroy();
       }
+
+      if ((bodyA.label != 'otherPlayer') && (bodyB.label == 'shotBullet')) {
+        console.log(bodyA)
+        const rootBodyB = getRootBody(bodyB)
+        rootBodyB.gameObject.destroy();
+      }
+
+      if ((bodyA.label == 'shotBullet' && (bodyB.label != 'otherPlayer'))) {
+        const rootBodyA = getRootBody(bodyA)
+        rootBodyA.gameObject.destroy();
+      }
+      
      });
      
   }
@@ -141,7 +185,7 @@ class gameScene extends Phaser.Scene {
     // Shooting
     if (this.input.activePointer.isDown && time > lastFired) {
       let bullet = bullets.get(this.car.x, this.car.y)
-       if (bullet) {
+      if (bullet) {
         bullet = this.matter.add.gameObject(bullet)
 
         //triggers collision code but doesn't actually collide
@@ -156,8 +200,10 @@ class gameScene extends Phaser.Scene {
         //console.log(bullet);
         bullet.thrust(.03);
         lastFired = time + 200;
-        }
+
+        this.socket.emit('gunFiring')
       }
+    }
   }   
 }
 
