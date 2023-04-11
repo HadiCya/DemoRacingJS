@@ -16,6 +16,7 @@ var lastFired = 0;
 
 class gameScene extends Phaser.Scene {
 
+
   constructor() {
     super('gameScene')
   }
@@ -31,19 +32,31 @@ class gameScene extends Phaser.Scene {
     this.load.image('lasergun', 'static/assets/gun.png')
     this.load.image('gun', 'static/assets/gun.png')//from machince gun
     this.load.image('bullet', 'static/assets/Bullet.png') 
+
+    this.load.image('tiles', 'static/assets/roads2w.png')
+    this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
   }
 
+
   create() {
+   
+    //this.add.image(0,0,'base_tiles')
 
-    //connect to server
-    this.socket = io()
+    const map = this.make.tilemap({ key: 'tilemap' })
 
-    //define current scene
+    const tileset = map.addTilesetImage('roads2w', 'tiles')
+
+    map.createLayer('Layer_1', tileset, 0, 0)
+
+    //this.add.image(0, 0, 'tiles')
+
     var self = this
 
     //for mouse position
     input = this.input;
 
+    this.socket = io()
+    
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
@@ -59,6 +72,7 @@ class gameScene extends Phaser.Scene {
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
+    this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
 
     //check list of players connected and identify us from other players
     this.socket.on('currentPlayers', function (players) {
@@ -72,6 +86,7 @@ class gameScene extends Phaser.Scene {
           Player.addOtherPlayers(self, players[id])
         }
       })
+
     })
 
     //render new player that has connected after this client
@@ -197,7 +212,7 @@ class gameScene extends Phaser.Scene {
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-      Player.drive(this.car, this.label, this.cursors, delta, this.socket)
+      Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
       Gun.calculate(this, this.gun, this.car, this.input)
 
       //damage example:
