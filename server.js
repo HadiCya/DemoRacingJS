@@ -67,11 +67,12 @@ io.on('connection', function (socket) {
 
   })
 
-  socket.on('healthChange', function (health) {
-    players[socket.id].health = health;
-
-    socket.broadcast.emit('healthChanged', players[socket.id]);
+  socket.on('hitOpponent', function (hitInfo) {
+    players[hitInfo.playerId].health -= hitInfo.damage
+    socket.broadcast.emit('reportHit', players[hitInfo.playerId])
   })
+
+
 })
 
 function getRandomColor() {

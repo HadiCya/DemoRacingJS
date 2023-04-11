@@ -47,9 +47,9 @@ export const Player = {
             .setDisplaySize(50, 50)
             .setDepth(1)
 
-            // otherPlayer.circle = self.add.sprite(playerInfo.x, playerInfo.y, 'circle')
-            // .setOrigin(0.5, 0.5)
-            // .setDisplaySize(50, 50)
+        // otherPlayer.circle = self.add.sprite(playerInfo.x, playerInfo.y, 'circle')
+        // .setOrigin(0.5, 0.5)
+        // .setDisplaySize(50, 50)
 
         otherPlayer.circle = self.matter.add.image(playerInfo.x, playerInfo.y, 'circle')
         otherPlayer.circle.setScale(9);
@@ -153,28 +153,20 @@ export const Player = {
 
     },
 
-    //called once per frame in game.js update loop
-    updateHealth(car, socket) {
-        console.log(car.health)
-        if (car.oldHealth && (car.health !== car.oldHealth)) {
-            console.log("health difference")
-            socket.emit('healthChange', car.health);
-        }
-        car.oldHealth = car.health;
-
+    inflictDamage(self, socket, otherPlayer, damage) {
+        console.log("inflictDamage")
+        socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
     },
 
-    updateOtherPlayerHealth(playerInfo, otherPlayer) {
+    updateHealth(car, health) {
+        console.log('updateHealth')
+        car.health = health;
+    },
+
+    updateOtherHealth(playerInfo, otherPlayer) {
+        console.log('updateOtherHealth')
         otherPlayer.health = playerInfo.health;
-    },
-
-    //decrement health of car by damage amount
-    //will automatically be communicated over server
-    takeDamage(car, damage) {
-        console.log(`takeDamage()`)
-        car.health -= damage;
-        console.log(car)
-    },
+    }
 
 
 }
