@@ -25,6 +25,7 @@ export const Player = {
 
         self.car.health = maxHealth;
 
+        self.car.body.label = "player";
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
 
         //self.car.setCollideWorldBounds(true)
@@ -44,7 +45,7 @@ export const Player = {
             .setDisplaySize(50, 50)
 
         otherPlayer.playerId = playerInfo.playerId
-
+        otherPlayer.body.label = "otherPlayer";
         otherPlayer.health = playerInfo.health
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
         otherPlayer.setTint(playerInfo.color)

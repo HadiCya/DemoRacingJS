@@ -60,7 +60,6 @@ io.on('connection', function (socket) {
     players[socket.id].y = movementData.y
     players[socket.id].rotation = movementData.rotation
     players[socket.id].gunrotation = movementData.gunrotation
-
     //let other clients know change
     socket.broadcast.emit('playerMoved', players[socket.id])
 
@@ -71,6 +70,9 @@ io.on('connection', function (socket) {
     players[socket.id].health = health;
 
     socket.broadcast.emit('healthChanged', players[socket.id]);
+  })
+  socket.on('gunFiring', function() {
+    socket.broadcast.emit('gunFired', players[socket.id])
   })
 })
 
