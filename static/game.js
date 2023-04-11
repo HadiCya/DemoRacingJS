@@ -24,6 +24,8 @@ class gameScene extends Phaser.Scene {
   init(data) {
     this.playerName = data.playerName
     this.gunChoice = "lasergun"
+    this.carStats = data.carStats
+    console.log(this.carStats)
   }
 
   //image preloads for car and gun
@@ -116,16 +118,6 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    this.socket.on('healthChanged', function (playerInfo) {
-      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerInfo.playerId === otherPlayer.playerId) {
-          //call to Player object to update health of other car
-          Player.updateOtherPlayerHealth(playerInfo, otherPlayer);
-        }
-        console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
-      })
-    })
-
     this.socket.on('gunFired', function (playerInfo) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         console.log(otherPlayer)
@@ -190,7 +182,6 @@ class gameScene extends Phaser.Scene {
       }
       
      });
-     
   }
 
 
@@ -218,8 +209,6 @@ class gameScene extends Phaser.Scene {
       //damage example:
       //Player.takeDamage(this.car, 1);
 
-      //Check health every frame (do not delete)
-      Player.updateHealth(this.car, this.socket);
 
     }
     
