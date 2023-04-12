@@ -22,6 +22,7 @@ server.listen(3000, function () {
 
 var players = {}
 var connected = 0
+var amountplayers = 0
 positionarray = [false, false, false, false, false, false, false, false]//the starting position array
 var position = 9
 io.on('connection', function (socket) {
@@ -37,7 +38,9 @@ for (let i = 0; i < 8; i++) {
     break
   }
 }
-console.log(position)
+amountplayers++
+
+//console.log(amountplayers)
   players[socket.id] = {
     rotation: 0,
     x: 30,
@@ -68,7 +71,7 @@ console.log(position)
     //this emptys the position in the array
     io.emit('playerDisconnected', socket.id)
     positionarray[spot] = false
-    
+    amountplayers--
   })
 
   socket.on('playerMovement', function (movementData) {

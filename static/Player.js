@@ -31,7 +31,7 @@ export const Player = {
     },
 
     //function to instantiate car of current player now also takes in the connected value so we know where you are in the lineup
-    addPlayer(self, playerInfo, connected) {
+    addPlayer(self, playerInfo, connected, socket) {
 
         this.setStats(self.carStats)
 
@@ -55,7 +55,14 @@ export const Player = {
         //gives us permantent access to which position in the lineup you are? i dont remember 100%
         connectedposition = connected
         
-
+        //moves the car to their starting position
+        self.car.setY(75*connectedposition + 100)
+        
+        //updates position on each of other clients
+        socket.emit('playerMovement', {x: self.car.x, y: self.car.y, rotation: self.car.rotation})
+        //updates your label for everything
+        self.label.setPosition(self.car.x, self.car.y)
+        
         
         //car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
         //label.y = car.y - labelOffsetY;
@@ -84,11 +91,11 @@ export const Player = {
 // changes the starting position of the car to just be down a bit, it has an added buffer because the cars will collide with anything
 //in the intial spawn location so we need that to be empty, we could change this to a switch statement with specific locations 
 //down the road if we want designated locations for where each car starts
-        if(start){
-            car.setY(75*connectedposition +100)
-            console.log(connectedposition)
-        start = false
-        }
+        // if(start){
+        //     car.setY(75*connectedposition +100)
+        //     //console.log(connectedposition)
+        // start = false
+        // }
 
         //accelerate car if below max speed
         if (speed < maxspeed) {
