@@ -97,18 +97,18 @@ function syncGameState() {
       if (err) {
         // If the ping returns an error, display an error notification to the console
         console.log(`Error: No response from player ${player.playerName}`);
-      } 
+      } else { 
+        // The response data is sent back as an array with 1 element
+        // We need to unpack the response from the client in order to get the 
+        // data from the client
+        let movementData = response[0];
 
-      // The response data is sent back as an array with 1 element
-      // We need to unpack the response from the client in order to get the 
-      // data from the client
-      let movementData = response[0];
-
-      // From here we individually assign the values for the 
-      // x, y, and rotation for the player we just pinged
-      players[id].x = movementData.x;
-      players[id].y = movementData.y;
-      players[id].rotation = movementData.rotation;
+        // From here we individually assign the values for the 
+        // x, y, and rotation for the player we just pinged
+        players[id].x = movementData.x;
+        players[id].y = movementData.y;
+        players[id].rotation = movementData.rotation;
+      }
     }) 
   }) 
 }
