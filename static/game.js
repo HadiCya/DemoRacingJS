@@ -64,7 +64,7 @@ class gameScene extends Phaser.Scene {
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateName', self.playerName)
 
-    Gun.addGun(self, self.gunChoice)
+    Gun.addGun(self, self.gunSelection)
     //adds gun sprite-image
     gun=this.add.sprite(400,300,'gun'); 
     gun.setDepth(1);
@@ -208,7 +208,6 @@ class gameScene extends Phaser.Scene {
 
       //damage example:
       //Player.takeDamage(this.car, 1);
-
 
     }
     
