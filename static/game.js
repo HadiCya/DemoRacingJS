@@ -8,6 +8,7 @@ var gun;  //laser gun
 var input; //mouse position for sprites
 var bullets;
 var lastFired = 0;
+var bulletSound;
 
 class gameScene extends Phaser.Scene {
 
@@ -22,8 +23,9 @@ class gameScene extends Phaser.Scene {
  //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-    this.load.image('gun', 'static/assets/gun.png')
-    this.load.image('bullet', 'static/assets/Bullet.png') 
+    this.load.image('gun', 'static/assets/machine_gun.png')
+    this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
+    this.load.audio('bang', 'static/assets/bang.wav') 
   }
 
   create() {
@@ -36,6 +38,8 @@ class gameScene extends Phaser.Scene {
 
     //for mouse position
     input=this.input;
+
+    bulletSound = this.sound.add('bang');
 
     console.log(this.playerName)
 
@@ -111,9 +115,8 @@ class gameScene extends Phaser.Scene {
             bullet.setDepth(-1);
             bullet.setActive(true);
             bullet.setVisible(true);
-            //console.log(bullet);
+            console.log(bullet);
             bullet.thrust(.03);
-            
             bullet.x = otherPlayer.x 
             bullet.y = otherPlayer.y
             console.log(otherPlayer.x, otherPlayer.y)
@@ -190,7 +193,7 @@ class gameScene extends Phaser.Scene {
 
         //triggers collision code but doesn't actually collide
         //basically isTrigger from Unity
-        bullet.setRectangle(20,20);
+        bullet.setRectangle(30,10);
         bullet.body.label = "shootingBullet";
         bullet.setSensor(true);
         bullet.setRotation(angle);
@@ -198,6 +201,7 @@ class gameScene extends Phaser.Scene {
         bullet.setActive(true);
         bullet.setVisible(true);
         //console.log(bullet);
+        bulletSound.play();
         bullet.thrust(.03);
         lastFired = time + 200;
 
