@@ -1,6 +1,7 @@
 import { Player } from "./Player.js"
 import Lobby from "./Lobby.js"
 
+
 var pointer; //variable for mouse's location
 var line1;
 var graphics;
@@ -15,6 +16,7 @@ var Slope;
 var CheckY;
 var CheckB;
 var lKey;
+var laser;
 
 class gameScene extends Phaser.Scene {
 
@@ -30,6 +32,7 @@ class gameScene extends Phaser.Scene {
   preload() {
     this.load.image('car', 'static/assets/car.png')
     this.load.image('gun', 'static/assets/gun.png')
+    this.load.audio('laser', 'static/assets/laser.mp3');
   }
 
   create() {
@@ -43,10 +46,14 @@ class gameScene extends Phaser.Scene {
     //for mouse position
     input = this.input;
 
-    console.log(this.playerName)
+    laser = this.sound.add('laser');
+
+    this.input.keyboard.on('keydown-L', function () {
+      laser.play();
+  });
 
     // create a key to toggle the laser sprite
-   lKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
+    lKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateName', self.playerName)
@@ -111,6 +118,7 @@ class gameScene extends Phaser.Scene {
         console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
       })
     })
+  
 
 
     graphics = this.add.graphics({ fillStyle: { color: 0x2266aa } });
@@ -139,21 +147,21 @@ class gameScene extends Phaser.Scene {
       laserY = laserLength * (pointer.worldY - this.car.y);
       laserX = laserLength * (pointer.worldX - this.car.x);
       line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
-      graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+      graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
 
       if (lKey.isDown) {
         if (!graphics)
-            graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-        graphics.strokeLineShape(line1); //draws the line
-    } else {
+           graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
+           graphics.strokeLineShape(line1); //draws the line
+        } else {
         if (graphics)
             graphics.clear();
-    }
-    
+        }
+
       gun.x = this.car.x;
       gun.y = this.car.y;
-      this.car.gunrotation = gun.rotation;
-
+      this.car.gunrotation = gun.rotation; 
+      
 
       Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
       CheckB = this.car.y - (Slope * this.car.x)
@@ -161,10 +169,11 @@ class gameScene extends Phaser.Scene {
 
       // Collision detection
       const collisionThreshold = 25;
-      if (Math.abs(CheckY - point.y) < collisionThreshold) {
+      if (lKey.isDown && Math.abs(CheckY - point.y) < collisionThreshold) {
         console.log("Collision detected");
       }
 
+      console.log(this.otherPlayers.getChildren())
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
