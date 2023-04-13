@@ -66,9 +66,16 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id])
   })
 
+  socket.on('hitOpponent', function (hitInfo) {
+    players[hitInfo.playerId].health -= hitInfo.damage
+    socket.broadcast.emit('reportHit', players[hitInfo.playerId])
+  })
+  
   socket.on('gunFiring', function() {
     socket.broadcast.emit('gunFired', players[socket.id])
   })
+
+
 })
 
 function getRandomColor() {

@@ -42,8 +42,11 @@ export const Player = {
 
         self.car.health = maxHealth;
 
-        self.car.body.label = "player";
-        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
+
+        self.car.body.label = "player"; //player's car's collsion box label;
+
+        self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
+
 
         //self.car.setCollideWorldBounds(true)
         self.car.setTint(playerInfo.color)
@@ -59,13 +62,28 @@ export const Player = {
             .setDisplaySize(50, 50)
             .setRotation(playerInfo.rotation)
 
-        otherPlayer.gun = self.add.sprite(playerInfo.x, playerInfo.y, 'gun')
+        otherPlayer.gun = self.add.sprite(playerInfo.x, playerInfo.y, 'poisongun')
             .setOrigin(0.5, 0.5)
             .setDisplaySize(50, 50)
+            .setDepth(1)
+
+        // otherPlayer.circle = self.add.sprite(playerInfo.x, playerInfo.y, 'circle')
+        // .setOrigin(0.5, 0.5)
+        // .setDisplaySize(50, 50)
+
+        otherPlayer.circle = self.matter.add.image(playerInfo.x, playerInfo.y, 'circle')
+        otherPlayer.circle.setScale(9);
+        otherPlayer.circle.setBody({
+            type: 'circle',
+            radius: 100
+        });
+        otherPlayer.circle.setSensor(true)
+        otherPlayer.circle.body.label = "poisonArea"
 
         otherPlayer.playerId = playerInfo.playerId
         otherPlayer.body.label = "otherPlayer";
         otherPlayer.health = playerInfo.health
+        otherPlayer.body.label = "otherPlayer"; //other's car's collision box label
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
         otherPlayer.setTint(playerInfo.color)
 
@@ -132,7 +150,7 @@ export const Player = {
 
         if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation || gr !== car.oldPosition.gunrotation)) {
             socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation, gunrotation: car.gunrotation })
-            console.log("moving")
+            //console.log("moving")
         }
 
         car.oldPosition = {
@@ -209,9 +227,25 @@ export const Player = {
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
         otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
+        otherPlayer.circle.setPosition(playerInfo.x, playerInfo.y)
         //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
         //self.gun.setRotation(angle);
 
     },
 
+
+    inflictDamage(self, socket, otherPlayer, damage) {
+        console.log("inflictDamage")
+        socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
+    },
+
+    updateHealth(car, health) {
+        console.log('updateHealth')
+        car.health = health;
+    },
+
+    updateOtherHealth(playerInfo, otherPlayer) {
+        console.log('updateOtherHealth')
+        otherPlayer.health = playerInfo.health;
+    }
 }

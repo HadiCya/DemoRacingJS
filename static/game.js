@@ -2,6 +2,11 @@ import { Player } from "./Player.js"
 import { Gun } from "./Gun.js"
 import Lobby from "./Lobby.js"
 
+
+var poisongun;
+var input; //mouse position for sprites
+var circle;
+
 class gameScene extends Phaser.Scene {
 
 
@@ -19,6 +24,10 @@ class gameScene extends Phaser.Scene {
   //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
+
+    this.load.image('poisongun', 'static/assets/posiongun.png')
+    this.load.image('circle', 'static/assets/circle.png')
+
     this.load.image('lasergun', 'static/assets/gun.png')
     this.load.image('machinegun', 'static/assets/gun.png')//from machince gun
     this.load.image('gun', 'static/assets/gun.png')
@@ -26,6 +35,7 @@ class gameScene extends Phaser.Scene {
 
     this.load.image('tiles', 'static/assets/roads2w.png')
     this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
+
   }
 
 
@@ -53,6 +63,19 @@ class gameScene extends Phaser.Scene {
     // //adds gun sprite-image
     // gun=this.add.sprite(400,300,'gun'); 
     // gun.setDepth(1);
+
+    //adds gun sprite-image
+    poisongun = this.add.sprite(400, 300, 'poisongun');
+    poisongun.setDepth(1);
+
+    circle = this.matter.add.image(400, 300, 'circle')
+    circle.setScale(9);
+    circle.setBody({
+      type: 'circle',
+      radius: 100
+    });
+    circle.setSensor(true)
+    circle.body.label = "poisonArea"
 
     Gun.addGun(self, this.gunSelection)
 
@@ -87,6 +110,8 @@ class gameScene extends Phaser.Scene {
     this.socket.on('playerDisconnected', function (playerId) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerId === otherPlayer.playerId) {
+          otherPlayer.gun.destroy()
+          otherPlayer.circle.destroy()
           otherPlayer.destroy()
           otherPlayer.label.destroy()
           otherPlayer.gun.destroy();
@@ -104,6 +129,20 @@ class gameScene extends Phaser.Scene {
         //console.log(`Compare: ${playerInfo.playerId}, ${otherPlayer.playerId}`)
       })
     })
+
+    this.socket.on('reportHit', function (playerInfo) {
+      if (self.socket.id === playerInfo.playerId) {
+        if (self.car) {
+          Player.updateHealth(self.car, playerInfo.health)
+        }
+      } else {
+        self.otherPlayers.getChildren().forEach(function (otherplayer) {
+          if (playerInfo.playerId === otherPlayer.playerId) {
+            Player.updateOtherHealth(playerInfo, otherplayer)
+          }
+        })
+        }
+      })
 
     //multiplayer logic for shooting guns (show bullet on all clients)
     this.socket.on('gunFired', function (playerInfo) {
@@ -154,6 +193,7 @@ class gameScene extends Phaser.Scene {
       defaultKey: 'bullet',
       maxSize: 1000
     });
+
     //collision detection for machine gun
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
       if ((bodyA.label != 'player') && (bodyB.label == 'shootingBullet')) {
@@ -177,6 +217,18 @@ class gameScene extends Phaser.Scene {
         const rootBodyA = getRootBody(bodyA)
         rootBodyA.gameObject.destroy();
       }
+
+      if (bodyA.label == "otherPlayer" && bodyB.label == "poisonArea") {
+        console.log(bodyA.gameObject)
+        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+      }
+
+      if (bodyB.label == "otherPlayer" && bodyA.label == "poisonArea") {
+        console.log('damage')
+        console.log(bodyB.gameObject)
+
+        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+      }
       
      });
   }
@@ -184,9 +236,17 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
+    let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, input.x, input.y);
+    poisongun.setRotation(angle);
 
     //Make sure car has been instantiated correctly
     if (this.car) {
+
+      poisongun.x = this.car.x;
+      poisongun.y = this.car.y;
+      circle.x = this.car.x;
+      circle.y = this.car.y;
+
       
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
@@ -202,7 +262,8 @@ class gameScene extends Phaser.Scene {
       }
     }
 
-  }   
+  }
+
 }
 
 var config = { //Keep this at the bottom of the file
