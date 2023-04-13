@@ -8,12 +8,16 @@ var gun; //laser gun
 var input; //mouse position for sprites
 
 //Rocket Launcher Vars
+// gun is Rocket Launcher
 var rocket; // rocket that gets fired
-
-// Exampl Missle follow mouse
-// https://blog.ourcade.co/posts/2020/make-homing-missile-seek-target-arcade-physics-phaser-3/
-
 var launched = false;
+var launchedtime; // the moment in time the rocket is launched
+var launchtime = 1000; //how long the rocket has to get to target
+var targetX; // target's coord
+var targetY; // target's coord
+
+// Example Missle follow mouse
+// https://blog.ourcade.co/posts/2020/make-homing-missile-seek-target-arcade-physics-phaser-3/
 
 class gameScene extends Phaser.Scene {
 
@@ -53,7 +57,7 @@ class gameScene extends Phaser.Scene {
     gun.setDepth(1);
 
     //adds rocket sprite-image
-    rocket = this.add.sprite(400, 300, 'rocket');
+    //rocket = this.add.sprite(400, 300, 'rocket');
     //rocket.setDepth(2);
 
     //array to store other players
@@ -111,10 +115,7 @@ class gameScene extends Phaser.Scene {
         console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
       })
     })
-
   }
-
-
 
   update(time, delta) {
 
@@ -124,17 +125,36 @@ class gameScene extends Phaser.Scene {
 
     //Make sure car has been instantiated correctly
     if (this.car) {
-
       pointer = this.input.activePointer; //sets pointer to user's mouse
       gun.x = this.car.x;
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
 
-      //rocket.x = this.car.x;
-      if(this.input.activePointer.isDown && launched == false){
-          rocket = this.matter.add.gameObject(rocket);
-          rocket.thrust(0.2);
-          launched = true;
+      if (this.input.activePointer.isDown && launched == false) {
+        targetX = this.car.x;
+        targetY = this.car.y;
+
+        rocket = this.add.sprite(400, 300, 'rocket');
+        rocket.setDepth(2);
+
+        rocket.x = this.car.x;
+        rocket.y = this.car.y
+        rocket = this.matter.add.gameObject(rocket);
+        launchedtime = time;
+        console.log(launchedtime);
+        launched = true;
+      }
+
+      if (launched == true && (time-launchedtime < launchtime)) {
+        rocket.x = pointer.x;
+        rocket.y = pointer.y;
+        
+        console.log('time :' + time);
+      }
+
+      if (time-launchedtime > launchtime) {
+        launched = false;
+        rocket.destroy();
       }
 
       //Drive according to logic in player object
@@ -148,10 +168,7 @@ class gameScene extends Phaser.Scene {
       //Check health every frame (do not delete)
       Player.updateHealth(this.car, this.socket);
 
-
     }
-
-     
   }
 
 }
