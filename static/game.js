@@ -40,16 +40,11 @@ class gameScene extends Phaser.Scene {
 
 
   create() {
-   
-    //this.add.image(0,0,'base_tiles')
-
     const map = this.make.tilemap({ key: 'tilemap' })
 
     const tileset = map.addTilesetImage('roads2w', 'tiles')
 
     map.createLayer('Layer_1', tileset, 0, 0)
-
-    //this.add.image(0, 0, 'tiles')
 
     var self = this
 
@@ -236,7 +231,7 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
-    let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, input.x, input.y);
+    let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, this.input.x, this.input.y);
     poisongun.setRotation(angle);
 
     //Make sure car has been instantiated correctly
