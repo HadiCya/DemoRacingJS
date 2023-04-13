@@ -55,25 +55,6 @@ class gameScene extends Phaser.Scene {
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateOptions', {playerName: self.playerName, gunSelection: self.gunSelection})
 
-    // //adds gun sprite-image
-    // gun=this.add.sprite(400,300,'gun'); 
-    // gun.setDepth(1);
-
-    //adds gun sprite-image
-    poisongun = this.add.sprite(400, 300, 'poisongun');
-    poisongun.setDepth(1);
-
-    circle = this.matter.add.image(400, 300, 'circle')
-    circle.setScale(9);
-    circle.setBody({
-      type: 'circle',
-      radius: 100
-    });
-    circle.setSensor(true)
-    circle.body.label = "poisonArea"
-
-    Gun.addGun(self, this.gunSelection)
-
     //array to store other players
     this.otherPlayers = this.add.group()
 
@@ -106,10 +87,10 @@ class gameScene extends Phaser.Scene {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerId === otherPlayer.playerId) {
           otherPlayer.gun.destroy()
-          otherPlayer.circle.destroy()
           otherPlayer.destroy()
           otherPlayer.label.destroy()
-          otherPlayer.gun.destroy();
+          if (otherPlayer.poisonCircle)
+            otherPlayer.poisonCircle.destroy()
         }
       })
     })
@@ -131,9 +112,9 @@ class gameScene extends Phaser.Scene {
           Player.updateHealth(self.car, playerInfo.health)
         }
       } else {
-        self.otherPlayers.getChildren().forEach(function (otherplayer) {
+        self.otherPlayers.getChildren().forEach(function (otherPlayer) {
           if (playerInfo.playerId === otherPlayer.playerId) {
-            Player.updateOtherHealth(playerInfo, otherplayer)
+            Player.updateOtherHealth(playerInfo, otherPlayer)
           }
         })
         }
@@ -186,43 +167,50 @@ class gameScene extends Phaser.Scene {
     // Create bullet group for machine gun
     this.bullets = this.add.group({
       defaultKey: 'bullet',
-      maxSize: 1000
+      maxSize: 300
     });
 
     //collision detection for machine gun
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
-      if ((bodyA.label != 'player') && (bodyB.label == 'shootingBullet')) {
-        console.log(bodyB);
+      if ((bodyA.label != 'player' && bodyA.label != 'poisonArea') && (bodyB.label == 'shootingBullet')) {
+        if (bodyA.label == 'otherPlayer') {
+          Player.inflictDamage(self, self.socket, bodyA.gameObject, 1)
+        }
+
         const rootBodyB = getRootBody(bodyB);
         rootBodyB.gameObject.destroy();
       }
-      if ((bodyA.label == 'shootingBullet') && (bodyB.label != 'player')) {
-        console.log(bodyA)
+      if ((bodyA.label == 'shootingBullet') && (bodyB.label != 'player' && bodyB.label != 'poisonArea')) {
+        if (bodyB.label == 'otherPlayer') {
+          Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        }
+
         const rootBodyA = getRootBody(bodyA)
         rootBodyA.gameObject.destroy();
       }
 
       if ((bodyA.label != 'otherPlayer') && (bodyB.label == 'shotBullet')) {
-        console.log(bodyA)
         const rootBodyB = getRootBody(bodyB)
         rootBodyB.gameObject.destroy();
       }
 
+      //TODO: differentiate between otherPlayer shooting bullet and otherPlayer getting hit
       if ((bodyA.label == 'shotBullet' && (bodyB.label != 'otherPlayer'))) {
+        console.log("destroy")
         const rootBodyA = getRootBody(bodyA)
         rootBodyA.gameObject.destroy();
       }
 
       if (bodyA.label == "otherPlayer" && bodyB.label == "poisonArea") {
         console.log(bodyA.gameObject)
-        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        //Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
       }
 
       if (bodyB.label == "otherPlayer" && bodyA.label == "poisonArea") {
         console.log('damage')
         console.log(bodyB.gameObject)
 
-        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        //Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
       }
       
      });
@@ -231,16 +219,9 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
-    let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, this.input.x, this.input.y);
-    poisongun.setRotation(angle);
 
     //Make sure car has been instantiated correctly
     if (this.car) {
-
-      poisongun.x = this.car.x;
-      poisongun.y = this.car.y;
-      circle.x = this.car.x;
-      circle.y = this.car.y;
 
       
       //Drive according to logic in player object
@@ -254,6 +235,10 @@ class gameScene extends Phaser.Scene {
 
       if (this.gunSelection == 'machinegun') {
         Gun.machineGun(this, this.gun, this.car, this.input, this.bullets, this.socket, time)
+      }
+
+      if (this.gunSelection === 'poisongun') {
+        Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
       }
     }
 

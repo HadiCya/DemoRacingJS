@@ -28,9 +28,58 @@ export const Gun = {
             self.gun = self.add.sprite(400, 300, 'lasergun');
             self.gun.setDepth(1);
         }
+
         if (gunChoice === 'machinegun') {
             self.gun = self.add.sprite(400, 300, 'machinegun');
             self.gun.setDepth(1);
+        }
+
+        if (gunChoice === 'poisongun') {
+            // //adds gun sprite-image
+            self.gun = self.add.sprite(400, 300, 'poisongun');
+            self.gun.setDepth(1);
+        
+
+            self.poisonCircle = self.matter.add.image(400, 300, 'circle')
+            self.poisonCircle.setScale(9);
+            self.poisonCircle.setBody({
+            type: 'circle',
+            radius: 100
+            });
+            
+            self.poisonCircle.setSensor(true)
+            self.poisonCircle.body.label = "poisonArea"
+        }
+    },
+
+    addOtherGun(self, otherPlayer, gunChoice) {
+        console.log(gunChoice)
+
+        if (gunChoice === 'lasergun') {
+            //adds gun sprite-image
+            otherPlayer.gun = self.add.sprite(400, 300, 'lasergun');
+            otherPlayer.gun.setDepth(1);
+        }
+
+        if (gunChoice === 'machinegun') {
+            otherPlayer.gun = self.add.sprite(400, 300, 'machinegun');
+            otherPlayer.gun.setDepth(1);
+        }
+
+        if (gunChoice === 'poisongun') {
+            //  //adds gun sprite-image
+            otherPlayer.gun = self.add.sprite(400, 300, 'poisongun')
+            .setDepth(1)
+
+            otherPlayer.poisonCircle = self.add.sprite(400, 300, 'circle')
+            .setOrigin(0.5, 0.5)
+            .setDisplaySize(50, 50)
+
+            otherPlayer.poisonCircle.setScale(9);
+
+            //otherPlayer.poisonCircle.body.label = "poisonArea"
+
+
         }
     },
 
@@ -42,6 +91,7 @@ export const Gun = {
 
         if (line1)
             graphics.destroy(line1);//deletes the line, so that they don't build up
+
         pointer = input.activePointer; //sets pointer to user's mouse
         laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
         laserY = laserLength * (pointer.worldY - car.y);
@@ -75,39 +125,49 @@ export const Gun = {
 
     machineGun(self, gun, car, input, bullets, socket, time) {
         //sets rotation of gun
-    let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
-    gun.setRotation(angle);
+        let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        gun.setRotation(angle);
 
-    //Make sure car has been instantiated correctly
-    if (car) {
+        //Make sure car has been instantiated correctly
+        if (car) {
+            gun.x = car.x;
+            gun.y = car.y;
+            car.gunrotation = gun.rotation;
+        }
+        
+        // Shooting
+        if (self.input.activePointer.isDown && time > lastFired) {
+            let bullet = bullets.get(car.x, car.y)
+            if (bullet) {
+                bullet = self.matter.add.gameObject(bullet)
 
-      gun.x = car.x;
-      gun.y = car.y;
-      car.gunrotation = gun.rotation;
+                //triggers collision code but doesn't actually collide
+                //basically isTrigger from Unity
+                bullet.setRectangle(20,20);
+                bullet.body.label = "shootingBullet";
+                bullet.setSensor(true);
+                bullet.setRotation(angle);
+                bullet.setDepth(-1);
+                bullet.setActive(true);
+                bullet.setVisible(true);
+                //console.log(bullet);
+                bullet.thrust(.03);
+                lastFired = time + 200;
 
-    }
-    
-    // Shooting
-    if (self.input.activePointer.isDown && time > lastFired) {
-      let bullet = bullets.get(car.x, car.y)
-      if (bullet) {
-        bullet = self.matter.add.gameObject(bullet)
+                socket.emit('gunFiring')
+            }
+        }
+    },
 
-        //triggers collision code but doesn't actually collide
-        //basically isTrigger from Unity
-        bullet.setRectangle(20,20);
-        bullet.body.label = "shootingBullet";
-        bullet.setSensor(true);
-        bullet.setRotation(angle);
-        bullet.setDepth(-1);
-        bullet.setActive(true);
-        bullet.setVisible(true);
-        //console.log(bullet);
-        bullet.thrust(.03);
-        lastFired = time + 200;
+    poisongun(self, gun, poisonCircle, car, input, socket, time) {
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        gun.setRotation(angle);
 
-        socket.emit('gunFiring')
-      }
-    }
+        if (car) {
+            gun.x = car.x;
+            gun.y = car.y;
+            poisonCircle.x = car.x;
+            poisonCircle.y = car.y;
+        }
     }
 }
