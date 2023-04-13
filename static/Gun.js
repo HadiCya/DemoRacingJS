@@ -1,3 +1,10 @@
+//Globals for MACHINEGUN:
+var lastFired = 0;
+
+
+
+
+//Globals for LASERGUN
 var pointer; //variable for mouse's location
 var line1;
 var graphics;
@@ -14,14 +21,20 @@ var CheckB;
 export const Gun = {
 
     addGun(self, gunChoice) {
+        console.log(gunChoice)
+
         if (gunChoice === 'lasergun') {
             //adds gun sprite-image
             self.gun = self.add.sprite(400, 300, 'lasergun');
             self.gun.setDepth(1);
         }
+        if (gunChoice === 'machinegun') {
+            self.gun = self.add.sprite(400, 300, 'machinegun');
+            self.gun.setDepth(1);
+        }
     },
 
-    calculate(self, gun, car, input) {
+    laserGun(self, gun, car, input) {
         //sets rotation of laser gun
         let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
         gun.setRotation(angle);
@@ -59,4 +72,42 @@ export const Gun = {
         //     console.log("Laser below dot")
         // }
     },
+
+    machineGun(self, gun, car, input, bullets, socket, time) {
+        //sets rotation of gun
+    let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+    gun.setRotation(angle);
+
+    //Make sure car has been instantiated correctly
+    if (car) {
+
+      gun.x = car.x;
+      gun.y = car.y;
+      car.gunrotation = gun.rotation;
+
+    }
+    
+    // Shooting
+    if (self.input.activePointer.isDown && time > lastFired) {
+      let bullet = bullets.get(car.x, car.y)
+      if (bullet) {
+        bullet = self.matter.add.gameObject(bullet)
+
+        //triggers collision code but doesn't actually collide
+        //basically isTrigger from Unity
+        bullet.setRectangle(20,20);
+        bullet.body.label = "shootingBullet";
+        bullet.setSensor(true);
+        bullet.setRotation(angle);
+        bullet.setDepth(-1);
+        bullet.setActive(true);
+        bullet.setVisible(true);
+        //console.log(bullet);
+        bullet.thrust(.03);
+        lastFired = time + 200;
+
+        socket.emit('gunFiring')
+      }
+    }
+    }
 }
