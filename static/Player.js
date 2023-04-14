@@ -134,8 +134,7 @@ export const Player = {
         car.oldPosition = {
             x: car.x,
             y: car.y,
-            rotation: car.rotation,
-            gunrotation: car.gunrotation
+            rotation: car.rotation
         }
 
     },
