@@ -46,12 +46,12 @@ class gameScene extends Phaser.Scene {
     circle = this.matter.add.image(400, 300, 'circle')
     circle.setScale(9);
     circle.setBody({
-      type: 'circle',
-      radius: 100
+        type: 'circle',
+        radius: 100
     });
     circle.setSensor(true)
     circle.body.label = "poisonArea"
-
+  
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -99,37 +99,31 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    this.socket.on('reportHit', function (playerInfo) {
-      if (self.socket.id === playerInfo.playerId) {
-        if (self.car) {
-          Player.updateHealth(self.car, playerInfo.health)
+    this.socket.on('healthChanged', function (playerInfo) {
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          //call to Player object to update health of other car
+          Player.updateOtherPlayerHealth(playerInfo, otherPlayer);
         }
-      } else {
-        self.otherPlayers.getChildren().forEach(function (otherplayer) {
-          if (playerInfo.playerId === otherPlayer.playerId) {
-            Player.updateOtherHealth(playerInfo, otherplayer)
-          }
-        })
-      }
+        console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
+      })
     })
 
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
 
       //console.log(bodyA, bodyB);
 
-      if (bodyA.label == "otherPlayer" && bodyB.label == "poisonArea") {
+      if (bodyA.label == "player" && bodyB.label == "poisonArea") {
         console.log(bodyA.gameObject)
-        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        Player.takeDamage(bodyA.gameObject, 1)
       }
-
-      if (bodyB.label == "otherPlayer" && bodyA.label == "poisonArea") {
+      
+      if (bodyB.label == "player" && bodyA.label == "poisonArea") {
         console.log('damage')
-        console.log(bodyB.gameObject)
-
-        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        Player.takeDamage(bodyB.gameObject, 1)
       }
 
-    });
+     });
 
   }
 
@@ -157,7 +151,9 @@ class gameScene extends Phaser.Scene {
       //damage example:
       //Player.takeDamage(this.car, 1);
 
-      console.log(this.car.health)
+      //Check health every frame (do not delete)
+      Player.updateHealth(this.car, this.socket);
+      //console.log(this.car.health);
 
     }
 
