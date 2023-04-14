@@ -82,8 +82,6 @@ class gameScene extends Phaser.Scene {
     this.socket.on('playerDisconnected', function (playerId) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerId === otherPlayer.playerId) {
-          otherPlayer.gun.destroy()
-          otherPlayer.circle.destroy()
           otherPlayer.destroy()
           otherPlayer.label.destroy()
         }
