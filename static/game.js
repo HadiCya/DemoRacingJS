@@ -1,14 +1,12 @@
 import { Player } from "./Player.js"
-import { Gun } from "./Gun.js"
 import Lobby from "./Lobby.js"
-
 
 var poisongun;
 var input; //mouse position for sprites
 var circle;
 
-class gameScene extends Phaser.Scene {
 
+class gameScene extends Phaser.Scene {
 
   constructor() {
     super('gameScene')
@@ -16,53 +14,30 @@ class gameScene extends Phaser.Scene {
 
   init(data) {
     this.playerName = data.playerName
-    this.gunSelection = data.gunSelection
-    this.carStats = data.carStats
-    console.log(this.carStats)
   }
 
   //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-
     this.load.image('poisongun', 'static/assets/posiongun.png')
     this.load.image('circle', 'static/assets/circle.png')
-
-    this.load.image('lasergun', 'static/assets/gun.png')
-    this.load.image('machinegun', 'static/assets/gun.png')//from machince gun
-    this.load.image('gun', 'static/assets/gun.png')
-    this.load.image('bullet', 'static/assets/Bullet.png') 
-
-    this.load.image('tiles', 'static/assets/roads2w.png')
-    this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
-
   }
 
-
   create() {
-   
-    //this.add.image(0,0,'base_tiles')
 
-    const map = this.make.tilemap({ key: 'tilemap' })
+    //connect to server
+    this.socket = io()
 
-    const tileset = map.addTilesetImage('roads2w', 'tiles')
-
-    map.createLayer('Layer_1', tileset, 0, 0)
-
-    //this.add.image(0, 0, 'tiles')
-
+    //define current scene
     var self = this
 
-    this.socket = io()
-    
+    //for mouse position
+    input = this.input;
+
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
-    self.socket.emit('updateOptions', {playerName: self.playerName, gunSelection: self.gunSelection})
-
-    // //adds gun sprite-image
-    // gun=this.add.sprite(400,300,'gun'); 
-    // gun.setDepth(1);
+    self.socket.emit('updateName', self.playerName)
 
     //adds gun sprite-image
     poisongun = this.add.sprite(400, 300, 'poisongun');
@@ -77,14 +52,12 @@ class gameScene extends Phaser.Scene {
     circle.setSensor(true)
     circle.body.label = "poisonArea"
 
-    Gun.addGun(self, this.gunSelection)
 
     //array to store other players
     this.otherPlayers = this.add.group()
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
-    this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
 
     //check list of players connected and identify us from other players
     this.socket.on('currentPlayers', function (players) {
@@ -98,12 +71,11 @@ class gameScene extends Phaser.Scene {
           Player.addOtherPlayers(self, players[id])
         }
       })
-
     })
 
     //render new player that has connected after this client
     this.socket.on('newPlayer', function (playerInfo) {
-      Player.addOtherPlayers(self, playerInfo);
+      Player.addOtherPlayers(self, playerInfo)
     })
 
     //delete objects for other players when they disconnect
@@ -114,7 +86,6 @@ class gameScene extends Phaser.Scene {
           otherPlayer.circle.destroy()
           otherPlayer.destroy()
           otherPlayer.label.destroy()
-          otherPlayer.gun.destroy();
         }
       })
     })
@@ -141,82 +112,13 @@ class gameScene extends Phaser.Scene {
             Player.updateOtherHealth(playerInfo, otherplayer)
           }
         })
-        }
-      })
-
-    //multiplayer logic for shooting guns (show bullet on all clients)
-    this.socket.on('gunFired', function (playerInfo) {
-      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerInfo.playerId === otherPlayer.playerId) {
-          
-          //Determine WHICH gun is being fired and then excecute corrseponding logic:
-
-
-          if (playerInfo.gunSelection == 'lasergun') {
-
-          }
-
-          if (playerInfo.gunSelection == 'machinegun') {
-            let bullet = self.bullets.get(0, 0)
-            if (bullet) {
-              bullet = self.matter.add.gameObject(bullet)
-
-              //triggers collision code but doesn't actually collide
-              //basically isTrigger from Unity
-              bullet.setRectangle(20,20);
-              bullet.body.label = "shotBullet"; //shotBullet is bullet shot by another player. this avoids bullet deleting itself when hitting other car 
-              bullet.setSensor(true);
-              bullet.setRotation(otherPlayer.gun.rotation);
-              bullet.setDepth(-1);
-              bullet.setActive(true);
-              bullet.setVisible(true);
-              //console.log(bullet);
-              bullet.thrust(.03);
-              
-              bullet.x = otherPlayer.x 
-              bullet.y = otherPlayer.y
-              console.log(otherPlayer.x, otherPlayer.y)
-              console.log(playerInfo.playerId)
-            }
-          }
-        }
-      })
+      }
     })
 
-    //helps destroy bullet sprite
-    function getRootBody(body) {
-      while (body.parent !== body) body = body.parent;
-      return body;
-    }
-    // Create bullet group for machine gun
-    this.bullets = this.add.group({
-      defaultKey: 'bullet',
-      maxSize: 1000
-    });
 
-    //collision detection for machine gun
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
-      if ((bodyA.label != 'player') && (bodyB.label == 'shootingBullet')) {
-        console.log(bodyB);
-        const rootBodyB = getRootBody(bodyB);
-        rootBodyB.gameObject.destroy();
-      }
-      if ((bodyA.label == 'shootingBullet') && (bodyB.label != 'player')) {
-        console.log(bodyA)
-        const rootBodyA = getRootBody(bodyA)
-        rootBodyA.gameObject.destroy();
-      }
 
-      if ((bodyA.label != 'otherPlayer') && (bodyB.label == 'shotBullet')) {
-        console.log(bodyA)
-        const rootBodyB = getRootBody(bodyB)
-        rootBodyB.gameObject.destroy();
-      }
-
-      if ((bodyA.label == 'shotBullet' && (bodyB.label != 'otherPlayer'))) {
-        const rootBodyA = getRootBody(bodyA)
-        rootBodyA.gameObject.destroy();
-      }
+      //console.log(bodyA, bodyB);
 
       if (bodyA.label == "otherPlayer" && bodyB.label == "poisonArea") {
         console.log(bodyA.gameObject)
@@ -229,13 +131,16 @@ class gameScene extends Phaser.Scene {
 
         Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
       }
-      
-     });
+
+    });
+
   }
+
 
 
   update(time, delta) {
 
+    //sets rotation of laser gun
     let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, input.x, input.y);
     poisongun.setRotation(angle);
 
@@ -247,19 +152,16 @@ class gameScene extends Phaser.Scene {
       circle.x = this.car.x;
       circle.y = this.car.y;
 
-      
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-      Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
-      
-      if (this.gunSelection == 'lasergun') {
-        Gun.laserGun(this, this.gun, this.car, this.input)
-      }
+      Player.drive(this.car, this.label, this.cursors, delta, this.socket)
 
-      if (this.gunSelection == 'machinegun') {
-        Gun.machineGun(this, this.gun, this.car, this.input, this.bullets, this.socket, time)
-      }
+      //damage example:
+      //Player.takeDamage(this.car, 1);
+
+      console.log(this.car.health)
+
     }
 
   }
