@@ -115,7 +115,6 @@ class gameScene extends Phaser.Scene {
       }
     })
 
-
     this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
 
       //console.log(bodyA, bodyB);
