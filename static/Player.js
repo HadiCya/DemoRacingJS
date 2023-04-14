@@ -217,16 +217,25 @@ export const Player = {
     },
 
     //update positions of other players. function is in Player object since labelOffset variables are here
-    updateOtherPlayerMovement(playerInfo, otherPlayer) {
+    updateOtherPlayerMovement(self, playerInfo, otherPlayer) {
         otherPlayer.setRotation(playerInfo.rotation)
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
         otherPlayer.healthDisplay.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY + 30)
         otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
+        
 
         if(otherPlayer.poisonCircle)
             otherPlayer.poisonCircle.setPosition(playerInfo.x, playerInfo.y)
+
+        if(otherPlayer.laserLine) {
+            otherPlayer.graphics.destroy(otherPlayer.laserLine)
+            otherPlayer.graphics = self.add.graphics({ lineStyle: { width: 4, color: otherPlayer.laserColor } });
+            otherPlayer.laserLine = new Phaser.Geom.Line(300, 300, 300, 300)
+            Phaser.Geom.Line.SetToAngle(otherPlayer.laserLine, playerInfo.x, playerInfo.y, playerInfo.gunrotation, 3000)
+            otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
+        } 
         //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
         //self.gun.setRotation(angle);
 

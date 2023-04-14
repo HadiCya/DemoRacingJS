@@ -90,8 +90,12 @@ class gameScene extends Phaser.Scene {
           otherPlayer.destroy()
           otherPlayer.label.destroy()
           otherPlayer.healthDisplay.destroy()
+
           if (otherPlayer.poisonCircle)
             otherPlayer.poisonCircle.destroy()
+
+          if (otherPlayer.graphics)
+            otherPlayer.graphics.destroy()
         }
       })
     })
@@ -101,7 +105,7 @@ class gameScene extends Phaser.Scene {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerInfo.playerId === otherPlayer.playerId) {
           //call to Player object to update position of other cars
-          Player.updateOtherPlayerMovement(playerInfo, otherPlayer);
+          Player.updateOtherPlayerMovement(self, playerInfo, otherPlayer);
         }
         //console.log(`Compare: ${playerInfo.playerId}, ${otherPlayer.playerId}`)
       })
@@ -128,10 +132,12 @@ class gameScene extends Phaser.Scene {
         if (playerInfo.playerId === otherPlayer.playerId) {
           
           //Determine WHICH gun is being fired and then excecute corrseponding logic:
-
-
           if (playerInfo.gunSelection == 'lasergun') {
-
+            console.log("gunColor")
+            otherPlayer.laserColor = 0x0303fc
+            setTimeout(() => {
+              otherPlayer.laserColor = 0xaa00aa
+            }, 2000)
           }
 
           if (playerInfo.gunSelection == 'machinegun') {
@@ -237,7 +243,7 @@ class gameScene extends Phaser.Scene {
       Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
       
       if (this.gunSelection == 'lasergun') {
-        Gun.laserGun(this, this.gun, this.car, this.input)
+        Gun.laserGun(this, this.gun, this.car, this.input, this.socket, time)
       }
 
       if (this.gunSelection == 'machinegun') {

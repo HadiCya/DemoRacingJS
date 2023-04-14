@@ -1,5 +1,8 @@
+import {Player} from "./Player.js"
+
+
 //Globals for MACHINEGUN:
-var lastFired = 0;
+var lastFired_mg = 0;
 
 
 
@@ -14,9 +17,9 @@ var laserY; //Y coordinate for the end of the laser
 var input; //mouse position for sprites
 var point;
 var graphics
-var Slope;
-var CheckY;
-var CheckB;
+var collisionThreshold = 40;
+var lastFired_laser = 0;
+var laserColor = 0xaa00aa;
 
 export const Gun = {
 
@@ -59,6 +62,12 @@ export const Gun = {
             //adds gun sprite-image
             otherPlayer.gun = self.add.sprite(400, 300, 'lasergun');
             otherPlayer.gun.setDepth(1);
+
+            otherPlayer.laserLine = new Phaser.Geom.Line(400, 300, 400, 300);
+            otherPlayer.laserColor = laserColor
+            otherPlayer.graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
+            otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
+
         }
 
         if (gunChoice === 'machinegun') {
@@ -83,7 +92,7 @@ export const Gun = {
         }
     },
 
-    laserGun(self, gun, car, input) {
+    laserGun(self, gun, car, input, socket, time) {
         //sets rotation of laser gun
         let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
         gun.setRotation(angle);
@@ -92,35 +101,50 @@ export const Gun = {
         if (line1)
             graphics.destroy(line1);//deletes the line, so that they don't build up
 
+        if (lastFired_laser < time) {
+            laserColor = 0xaa00aa;
+        }
+    
         pointer = input.activePointer; //sets pointer to user's mouse
         laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
         laserY = laserLength * (pointer.worldY - car.y);
         laserX = laserLength * (pointer.worldX - car.x);
         line1 = new Phaser.Geom.Line(car.x, car.y, laserX, laserY);
-        graphics = self.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+        graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
         graphics.strokeLineShape(line1); //draws the line
         gun.x = car.x;
         gun.y = car.y;
         car.gunrotation = gun.rotation;
 
-        Slope = ((pointer.worldY - car.y) / (pointer.worldX - car.x));
-        CheckB = car.y - (Slope * car.x)
-        //CheckY = ((Slope * point.x) + CheckB);
+    
+        if (self.input.activePointer.isDown && time > lastFired_laser) {
+            let Slope = ((pointer.worldY - car.y) / (pointer.worldX - car.x));
 
-        // // Collision detection
-        // const collisionThreshold = 25;
-        // if (Math.abs(CheckY - point.y) < collisionThreshold) {
-        //     console.log("Collision detected");
-        // }
+            let CheckB = car.y - (Slope * car.x)
 
+            if (Math.abs(Slope) > 10) {
+                Slope = 'undef'
+            } 
 
-        // if (CheckY < point.y) {
-        //     console.log("Laser above dot")
-        // }
+            let othersHit = []
+            self.otherPlayers.getChildren().forEach((otherPlayer) => {
+                if (Slope === 'undef') {
+                    if(Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
+                        laserColor = 0x0303fc
+                        lastFired_laser = time + 2000
+                        Player.inflictDamage(self, socket, otherPlayer, 1)
+                        socket.emit('gunFiring')
+                    }
+                }
+                else if (Math.abs(((Slope * otherPlayer.x) + CheckB) - otherPlayer.y) < collisionThreshold) {
+                    laserColor = 0x0303fc
+                    lastFired_laser = time + 2000
+                    Player.inflictDamage(self, socket, otherPlayer, 1)
+                    socket.emit('gunFiring')
+                }
+            })
+        }
 
-        // if (CheckY > point.y) {
-        //     console.log("Laser below dot")
-        // }
     },
 
     machineGun(self, gun, car, input, bullets, socket, time) {
@@ -136,7 +160,7 @@ export const Gun = {
         }
         
         // Shooting
-        if (self.input.activePointer.isDown && time > lastFired) {
+        if (self.input.activePointer.isDown && time > lastFired_mg) {
             let bullet = bullets.get(car.x, car.y)
             if (bullet) {
                 bullet = self.matter.add.gameObject(bullet)
@@ -153,7 +177,7 @@ export const Gun = {
                 bullet.setVisible(true);
                 //console.log(bullet);
                 bullet.thrust(.03);
-                lastFired = time + 200;
+                lastFired_mg = time + 200;
 
                 socket.emit('gunFiring')
             }
