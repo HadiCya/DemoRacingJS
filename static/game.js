@@ -89,6 +89,7 @@ class gameScene extends Phaser.Scene {
           otherPlayer.gun.destroy()
           otherPlayer.destroy()
           otherPlayer.label.destroy()
+          otherPlayer.healthDisplay.destroy()
           if (otherPlayer.poisonCircle)
             otherPlayer.poisonCircle.destroy()
         }
@@ -107,16 +108,17 @@ class gameScene extends Phaser.Scene {
     })
 
     this.socket.on('reportHit', function (playerInfo) {
+      console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
         if (self.car) {
           Player.updateHealth(self.car, playerInfo.health)
         }
       } else {
-        self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-          if (playerInfo.playerId === otherPlayer.playerId) {
-            Player.updateOtherHealth(playerInfo, otherPlayer)
-          }
-        })
+          self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+            if (playerInfo.playerId === otherPlayer.playerId) {
+               Player.updateOtherHealth(playerInfo, otherPlayer)
+            }
+          })
         }
       })
 
@@ -141,6 +143,7 @@ class gameScene extends Phaser.Scene {
               //basically isTrigger from Unity
               bullet.setRectangle(20,20);
               bullet.body.label = "shotBullet"; //shotBullet is bullet shot by another player. this avoids bullet deleting itself when hitting other car 
+              bullet.body.shooterIdentifier = otherPlayer.playerId; //used to turn off bullet despawning when colliding with car that shot bullet
               bullet.setSensor(true);
               bullet.setRotation(otherPlayer.gun.rotation);
               bullet.setDepth(-1);
@@ -189,28 +192,32 @@ class gameScene extends Phaser.Scene {
         rootBodyA.gameObject.destroy();
       }
 
-      if ((bodyA.label != 'otherPlayer') && (bodyB.label == 'shotBullet')) {
-        const rootBodyB = getRootBody(bodyB)
-        rootBodyB.gameObject.destroy();
+      if ((bodyA.label != 'poisonArea') && (bodyB.label == 'shotBullet')) {
+        //prevent despawn out of car shooting bullet
+        if (!(bodyA.label == 'otherPlayer' && bodyB.shooterIdentifier === bodyA.gameObject.playerId)) {
+          const rootBodyB = getRootBody(bodyB)
+          rootBodyB.gameObject.destroy()
+        } 
       }
 
-      //TODO: differentiate between otherPlayer shooting bullet and otherPlayer getting hit
-      if ((bodyA.label == 'shotBullet' && (bodyB.label != 'otherPlayer'))) {
-        console.log("destroy")
-        const rootBodyA = getRootBody(bodyA)
-        rootBodyA.gameObject.destroy();
+      if ((bodyA.label == 'shotBullet' && bodyB.label != 'poisonArea')) {
+        //prevent despawn out of car shooting bullet
+        if (!(bodyB.label == 'otherPlayer' && bodyA.shooterIdentifier === bodyB.gameObject.playerId)) {
+          const rootBodyA = getRootBody(bodyA)
+          rootBodyA.gameObject.destroy()
+        } 
       }
 
       if (bodyA.label == "otherPlayer" && bodyB.label == "poisonArea") {
         console.log(bodyA.gameObject)
-        //Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        Player.inflictDamage(self, self.socket, bodyA.gameObject, 1)
       }
 
       if (bodyB.label == "otherPlayer" && bodyA.label == "poisonArea") {
         console.log('damage')
         console.log(bodyB.gameObject)
 
-        //Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
+        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
       }
       
      });

@@ -48,7 +48,7 @@ export const Player = {
         self.car.body.label = "player"; //player's car's collsion box label;
 
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
-        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, self.car.health); //text on the car
+        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]); 
 
         Gun.addGun(self, self.gunSelection)
 
@@ -72,7 +72,9 @@ export const Player = {
 
         otherPlayer.playerId = playerInfo.playerId
         otherPlayer.body.label = "otherPlayer";
+
         otherPlayer.health = playerInfo.health
+        otherPlayer.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]);
 
 
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
@@ -204,7 +206,7 @@ export const Player = {
             }
 
             //console.log(car.angle + 180)
-            console.log(speed)
+            //console.log(speed)
             car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
             car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
             // console.log(speed)
@@ -219,6 +221,7 @@ export const Player = {
         otherPlayer.setRotation(playerInfo.rotation)
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
+        otherPlayer.healthDisplay.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY + 30)
         otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
 
@@ -231,18 +234,19 @@ export const Player = {
 
 
     inflictDamage(self, socket, otherPlayer, damage) {
-        if (otherPlayer.playerId)
-            socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
+        console.log("inflictDamage")
+        socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
     },
 
     updateHealth(car, health) {
-       console.log('updateHealth')
+        console.log('updateHealth')
         car.health = health;
         car.healthDisplay.setText(['Health: ', String(health)])
     },
 
     updateOtherHealth(playerInfo, otherPlayer) {
-        console.log('updateOtherHealth')
+        console.log(playerInfo, otherPlayer)
         otherPlayer.health = playerInfo.health;
+        otherPlayer.healthDisplay.setText(['Health: ', String(otherPlayer.health)])
     }
 }

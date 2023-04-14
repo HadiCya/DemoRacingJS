@@ -145,6 +145,7 @@ export const Gun = {
                 //basically isTrigger from Unity
                 bullet.setRectangle(20,20);
                 bullet.body.label = "shootingBullet";
+                bullet.body.shooterIdentifier = socket.id; //used to turn off bullet despawning when colliding with car that shot bullet
                 bullet.setSensor(true);
                 bullet.setRotation(angle);
                 bullet.setDepth(-1);
