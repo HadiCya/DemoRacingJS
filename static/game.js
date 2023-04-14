@@ -9,6 +9,7 @@ var input; //mouse position for sprites
 var bullets;
 var lastFired = 0;
 var bulletSound;
+var muzzle;
 
 class gameScene extends Phaser.Scene {
 
@@ -25,7 +26,11 @@ class gameScene extends Phaser.Scene {
     this.load.image('car', 'static/assets/car.png')
     this.load.image('gun', 'static/assets/machine_gun.png')
     this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
-    this.load.audio('bang', 'static/assets/bang.wav') 
+    this.load.audio('bang', 'static/assets/bang.wav')
+    this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
+      frameWidth: 82,
+      frameHeight: 34
+    });
   }
 
   create() {
@@ -49,6 +54,10 @@ class gameScene extends Phaser.Scene {
     //adds gun sprite-image
     gun=this.add.sprite(400,300,'gun'); 
     gun.setDepth(1);
+
+    //adds gun animation
+    muzzle = this.add.sprite(400, 300, 'bulletAnimation');
+    muzzle.setDepth(2);
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -96,7 +105,16 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-  
+    //bullet animation
+    this.anims.create({
+      key: 'animateBullet',
+      frames: this.anims.generateFrameNumbers('bulletAnimation', {
+        start: 0,
+        end: 5
+      }),
+      frameRate: 30,
+      repeat: 0
+    });
 
     this.socket.on('gunFired', function (playerInfo) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
@@ -116,6 +134,7 @@ class gameScene extends Phaser.Scene {
             bullet.setActive(true);
             bullet.setVisible(true);
             console.log(bullet);
+            bulletSound.play();
             bullet.thrust(.03);
             bullet.x = otherPlayer.x 
             bullet.y = otherPlayer.y
@@ -169,6 +188,7 @@ class gameScene extends Phaser.Scene {
     //sets rotation of gun
     let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
     gun.setRotation(angle);
+    muzzle.setRotation(angle);
 
     //Make sure car has been instantiated correctly
     if (this.car) {
@@ -178,6 +198,10 @@ class gameScene extends Phaser.Scene {
       gun.x = this.car.x;
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
+
+      muzzle.x = this.car.x;
+      muzzle.y = this.car.y;
+
       
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
@@ -202,7 +226,9 @@ class gameScene extends Phaser.Scene {
         bullet.setVisible(true);
         //console.log(bullet);
         bulletSound.play();
+        muzzle.play('animateBullet');
         bullet.thrust(.03);
+       
         lastFired = time + 200;
 
         this.socket.emit('gunFiring')
