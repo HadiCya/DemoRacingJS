@@ -190,7 +190,7 @@ var config = {
       },
       setBounds: {
         width: 7680,
-        height: 4320
+        height: 7680
       },
       debug: true,
     }

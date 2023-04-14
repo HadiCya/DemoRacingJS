@@ -46,7 +46,7 @@ export const Player = {
         self.car.setTint(playerInfo.color);
         //self.car.setDrag(1000)
 
-        self.cameras.main.setBounds(0, 0, 7680, 4320);
+        self.cameras.main.setBounds(0, 0, 7680, 8640);
         self.cameras.main.startFollow(self.car, true);
         self.cameras.main.setZoom(1);
 
