@@ -33,6 +33,8 @@ class gameScene extends Phaser.Scene {
 
     //for mouse position
     input = this.input;
+    
+    
 
     console.log(this.playerName)
 
@@ -51,7 +53,16 @@ class gameScene extends Phaser.Scene {
     });
     circle.setSensor(true)
     circle.body.label = "poisonArea"
-  
+    
+    this.input.on('pointerdown', function (pointer)
+    {
+
+        console.log('down');
+
+        this.add.image(this.car.x, this.car.y, 'circle');
+
+    }, this);
+
 
     //array to store other players
     this.otherPlayers = this.add.group()
