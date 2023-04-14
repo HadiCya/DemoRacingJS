@@ -4,6 +4,8 @@ import Lobby from "./Lobby.js"
 var poisongun;
 var input; //mouse position for sprites
 var circle;
+var circleActive = false;
+var circleCooldown = false;
 
 
 class gameScene extends Phaser.Scene {
@@ -45,23 +47,53 @@ class gameScene extends Phaser.Scene {
     poisongun = this.add.sprite(400, 300, 'poisongun');
     poisongun.setDepth(1);
 
-    circle = this.matter.add.image(400, 300, 'circle')
-    circle.setScale(9);
-    circle.setBody({
+
+
+    circle = this.matter.add.image(400, 300, 'circle');
+      circle.setScale(9);
+      circle.setBody({
         type: 'circle',
         radius: 100
     });
-    circle.setSensor(true)
-    circle.body.label = "poisonArea"
-    
-    this.input.on('pointerdown', function (pointer)
-    {
+    circle.visible = false;
+    circle.setSensor(true);
+    circle.body.label = "poisonArea";
 
-        console.log('down');
+    let isCircleActive = false;
+    let isCooldownActive = false;
+    let cooldownTimer = null;
 
-        this.add.image(this.car.x, this.car.y, 'circle');
+    function activateCircle() {
+        console.log('activate');
+        circle.visible = true;
+        circle.setSensor(false);
+        isCircleActive = true;
+        setTimeout(endActiveTime, 5000); // 5 seconds active
+    }
 
-    }, this);
+    function endActiveTime() {
+        console.log('end active time');
+        circle.visible = false;
+        circle.setSensor(true);
+        isCircleActive = false;
+        isCooldownActive = true;
+        cooldownTimer = setTimeout(endCooldown, 10000); // 10 seconds cooldown
+    }
+
+    function endCooldown() {
+        console.log('end cooldown');
+        isCooldownActive = false;
+    }
+
+    this.input.on('pointerdown', function (pointer) {
+        if (!isCircleActive && !isCooldownActive) {
+            activateCircle();
+        } else if (isCircleActive) {
+            // do nothing
+        } else if (isCooldownActive) {
+            // do nothing
+        }
+    });
 
 
     //array to store other players
@@ -137,6 +169,30 @@ class gameScene extends Phaser.Scene {
      });
 
   }
+
+   onLeftClickDown() {
+    // Start the circle activation timer
+    game.time.events.add(5000, activateCircle, this);
+}
+
+onLeftClickUp() {
+    // If circle is still activating, cancel the activation timer
+    if (game.time.events.pendingActivation == 1) {
+        game.time.events.remove(activateCircle, this);
+    }
+}
+
+ activateCircle() {
+    circleActive = true;
+    circleCooldown = true;
+    // Start the circle cooldown timer
+    game.time.events.add(10000, resetCircle, this);
+}
+
+ resetCircle() {
+    circleActive = false;
+    circleCooldown = false;
+}
 
 
 
