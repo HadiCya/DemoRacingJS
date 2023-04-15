@@ -111,7 +111,7 @@ export const Player = {
 
         if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation || gr !== car.oldPosition.gunrotation)) {
             socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation, gunrotation: car.gunrotation })
-            console.log("moving")
+            //console.log("moving")
         }
 
         car.oldPosition = {
