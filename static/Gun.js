@@ -4,6 +4,10 @@ import {Player} from "./Player.js"
 //Globals for MACHINEGUN:
 var lastFired_mg = 0;
 
+//Globals for POISONGUN:
+var isCircleActive
+var isCooldownActive
+
 
 
 
@@ -54,6 +58,7 @@ export const Gun = {
             });
             
             self.poisonCircle.setSensor(true)
+            self.poisonCircle.visible = false
             self.poisonCircle.body.label = "poisonArea"
         }
     },
@@ -206,5 +211,28 @@ export const Gun = {
             poisonCircle.x = car.x;
             poisonCircle.y = car.y;
         }
+
+        //trigger poison area on click
+        if (self.input.activePointer.isDown) {
+
+            //turn circle on if off cooldown 
+            if (!isCircleActive && !isCooldownActive) {
+
+                poisonCircle.visible = true;
+                isCircleActive = true;
+
+                //turn circle off after 5 seconds
+                setTimeout(() => {
+                    poisonCircle.visible = false;
+                    isCircleActive = false;
+                    isCooldownActive = true;
+
+                    //end cooldown after 10 seconds
+                    setTimeout(() => {isCooldownActive = false}, 10000); // 10 seconds cooldown
+
+                }, 5000); // 5 seconds active
+            }
+        }
     }
 }
+
