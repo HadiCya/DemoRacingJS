@@ -64,7 +64,7 @@ export const Player = {
             //console.log((this.driftAngle - car.angle) * 0.05)
             
            
-            console.log(speed)
+            //console.log(speed)
             car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
             car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
              
@@ -81,7 +81,7 @@ export const Player = {
             }
 
             //console.log(car.angle + 180)
-            console.log(speed)
+            //console.log(speed)
             car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
             car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
             // console.log(speed)
@@ -98,12 +98,12 @@ export const Player = {
             .setDisplaySize(50, 50)
             .setRotation(playerInfo.rotation)
 
-        otherPlayer.playerId = playerInfo.playerId
-        otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
-        otherPlayer.setTint(playerInfo.color)
+        otherPlayer.playerId = playerInfo.playerId;
+        otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName);
+        otherPlayer.setTint(playerInfo.color);
 
         //add this car to array storing other players in game.js
-        self.otherPlayers.add(otherPlayer)
+        self.otherPlayers.add(otherPlayer);
     },
 
 
@@ -115,21 +115,21 @@ export const Player = {
         //accelerate car if below max speed
         if (speed < maxspeed) {
             if (cursors.up.isDown || wasd.W.isDown) {
-                speed = speed + (accel * (delta / 10))
+                    speed = speed + (accel * (delta / 10));
             }
         }
 
 
         else {
             //car is at max speed
-            speed = maxspeed
+            speed = maxspeed;
         }
 
 
         //reverse car if below max speed (in reverse)
         if (speed > -maxspeed) {
             if (cursors.down.isDown || wasd.S.isDown) {
-                speed = speed - (accel * (delta / 10))
+                    speed = speed - (accel * (delta / 10))
             }
         }
 
@@ -148,8 +148,8 @@ export const Player = {
 
         //move car based on new speed and rotation 
         //delta factor makes movement frame rate independent
-        //car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
-        //car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
+        //car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)));
+        //car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)));
         
         this.updateCarMovementWithDrift(car, cursors, wasd, delta)
 
@@ -157,8 +157,13 @@ export const Player = {
 
         //update position of label. offset from car to position correctly 
         label.x = car.x - labelOffsetX;
-        label.y = car.y - labelOffsetY;
+        label.y = car.y- labelOffsetY;
 
+
+        var x = car.x;
+        var y = car.y;
+        var r = car.rotation;        
+        
         var x = car.x
         var y = car.y
         var r = car.rotation
@@ -173,7 +178,6 @@ export const Player = {
             y: car.y,
             rotation: car.rotation
         }
-
     },
 
     //update positions of other players. function is in Player object since labelOffset variables are here
@@ -181,6 +185,12 @@ export const Player = {
         otherPlayer.setRotation(playerInfo.rotation)
         otherPlayer.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.label.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY)
+    },
+
+    //Get method to access speed in game.js
+    GetSpeed()
+    {
+        return speed
     },
 
 
