@@ -190,6 +190,13 @@ class gameScene extends Phaser.Scene {
               console.log(playerInfo.playerId)
             }
           }
+
+          if(playerInfo.gunSelection == 'poisongun') {
+              otherPlayer.poisonCircle.visible = true;
+  
+              //turn circle off after 5 seconds
+              setTimeout(() => {otherPlayer.poisonCircle.visible = false}, 5000); 
+          }
         }
       })
     })

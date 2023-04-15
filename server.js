@@ -30,6 +30,7 @@ io.on('connection', function (socket) {
     x: 30,
     y: 30,
     gunrotation: 0,
+    gunSelection: 'lasergun',
     health: 10,
     playerId: socket.id,
     playerName: socket.id,
@@ -39,10 +40,11 @@ io.on('connection', function (socket) {
   //give new client list of players already in game
   socket.emit('currentPlayers', players)
 
-  //new client has updated their playerName
-  socket.on('updateName', function (playerName) {
+  //only adds new player to other clients once the connecting client's options (playerName and gunSelection) have been updated correctly
+  socket.on('updateOptions', function (options) {
     //store new playerName
-    players[socket.id].playerName = playerName
+    players[socket.id].playerName = options.playerName
+    players[socket.id].gunSelection = options.gunSelection
 
     //tell clients already connected that a new player has joined
     socket.broadcast.emit('newPlayer', players[socket.id])
@@ -60,16 +62,17 @@ io.on('connection', function (socket) {
     players[socket.id].y = movementData.y
     players[socket.id].rotation = movementData.rotation
     players[socket.id].gunrotation = movementData.gunrotation
-
     //let other clients know change
     socket.broadcast.emit('playerMoved', players[socket.id])
-
-
   })
 
   socket.on('hitOpponent', function (hitInfo) {
     players[hitInfo.playerId].health -= hitInfo.damage
     io.emit('reportHit', players[hitInfo.playerId])
+  })
+  
+  socket.on('gunFiring', function() {
+    socket.broadcast.emit('gunFired', players[socket.id])
   })
 
 

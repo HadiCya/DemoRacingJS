@@ -93,6 +93,7 @@ export const Gun = {
             .setDisplaySize(50, 50)
 
             otherPlayer.poisonCircle.setScale(9);
+            otherPlayer.poisonCircle.visible = false;
 
             //otherPlayer.poisonCircle.body.label = "poisonArea"
 
@@ -215,24 +216,27 @@ export const Gun = {
         //trigger poison area on click
         if (self.input.activePointer.isDown) {
 
-            //turn circle on if off cooldown 
             if (!isCircleActive && !isCooldownActive) {
 
                 poisonCircle.visible = true;
                 isCircleActive = true;
-
+    
+                socket.emit('gunFiring')
+    
                 //turn circle off after 5 seconds
                 setTimeout(() => {
                     poisonCircle.visible = false;
                     isCircleActive = false;
                     isCooldownActive = true;
-
+    
                     //end cooldown after 10 seconds
-                    setTimeout(() => {isCooldownActive = false}, 10000); // 10 seconds cooldown
-
+                    setTimeout(() => {isCooldownActive = false}, 10000); 
+    
                 }, 5000); // 5 seconds active
             }
         }
-    }
+    },
+
+
 }
 
