@@ -1,4 +1,4 @@
-import {Gun} from "./Gun.js"
+import {Gun, cooldown} from "./Gun.js"
 
 var speed = 0.0;
 var accel = 0.2;
@@ -50,6 +50,8 @@ export const Player = {
 
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
         self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]); 
+        self.car.cooldownDisplay = self.add.text(1175, 25, ["Cooldown: " , cooldown]);
+        self.car.cooldownDisplay.visible = false; 
 
         Gun.addGun(self, self.gunSelection)
 

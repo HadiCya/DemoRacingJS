@@ -1,5 +1,5 @@
 import {Player} from "./Player.js"
-
+import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 
 //Globals for MACHINEGUN:
 var lastFired_mg = 0;
@@ -19,7 +19,7 @@ var input; //mouse position for sprites
 var point;
 var graphics
 var collisionThreshold = 40;
-const cooldown = 5000; // in milliseconds
+export const cooldown = 5000; // in milliseconds
 const duration = 500; // in milliseconds
 var laserOnCooldown;
 var laserColor = 0xff0000;
@@ -116,6 +116,8 @@ export const Gun = {
 
         pointer = input.activePointer; //sets pointer to user's mouse
 
+        car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (lastFired_laser - time - 500)) )]);
+
         if(!laserOnCooldown) {
             if (line1)
                 graphics.destroy(line1);//deletes the line, so that they don't build up
@@ -133,8 +135,11 @@ export const Gun = {
 
                 graphics.strokeLineShape(line1);    
 
+                car.cooldownDisplay.visible = true;
+
                 // Play laser sound
                 self.laser.play();
+                self.laser.setVolume(effectsVolume);
 
                 socket.emit('gunFiring')
 
@@ -149,12 +154,12 @@ export const Gun = {
                 laserOnCooldown = true;
                 self.time.delayedCall(cooldown, () => {
                     laserOnCooldown = false;
+                    car.cooldownDisplay.visible = false;
                 });
             } else {
                 if (graphics)
                     graphics.clear();
             }
-
         }
 
         //display laser until duration ends
@@ -211,6 +216,7 @@ export const Gun = {
 
             self.gun.muzzle.x = car.x;
             self.gun.muzzle.y = car.y;
+            
         }
         
         // Shooting
@@ -233,11 +239,12 @@ export const Gun = {
                 bullet.thrust(.03);
 
                 self.bulletSound.play();
+                self.bulletSound.setVolume(effectsVolume);
                 self.gun.muzzle.play('animateBullet');
 
                 lastFired_mg = time + 200;
 
-                socket.emit('gunFiring')
+                socket.emit('gunFiring');
             }
         }
     },
@@ -248,6 +255,8 @@ export const Gun = {
 
         //TODO: car.gunrotation
 
+        car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(10000 + (lastFired_laser - time)) )]);
+        
         if (car) {
             gun.x = car.x;
             gun.y = car.y;
@@ -255,13 +264,16 @@ export const Gun = {
             poisonCircle.y = car.y;
         }
 
+        if(isCooldownActive && (10000 + (lastFired_laser - time)) < 0){
+            car.cooldownDisplay.visible = false;
+        }
         //trigger poison area on click
         if (self.input.activePointer.isDown) {
 
             if (!isCooldownActive) {
-
+                lastFired_laser = time;
                 poisonCircle.visible = true;
-    
+                car.cooldownDisplay.visible = true;
                 socket.emit('gunFiring')
     
                 //turn circle off after 5 seconds
@@ -270,8 +282,10 @@ export const Gun = {
                     isCooldownActive = true;
     
                     //end cooldown after 10 seconds
-                    setTimeout(() => {isCooldownActive = false}, 10000); 
-    
+                    setTimeout(() => {
+                        isCooldownActive = false
+                    }, 10000); 
+
                 }, 5000); // 5 seconds active
             }
         }

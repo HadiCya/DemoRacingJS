@@ -1,6 +1,6 @@
 import { Player } from "./Player.js"
 import { Gun } from "./Gun.js"
-import Lobby from "./Lobby.js"
+import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 
 
 var poisongun;
@@ -68,6 +68,7 @@ class gameScene extends Phaser.Scene {
     gameSong = this.sound.add('gameTheme');
     gameSong.loop = true;
     gameSong.play();
+    gameSong.setVolume(musicVolume);
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateOptions', {playerName: self.playerName, gunSelection: self.gunSelection})
