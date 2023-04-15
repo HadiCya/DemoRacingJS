@@ -21,8 +21,9 @@ class gameScene extends Phaser.Scene {
   //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-    this.load.image('poisongun', 'static/assets/posiongun.png')
+    this.load.spritesheet('poisongun', 'static/assets/poisongun.png', { frameWidth: 30, frameHeight: 54, endframe:9 })
     this.load.image('circle', 'static/assets/circle.png')
+    this.load.audio('stem', ['static/assets/Caustic_stem.mp3']);
   }
 
   create() {
@@ -47,10 +48,19 @@ class gameScene extends Phaser.Scene {
     poisongun = this.add.sprite(400, 300, 'poisongun');
     poisongun.setDepth(1);
 
+    this.stem = this.sound.add('stem');
 
+    this.anims.create({
+      key: 'poisongun',
+      frames: this.anims.generateFrameNumbers('poisongun', { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1
+    });
+    
 
     circle = this.matter.add.image(400, 300, 'circle');
       circle.setScale(9);
+      //this.stem.play();
       circle.setBody({
         type: 'circle',
         radius: 100
@@ -92,6 +102,12 @@ class gameScene extends Phaser.Scene {
         } else if (isCooldownActive) {
             // do nothing
         }
+    });
+    
+    
+    this.input.on('pointerdown', (pointer) => {
+      // play audio when pointer is pressed
+      this.stem.play();
     });
 
 
@@ -171,7 +187,17 @@ class gameScene extends Phaser.Scene {
 
    onLeftClickDown() {
     // Start the circle activation timer
-    game.time.events.add(5000, activateCircle, this);
+    socket.emit('activateCircle');
+
+    // Start the circle activation timer
+    game.time.events.add(5000, () => {
+        // Send a message to the server to indicate that the circle has been activated
+        socket.emit('circleActivated');
+        
+        // Add damage to players within the circle
+        // ...
+    }, this);
+    
 }
 
 onLeftClickUp() {
@@ -200,6 +226,8 @@ onLeftClickUp() {
     //sets rotation of laser gun
     let angle = Phaser.Math.Angle.Between(poisongun.x, poisongun.y, input.x, input.y);
     poisongun.setRotation(angle);
+
+    poisongun.anims.play('poisongun', true);
 
     //Make sure car has been instantiated correctly
     if (this.car) {

@@ -47,10 +47,6 @@ export const Player = {
             .setDisplaySize(50, 50)
             .setDepth(1)
 
-            // otherPlayer.circle = self.add.sprite(playerInfo.x, playerInfo.y, 'circle')
-            // .setOrigin(0.5, 0.5)
-            // .setDisplaySize(50, 50)
-
         otherPlayer.circle = self.matter.add.image(playerInfo.x, playerInfo.y, 'circle')
         otherPlayer.circle.setScale(9);
         otherPlayer.circle.setBody({
@@ -174,7 +170,8 @@ export const Player = {
     //     car.health -= damage;
     //     console.log(car)
     // },
-
+    
+    
 
     takeDamage(car, damage) {
         console.log(`takeDamage()`)
