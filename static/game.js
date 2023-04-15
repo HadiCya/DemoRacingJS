@@ -6,6 +6,7 @@ import Lobby from "./Lobby.js"
 var poisongun;
 var input; //mouse position for sprites
 var circle;
+var gameSong
 
 class gameScene extends Phaser.Scene {
 
@@ -29,9 +30,16 @@ class gameScene extends Phaser.Scene {
     this.load.image('circle', 'static/assets/circle.png')
 
     this.load.image('lasergun', 'static/assets/gun.png')
-    this.load.image('machinegun', 'static/assets/gun.png')//from machince gun
+    this.load.image('machinegun', 'static/assets/machine_gun.png')//from machince gun
     this.load.image('gun', 'static/assets/gun.png')
-    this.load.image('bullet', 'static/assets/Bullet.png') 
+    this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
+
+    this.load.audio('bang', 'static/assets/bang.wav')
+    this.load.audio('gameTheme', 'static/assets/Issa.is.a.pizza.mp3')
+    this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
+      frameWidth: 82,
+      frameHeight: 34
+    });
 
     this.load.image('tiles', 'static/assets/roads2w.png')
     this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
@@ -51,6 +59,12 @@ class gameScene extends Phaser.Scene {
     this.socket = io()
     
     console.log(this.playerName)
+
+    this.bulletSound = this.sound.add('bang');
+
+    gameSong = this.sound.add('gameTheme');
+    gameSong.loop = true;
+    gameSong.play();
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateOptions', {playerName: self.playerName, gunSelection: self.gunSelection})
@@ -111,6 +125,17 @@ class gameScene extends Phaser.Scene {
       })
     })
 
+    //bullet animation
+    this.anims.create({
+      key: 'animateBullet',
+      frames: this.anims.generateFrameNumbers('bulletAnimation', {
+        start: 0,
+        end: 5
+      }),
+      frameRate: 30,
+      repeat: 0
+    });
+
     this.socket.on('reportHit', function (playerInfo) {
       console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
@@ -157,6 +182,7 @@ class gameScene extends Phaser.Scene {
               bullet.setVisible(true);
               //console.log(bullet);
               bullet.thrust(.03);
+              self.bulletSound.play();
               
               bullet.x = otherPlayer.x 
               bullet.y = otherPlayer.y

@@ -35,6 +35,10 @@ export const Gun = {
         if (gunChoice === 'machinegun') {
             self.gun = self.add.sprite(400, 300, 'machinegun');
             self.gun.setDepth(1);
+            //adds gun animation
+            self.gun.muzzle = this.add.sprite(400, 300, 'bulletAnimation');
+            self.gun.muzzle.setDepth(2);
+
         }
 
         if (gunChoice === 'poisongun') {
@@ -157,6 +161,9 @@ export const Gun = {
             gun.x = car.x;
             gun.y = car.y;
             car.gunrotation = gun.rotation;
+
+            gun.muzzle.x = car.x;
+            gun.muzzle.y = car.y;
         }
         
         // Shooting
@@ -177,6 +184,10 @@ export const Gun = {
                 bullet.setVisible(true);
                 //console.log(bullet);
                 bullet.thrust(.03);
+
+                self.bulletSound.play();
+                gun.muzzle.play('animateBullet');
+
                 lastFired_mg = time + 200;
 
                 socket.emit('gunFiring')
