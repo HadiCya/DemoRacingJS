@@ -140,7 +140,7 @@ class gameScene extends Phaser.Scene {
     });
 
     this.socket.on('reportHit', function (playerInfo) {
-      console.log(playerInfo)
+      //console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
         if (self.car) {
           Player.updateHealth(self.car, playerInfo.health)
@@ -249,19 +249,23 @@ class gameScene extends Phaser.Scene {
         } 
       }
 
-      if (bodyA.label == "otherPlayer" && bodyB.label == "poisonArea") {
-        console.log(bodyA.gameObject)
-        Player.inflictDamage(self, self.socket, bodyA.gameObject, 1)
-      }
-
-      if (bodyB.label == "otherPlayer" && bodyA.label == "poisonArea") {
-        console.log('damage')
-        console.log(bodyB.gameObject)
-
-        Player.inflictDamage(self, self.socket, bodyB.gameObject, 1)
-      }
       
      });
+
+     //listeners for guns which are objects that are active continiously
+     this.matter.world.on('collisionactive', function (event) {
+      event.pairs.forEach((pair) => {
+        if (pair.bodyA.label == "otherPlayer" && pair.bodyB.label == "poisonArea") {
+          Player.inflictDamage(self, self.socket, pair.bodyA.gameObject, 1)
+        }
+  
+        if (pair.bodyB.label == "otherPlayer" && pair.bodyA.label == "poisonArea") {
+          
+          Player.inflictDamage(self, self.socket, pair.bodyB.gameObject, 1)
+        }
+      }) 
+      
+     })
   }
 
 

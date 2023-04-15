@@ -17,6 +17,7 @@ var isDriftStart = true
 var labelOffsetX = -20
 var labelOffsetY = -40
 
+
 //Object stores functions which are called in game.js
 
 export const Player = {
@@ -247,8 +248,27 @@ export const Player = {
 
 
     inflictDamage(self, socket, otherPlayer, damage) {
-        console.log("inflictDamage")
-        socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
+        if (self.gunSelection == "poisongun" ) {
+            console.log(self.poisonCircle.visible, self.damageLockout)
+
+            if (self.poisonCircle.visible == true && self.damageLockout == false) {
+                console.log("inflictDamage")
+                socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
+
+                //after dealing damage, prevent further until lockout ends
+                //setTimeout to allow for all players hit to get a chance to call inflictDamage()
+                setTimeout(() => {self.damageLockout = true}, 0.1)
+
+                //reset lockout so another tick of damage can be applied
+                setTimeout(() => {
+                    self.damageLockout = false
+                }, 1000)
+            }
+        } 
+        else {
+            console.log("inflictDamage")
+            socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
+        }
     },
 
     updateHealth(car, health) {

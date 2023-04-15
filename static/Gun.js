@@ -57,9 +57,11 @@ export const Gun = {
             type: 'circle',
             radius: 100
             });
+
             
             self.poisonCircle.setSensor(true)
             self.poisonCircle.visible = false
+            self.damageLockout = false
             self.poisonCircle.body.label = "poisonArea"
         }
     },
@@ -256,17 +258,15 @@ export const Gun = {
         //trigger poison area on click
         if (self.input.activePointer.isDown) {
 
-            if (!isCircleActive && !isCooldownActive) {
+            if (!isCooldownActive) {
 
                 poisonCircle.visible = true;
-                isCircleActive = true;
     
                 socket.emit('gunFiring')
     
                 //turn circle off after 5 seconds
                 setTimeout(() => {
                     poisonCircle.visible = false;
-                    isCircleActive = false;
                     isCooldownActive = true;
     
                     //end cooldown after 10 seconds
