@@ -1,7 +1,7 @@
 let lastCheckpointPassed = 0;
 let lapNumber = 0;
 
-const checkpointsPerLap = 4;
+const checkpointsPerLap = 28;
 const lapsPerRace = 3;
 
 var graphics
@@ -50,7 +50,7 @@ export const Checkpoints = {
 
         //Lap Line, set position of the lap line here
         //Line parameters: (x1, y1, x2, y2)
-        line = new Phaser.Geom.Line(650, 375, 650, 550);
+        line = new Phaser.Geom.Line(1150, 650, 1150, 975);
 
         //draws the line
         graphics.strokeLineShape(line);

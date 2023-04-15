@@ -42,7 +42,7 @@ class gameScene extends Phaser.Scene {
     var self = this
     this.socket = io()
 
-    
+
 
     Checkpoints.initializeMap(self);
 
@@ -74,11 +74,11 @@ class gameScene extends Phaser.Scene {
 
     //array to store other players
     this.otherPlayers = this.add.group()
-    
+
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
     this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
-    
+
     //check list of players connected and identify us from other players
     this.socket.on('currentPlayers', function (players) {
       Object.keys(players).forEach(function (id) {
@@ -92,7 +92,7 @@ class gameScene extends Phaser.Scene {
         } else {
           //call to Player object to create other player's cars
           Player.addOtherPlayers(self, players[id])
-          
+
         }
       })
 
@@ -141,9 +141,9 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
-    
 
-   
+
+
     //dynamic camera 
     //TODO: add wasd to scroll
 
@@ -174,9 +174,9 @@ class gameScene extends Phaser.Scene {
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-  
+
       //prevent movement until all 8 players join
-      if(this.otherPlayers.getChildren().length >= 7){
+      if (this.otherPlayers.getChildren().length >= 7) {
         Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
       }
     }
@@ -194,6 +194,7 @@ var config = {
   parent: 'phaser-example',
   width: 1280,
   height: 720,
+  transparent: true,
   physics: {
     default: "matter",
     matter: {
