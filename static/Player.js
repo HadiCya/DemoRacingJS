@@ -165,15 +165,31 @@ export const Player = {
 
     updateOtherPlayerHealth(playerInfo, otherPlayer) {
         otherPlayer.health = playerInfo.health;
-    },
+    },   
 
     //decrement health of car by damage amount
     //will automatically be communicated over server
+    // takeDamage(car, damage) {
+    //     console.log(`takeDamage()`)
+    //     car.health -= damage;
+    //     console.log(car)
+    // },
+
+
     takeDamage(car, damage) {
         console.log(`takeDamage()`)
-        car.health -= damage;
-        console.log(car)
-    },
-
+        if (!car.damageCooldown) {
+            car.damageCooldown = true;
+            car.health -= damage;
+            console.log(car);
+            setTimeout(() => {
+                car.damageCooldown = false;
+                console.log('Damage is recharged.');
+            }, 10000);
+        } else {
+            console.log('Damage is on cooldown.');
+        }
+      }
+    
 
 }
