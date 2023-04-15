@@ -66,7 +66,6 @@ class gameScene extends Phaser.Scene {
     function activateCircle() {
         console.log('activate');
         circle.visible = true;
-        circle.setSensor(false);
         isCircleActive = true;
         setTimeout(endActiveTime, 5000); // 5 seconds active
     }
