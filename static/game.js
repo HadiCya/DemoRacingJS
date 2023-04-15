@@ -13,8 +13,8 @@ var targetY;
 // gun is Rocket Launcher
 var rocket; // rocket that gets fired
 var launched = false;
-var launchedtime; // the moment in time the rocket is launched
-var launchtime = 1000; //how long the rocket has to get to target
+var launchedtime = 0; // the moment in time the rocket is launched
+var cooldown = 5000; //how long the rocket has to cooldown
 var rocketDirection;
 
 // Example Missle follow mouse
@@ -150,7 +150,7 @@ class gameScene extends Phaser.Scene {
     //sets rotation of gun
     let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
     gun.setRotation(angle);
-    
+
     //Make sure car has been instantiated correctly
     if (this.car) {
       pointer = this.input.activePointer; //sets pointer to user's mouse
@@ -158,7 +158,10 @@ class gameScene extends Phaser.Scene {
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
 
-      if (this.input.activePointer.isDown && launched == false) {
+      // console.log("launch: " + launchedtime + " " + cooldown + " time: " + time);
+      // console.log(time - launchedtime);
+      // console.log(cooldown <= time - launchedtime);
+      if (this.input.activePointer.isDown && launched == false && (cooldown <= time - launchedtime || (time <= cooldown && launchedtime == 0))) {
         rocket = this.add.sprite(400, 300, 'rocketAnimation');
         rocket.setDepth(2);
         rocket.play('animateRocket');
@@ -171,25 +174,21 @@ class gameScene extends Phaser.Scene {
         launchedtime = time;
         //console.log(launchedtime);
         launched = true;
-
-        //this.car.x = 500; //just a test X point, should be removed later
-        //this.car.y = 300; //just a test Y point, should be removed later
-
       }
 
       if (launched == true) {
         rocket.play('animateRocket');
-        targetX = pointer.worldX;  //for opponent just replace pointer.worldX with oppponent.x
-        targetY = pointer.worldY;  //for opponent just replace pointer.worldY with oppponent.y
-        rocketDirection = Phaser.Math.Angle.Between(rocket.x,rocket.y,input.x,input.y);
-        rocket.setRotation(rocketDirection + Math.PI/2);
-        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x)/1000 + rocket.x;  //divided by 1000 because time is in miliseconds
-        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y)/1000 + rocket.y;
+        targetX = pointer.worldX; //for opponent just replace pointer.worldX with oppponent.x
+        targetY = pointer.worldY; //for opponent just replace pointer.worldY with oppponent.y
+        rocketDirection = Phaser.Math.Angle.Between(rocket.x, rocket.y, input.x, input.y);
+        rocket.setRotation(rocketDirection + Math.PI / 2);
+        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 1000 + rocket.x; //divided by 1000 because time is in miliseconds
+        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 1000 + rocket.y;
         //console.log((time - launchedtime)/1000);
         //console.log(rocket.y);
 
         var targetBuffer = 5;
-        if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) { 
+        if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) {
           launched = false;
           rocket.destroy();
         }
@@ -207,7 +206,7 @@ class gameScene extends Phaser.Scene {
       Player.updateHealth(this.car, this.socket);
 
     }
-    
+
   }
 
 }
