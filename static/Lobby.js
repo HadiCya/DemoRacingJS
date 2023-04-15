@@ -1,4 +1,7 @@
+var menuSong;
+
 export default class Lobby extends Phaser.Scene {
+
     constructor() {
         super('Lobby')
     }
@@ -6,10 +9,15 @@ export default class Lobby extends Phaser.Scene {
     preload() {
         this.load.html('form', 'static/assets/input-form.html');
         this.load.image('car', 'static/assets/car.png');
+        this.load.audio('menuTheme', 'static/assets/menuTheme.mp3');
     }
 
     create() {
         //reference html form
+        menuSong = this.sound.add('menuTheme');
+        menuSong.loop = true;
+        menuSong.play();
+
         var element = this.add.dom(640, 360).createFromCache('form');
 
         element.addListener('click')
@@ -27,6 +35,7 @@ export default class Lobby extends Phaser.Scene {
                 var enteredName = textInput.value
                 
                 this.scene.start('gameScene', {playerName: enteredName})
+                menuSong.stop();
             }
         }, this)
     }

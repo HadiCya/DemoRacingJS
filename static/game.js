@@ -10,6 +10,8 @@ var bullets;
 var lastFired = 0;
 var bulletSound;
 var muzzle;
+var gameSong;
+
 
 class gameScene extends Phaser.Scene {
 
@@ -27,6 +29,7 @@ class gameScene extends Phaser.Scene {
     this.load.image('gun', 'static/assets/machine_gun.png')
     this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
     this.load.audio('bang', 'static/assets/bang.wav')
+    this.load.audio('gameTheme', 'static/assets/Issa.is.a.pizza.mp3')
     this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
       frameWidth: 82,
       frameHeight: 34
@@ -46,6 +49,10 @@ class gameScene extends Phaser.Scene {
 
     bulletSound = this.sound.add('bang');
 
+    gameSong = this.sound.add('gameTheme');
+    gameSong.loop = true;
+    gameSong.play();
+    
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
