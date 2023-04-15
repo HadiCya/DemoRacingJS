@@ -1,14 +1,10 @@
-var menuSong;
-
 export default class Lobby extends Phaser.Scene {
-
     constructor() {
         super('Lobby')
     }
 
     preload() {
         this.load.html('form', 'static/assets/input-form.html');
-        this.load.image('car', 'static/assets/car.png');
         this.load.audio('menuTheme', 'static/assets/menuTheme.mp3');
     }
 
@@ -69,15 +65,16 @@ export default class Lobby extends Phaser.Scene {
             },
         ]
 
+        var menuSong = this.sound.add('menuTheme');
+        menuSong.loop = true;
+        menuSong.play();
+
         var carChoice = carChoices.at(0)
         var gunChoice = "lasergun"
 
         //reference html form
-        menuSong = this.sound.add('menuTheme');
-        menuSong.loop = true;
-        menuSong.play();
+        var element = this.add.dom(640, 325).createFromCache('form');
 
-        var element = this.add.dom(640, 360).createFromCache('form');
 
         element.addListener('click')
 
@@ -119,8 +116,8 @@ export default class Lobby extends Phaser.Scene {
                 element.removeListener('click');
 
                 var enteredName = textInput.value
-                
-                this.scene.start('gameScene', {playerName: enteredName})
+
+                this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice})
                 menuSong.stop();
             }
         }, this)

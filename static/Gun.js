@@ -36,9 +36,8 @@ export const Gun = {
             self.gun = self.add.sprite(400, 300, 'machinegun');
             self.gun.setDepth(1);
             //adds gun animation
-            self.gun.muzzle = this.add.sprite(400, 300, 'bulletAnimation');
+            self.gun.muzzle = self.add.sprite(400, 300, 'bulletAnimation');
             self.gun.muzzle.setDepth(2);
-
         }
 
         if (gunChoice === 'poisongun') {
@@ -155,15 +154,17 @@ export const Gun = {
         //sets rotation of gun
         let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
         gun.setRotation(angle);
+        gun.muzzle.setRotation(angle);
 
         //Make sure car has been instantiated correctly
         if (car) {
             gun.x = car.x;
             gun.y = car.y;
             car.gunrotation = gun.rotation;
+            
 
-            gun.muzzle.x = car.x;
-            gun.muzzle.y = car.y;
+            self.gun.muzzle.x = car.x;
+            self.gun.muzzle.y = car.y;
         }
         
         // Shooting
@@ -186,7 +187,7 @@ export const Gun = {
                 bullet.thrust(.03);
 
                 self.bulletSound.play();
-                gun.muzzle.play('animateBullet');
+                self.gun.muzzle.play('animateBullet');
 
                 lastFired_mg = time + 200;
 
