@@ -7,6 +7,9 @@ var line
 var line2
 var threshold
 var threshold2
+var istrue = true
+var startspawn = 0
+
 class gameScene extends Phaser.Scene {
 
 
@@ -18,7 +21,7 @@ class gameScene extends Phaser.Scene {
   init(data) {
     this.playerName = data.playerName
     this.carStats = data.carStats
-    console.log(this.carStats)
+    //console.log(this.carStats)
   }
 
   preload() {
@@ -39,7 +42,7 @@ class gameScene extends Phaser.Scene {
     var self = this
     this.socket = io()
 
-    console.log(this.playerName)
+    
 
     Checkpoints.initializeMap(self);
 
@@ -71,22 +74,25 @@ class gameScene extends Phaser.Scene {
 
     //array to store other players
     this.otherPlayers = this.add.group()
-
+    
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
     this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
-
+    
     //check list of players connected and identify us from other players
     this.socket.on('currentPlayers', function (players) {
       Object.keys(players).forEach(function (id) {
         if (players[id].playerId === self.socket.id) {
           //call to Player object to create car controlled by this client
           players[id].playerName = self.playerName
-          Player.addPlayer(self, players[id])
+          //added in the position you are in lineup to this also added in socket to emit to update everyone else
+          Player.addPlayer(self, players[id], players[id].numberconnected, self.socket)
+          console.log(players[id].numberconnected)
 
         } else {
           //call to Player object to create other player's cars
           Player.addOtherPlayers(self, players[id])
+          
         }
       })
 
@@ -135,6 +141,9 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
+    
+
+   
     //dynamic camera 
     //TODO: add wasd to scroll
 
@@ -165,8 +174,11 @@ class gameScene extends Phaser.Scene {
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-
-      Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
+  
+      //prevent movement until all 8 players join
+      if(this.otherPlayers.getChildren().length >= 7){
+        Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
+      }
     }
 
   }
