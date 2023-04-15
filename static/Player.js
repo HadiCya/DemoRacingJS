@@ -229,13 +229,17 @@ export const Player = {
         if(otherPlayer.poisonCircle)
             otherPlayer.poisonCircle.setPosition(playerInfo.x, playerInfo.y)
 
-        if(otherPlayer.laserLine) {
-            otherPlayer.graphics.destroy(otherPlayer.laserLine)
-            otherPlayer.graphics = self.add.graphics({ lineStyle: { width: 4, color: otherPlayer.laserColor } });
+        if(otherPlayer.laserActive) {
+            if (otherPlayer.laserLine)
+                otherPlayer.graphics.destroy(otherPlayer.laserLine)
+
+            otherPlayer.graphics = self.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
             otherPlayer.laserLine = new Phaser.Geom.Line(300, 300, 300, 300)
             Phaser.Geom.Line.SetToAngle(otherPlayer.laserLine, playerInfo.x, playerInfo.y, playerInfo.gunrotation, 3000)
             otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
-        } 
+        } else if (otherPlayer.laserLine){
+            otherPlayer.graphics.destroy(otherPlayer.laserLine)
+        }
         //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
         //self.gun.setRotation(angle);
 

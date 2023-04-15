@@ -23,6 +23,8 @@ const cooldown = 5000; // in milliseconds
 const duration = 500; // in milliseconds
 var laserOnCooldown;
 var laserColor = 0xff0000;
+var lastFired_laser = 0;
+var damageCooldown_laser = 0;
 
 export const Gun = {
 
@@ -71,7 +73,8 @@ export const Gun = {
             otherPlayer.gun.setDepth(1);
 
             otherPlayer.laserLine = new Phaser.Geom.Line(400, 300, 400, 300);
-            otherPlayer.laserColor = laserColor
+            otherPlayer.laserActive = false
+            otherPlayer.laserDuration = duration
             otherPlayer.graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
             otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
 
@@ -109,18 +112,19 @@ export const Gun = {
         gun.y = car.y;
         car.gunrotation = gun.rotation;
 
+        pointer = input.activePointer; //sets pointer to user's mouse
+
         if(!laserOnCooldown) {
             if (line1)
                 graphics.destroy(line1);//deletes the line, so that they don't build up
         
-            pointer = input.activePointer; //sets pointer to user's mouse
             laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
             laserY = laserLength * (pointer.worldY - car.y);
             laserX = laserLength * (pointer.worldX - car.x);
             line1 = new Phaser.Geom.Line(car.x, car.y, laserX, laserY);
             graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
 
-        
+            
             if (self.input.activePointer.isDown && !this.laserOnCooldown && line1) {
                 if (!graphics)
                     graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 }})
@@ -130,47 +134,14 @@ export const Gun = {
                 // Play laser sound
                 self.laser.play();
 
-                let Slope = ((pointer.worldY - car.y) / (pointer.worldX - car.x));
-
-                let CheckB = car.y - (Slope * car.x)
-
-                if (Math.abs(Slope) > 10) {
-                    Slope = 'undef'
-                } 
-
-                self.time.addEvent({
-                    delay: 10, // in milliseconds
-                    loop: true,
-                    callback: () => {
-                      if (self.input.activePointer && !laserOnCooldown) {
-                        laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
-                        laserY = laserLength * (pointer.worldY - car.y);
-                        laserX = laserLength * (pointer.worldX - car.x);
-                        line1.setTo(car.x, car.y, laserX, laserY);
-                        graphics.clear();
-                        graphics.strokeLineShape(line1);
-
-                        self.otherPlayers.getChildren().forEach((otherPlayer) => {
-                            if (Slope === 'undef') {
-                                if(Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
-                                    Player.inflictDamage(self, socket, otherPlayer, 0.1)
-                                    socket.emit('gunFiring')
-                                }
-                            }
-                            else if (Math.abs(((Slope * otherPlayer.x) + CheckB) - otherPlayer.y) < collisionThreshold) {
-        
-                                Player.inflictDamage(self, socket, otherPlayer, 1)
-                                socket.emit('gunFiring')
-                            }
-                        })
-
-                      }
-                    }
-                });
+                socket.emit('gunFiring')
 
                 self.time.delayedCall(duration, () => {
                     graphics.clear();
                 });
+
+                //set how long laser will be displayed for
+                lastFired_laser = time + duration
 
                 // Set laser on cooldown
                 laserOnCooldown = true;
@@ -182,9 +153,44 @@ export const Gun = {
                     graphics.clear();
             }
 
-            let othersHit = []
-                
         }
+
+        //display laser until duration ends
+        if (time < lastFired_laser) {
+            laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
+            laserY = laserLength * (pointer.worldY - car.y);
+            laserX = laserLength * (pointer.worldX - car.x);
+            line1.setTo(car.x, car.y, laserX, laserY);
+            graphics.clear();
+            graphics.strokeLineShape(line1);
+
+            let Slope = ((pointer.worldY - car.y) / (pointer.worldX - car.x));
+
+            let CheckB = car.y - (Slope * car.x)
+
+            if (Math.abs(Slope) > 10) {
+                Slope = 'undef'
+            } 
+
+
+            if(time > damageCooldown_laser) {
+                self.otherPlayers.getChildren().forEach((otherPlayer) => {
+                    if (Slope === 'undef') {
+                        if(Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
+                            Player.inflictDamage(self, socket, otherPlayer, 1)
+                        }
+                    }
+                    else if (Math.abs(((Slope * otherPlayer.x) + CheckB) - otherPlayer.y) < collisionThreshold) {
+                        Player.inflictDamage(self, socket, otherPlayer, 1)
+                    }
+                })
+                damageCooldown_laser = time + 100
+            }
+
+          }
+
+        let othersHit = []
+            
     },
     
 

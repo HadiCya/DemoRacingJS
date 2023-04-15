@@ -161,11 +161,11 @@ class gameScene extends Phaser.Scene {
           
           //Determine WHICH gun is being fired and then excecute corrseponding logic:
           if (playerInfo.gunSelection == 'lasergun') {
-            console.log("gunColor")
-            otherPlayer.laserColor = 0x0303fc
+            otherPlayer.laserActive = true
+
             setTimeout(() => {
-              otherPlayer.laserColor = 0xaa00aa
-            }, 2000)
+              otherPlayer.laserActive = false
+            }, otherPlayer.laserDuration)
           }
 
           if (playerInfo.gunSelection == 'machinegun') {
@@ -190,7 +190,6 @@ class gameScene extends Phaser.Scene {
               bullet.x = otherPlayer.x 
               bullet.y = otherPlayer.y
               console.log(otherPlayer.x, otherPlayer.y)
-              console.log(playerInfo.playerId)
             }
           }
 

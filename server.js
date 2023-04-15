@@ -30,7 +30,7 @@ io.on('connection', function (socket) {
     x: 30,
     y: 30,
     gunrotation: 0,
-    gunSelection: 'lasergun',
+    gunSelection: 'machinegun',
     health: 10,
     playerId: socket.id,
     playerName: socket.id,
