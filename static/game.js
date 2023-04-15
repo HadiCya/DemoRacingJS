@@ -46,11 +46,8 @@ class gameScene extends Phaser.Scene {
     //for mouse position
     input = this.input;
 
+    //add laser sound
     laser = this.sound.add('laser');
-
-    this.input.keyboard.on('keydown-L', function () {
-      laser.play();
-  });
 
     // create a key to toggle the laser sprite
     lKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
@@ -131,7 +128,6 @@ class gameScene extends Phaser.Scene {
 
 
   update(time, delta) {
-
     //sets rotation of laser gun
     let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
     gun.setRotation(angle);
@@ -141,84 +137,72 @@ class gameScene extends Phaser.Scene {
   
       // Set cooldown and duration values
       const cooldown = 5000; // in milliseconds
-      const duration = 3000; // in milliseconds
+      const duration = 500; // in milliseconds
   
       if (!this.laserOnCooldown) {
         if (line1)
-<<<<<<< HEAD
           graphics.destroy(line1); //deletes the line, so that they don't build up
         pointer = this.input.activePointer; //sets pointer to user's mouse
         laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
         laserY = laserLength * (pointer.worldY - this.car.y);
         laserX = laserLength * (pointer.worldX - this.car.x);
         line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
-        graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
+        graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
   
-        if (lKey.isDown) {
+        if (lKey.isDown && !this.laserOnCooldown && line1) {
           if (!graphics)
-            graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa } });
-          graphics.strokeLineShape(line1); //draws the line
+            graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
+          graphics.strokeLineShape(line1);
+  
+          // Move laser line every frame while it's active and the key is pressed
+          this.time.addEvent({
+            delay: 10, // in milliseconds
+            loop: true,
+            callback: () => {
+              if (lKey.isDown && !this.laserOnCooldown) {
+                pointer = this.input.activePointer;
+                laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
+                laserY = laserLength * (pointer.worldY - this.car.y);
+                laserX = laserLength * (pointer.worldX - this.car.x);
+                line1.setTo(this.car.x, this.car.y, laserX, laserY);
+                graphics.clear();
+                graphics.strokeLineShape(line1);
+              }
+            }
+          });
+  
+          // Play laser sound
+          laser.play();
   
           // Turn off the laser after duration
           this.time.delayedCall(duration, () => {
             graphics.clear();
           });
-          
+  
           // Set laser on cooldown
           this.laserOnCooldown = true;
           this.time.delayedCall(cooldown, () => {
             this.laserOnCooldown = false;
           });
-        }
-      }
-  
-      gun.x = this.car.x;
-      gun.y = this.car.y;
-      this.car.gunrotation = gun.rotation;
-  
-=======
-        graphics.destroy(line1);//deletes the line, so that they don't build up
-      pointer = this.input.activePointer; //sets pointer to user's mouse
-      laserLength = Math.sqrt((pointer.worldY - this.car.y) ** 2 + (pointer.worldX - this.car.x) ** 2);
-      laserY = laserLength * (pointer.worldY - this.car.y);
-      laserX = laserLength * (pointer.worldX - this.car.x);
-      line1 = new Phaser.Geom.Line(this.car.x, this.car.y, laserX, laserY);
-      graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
-
-      if (lKey.isDown) {
-        if (!graphics)
-           graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } });
-           graphics.strokeLineShape(line1); //draws the line
         } else {
-        if (graphics)
+          if (graphics)
             graphics.clear();
         }
-
-      gun.x = this.car.x;
-      gun.y = this.car.y;
-      this.car.gunrotation = gun.rotation; 
-      
-
->>>>>>> e9257b83ce227c1583895d0a61215a7d18ce12ba
-      Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
-      CheckB = this.car.y - (Slope * this.car.x)
-      CheckY = ((Slope * point.x) + CheckB);
   
-      // Collision detection
-      const collisionThreshold = 25;
-<<<<<<< HEAD
-      if (this.laserOnCooldown && lKey.isDown && Math.abs(CheckY - point.y) < collisionThreshold) {
-        console.log("Collision detected");
-      }
+        gun.x = this.car.x;
+        gun.y = this.car.y;
+        this.car.gunrotation = gun.rotation;
   
-=======
-      if (lKey.isDown && Math.abs(CheckY - point.y) < collisionThreshold) {
-        console.log("Collision detected");
-      }
-
-      console.log(this.otherPlayers.getChildren())
-
->>>>>>> e9257b83ce227c1583895d0a61215a7d18ce12ba
+        Slope = ((pointer.worldY - this.car.y) / (pointer.worldX - this.car.x));
+        CheckB = this.car.y - (Slope * this.car.x)
+        CheckY = ((Slope * point.x) + CheckB);
+  
+        // Collision detection
+        const collisionThreshold = 25;
+        if (this.laserOnCooldown && lKey.isDown && Math.abs(CheckY - point.y) < collisionThreshold) {
+          console.log("Collision detected");
+        }
+  
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
@@ -232,6 +216,7 @@ class gameScene extends Phaser.Scene {
   
     }
   }
+}
 }
 
  var config = { //Keep this at the bottom of the file
