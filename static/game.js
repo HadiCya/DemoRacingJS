@@ -5,12 +5,7 @@ import Lobby from "./Lobby.js"
 
 var poisongun;
 var input; //mouse position for sprites
-var bullets;
-var lastFired = 0;
-var bulletSound;
-var muzzle;
-var gameSong;
-
+var circle;
 
 class gameScene extends Phaser.Scene {
 
@@ -29,14 +24,6 @@ class gameScene extends Phaser.Scene {
   //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
-    this.load.image('gun', 'static/assets/machine_gun.png')
-    this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
-    this.load.audio('bang', 'static/assets/bang.wav')
-    this.load.audio('gameTheme', 'static/assets/Issa.is.a.pizza.mp3')
-    this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
-      frameWidth: 82,
-      frameHeight: 34
-    });
 
     this.load.image('poisongun', 'static/assets/posiongun.png')
     this.load.image('circle', 'static/assets/circle.png')
@@ -61,22 +48,12 @@ class gameScene extends Phaser.Scene {
 
     var self = this
 
-    bulletSound = this.sound.add('bang');
-
-    gameSong = this.sound.add('gameTheme');
-    gameSong.loop = true;
-    gameSong.play();
-    
     this.socket = io()
     
     console.log(this.playerName)
 
     //sends the enetered player name of this client to server so that it can be stored in array
     self.socket.emit('updateOptions', {playerName: self.playerName, gunSelection: self.gunSelection})
-
-    //adds gun animation
-    muzzle = this.add.sprite(400, 300, 'bulletAnimation');
-    muzzle.setDepth(2);
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -134,16 +111,6 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    //bullet animation
-    this.anims.create({
-      key: 'animateBullet',
-      frames: this.anims.generateFrameNumbers('bulletAnimation', {
-        start: 0,
-        end: 5
-      }),
-      frameRate: 30,
-      repeat: 0
-    });
     this.socket.on('reportHit', function (playerInfo) {
       console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
@@ -190,7 +157,6 @@ class gameScene extends Phaser.Scene {
               bullet.setVisible(true);
               //console.log(bullet);
               bullet.thrust(.03);
-              bulletSound.play();
               
               bullet.x = otherPlayer.x 
               bullet.y = otherPlayer.y
@@ -266,76 +232,31 @@ class gameScene extends Phaser.Scene {
 
   update(time, delta) {
 
-    //sets rotation of gun
-    let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
-    gun.setRotation(angle);
-    muzzle.setRotation(angle);
 
     //Make sure car has been instantiated correctly
     if (this.car) {
 
       
-      pointer = this.input.activePointer; //sets pointer to user's mouse
-      gun.x = this.car.x;
-      gun.y = this.car.y;
-      this.car.gunrotation = gun.rotation;
-
-      muzzle.x = this.car.x;
-      muzzle.y = this.car.y;
-
-      
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-      Player.drive(this.car, this.label, this.cursors, delta, this.socket)
-    
-    
-      // Shooting
-      if (this.input.activePointer.isDown && time > lastFired) {
-        let bullet = bullets.get(this.car.x, this.car.y)
-        if (bullet) {
-          bullet = this.matter.add.gameObject(bullet)
-
-          //triggers collision code but doesn't actually collide
-          //basically isTrigger from Unity
-          bullet.setRectangle(30,10);
-          bullet.body.label = "shootingBullet";
-          bullet.setSensor(true);
-          bullet.setRotation(angle);
-          bullet.setDepth(-1);
-          bullet.setActive(true);
-          bullet.setVisible(true);
-          //console.log(bullet);
-          bulletSound.play();
-          muzzle.play('animateBullet');
-          bullet.thrust(.03);
-        
-          lastFired = time + 200;
-
-          this.socket.emit('gunFiring')
-          //Drive according to logic in player object
-          //function takes: car object, label object, input system, time delta, and socket object
-          //objects passed in are all defined in create()
-          Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
-          
-          if (this.gunSelection == 'lasergun') {
-            Gun.laserGun(this, this.gun, this.car, this.input, this.socket, time)
-          }
-
-          if (this.gunSelection == 'machinegun') {
-            Gun.machineGun(this, this.gun, this.car, this.input, this.bullets, this.socket, time)
-          }
-
-          if (this.gunSelection === 'poisongun') {
-            Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
-          }
-        }
-
+      Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
+      
+      if (this.gunSelection == 'lasergun') {
+        Gun.laserGun(this, this.gun, this.car, this.input, this.socket, time)
       }
 
+      if (this.gunSelection == 'machinegun') {
+        Gun.machineGun(this, this.gun, this.car, this.input, this.bullets, this.socket, time)
+      }
+
+      if (this.gunSelection === 'poisongun') {
+        Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
+      }
     }
 
   }
+
 }
 
 var config = { //Keep this at the bottom of the file
