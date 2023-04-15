@@ -2,23 +2,6 @@
 <html>
     <head>
         <style>
-            html * {
-                font-family: sans-serif;
-                padding: 0px;
-                border: 0px
-            }
-            h3 {
-                margin: 0px
-            }
-            p {
-                font-size: 12px;
-            }
-            #title {
-                font-family: Verdana;
-                color: white;
-                text-align: center;
-                font-size: 48px;
-            }
             #input-form {
                 padding: 15px;
                 background-color: #931C22;
@@ -28,62 +11,12 @@
                 font-size: 20px;
                 width: 400px;
             }
-            .grid-container {
-                display: grid;
-                background-color: #931C22;
-                grid-template-rows: 200px;
-                margin-top: 20px;
-                padding: 0px;
-                width: 1000px;
-            }
-            .grid-container#car-choice {
-                grid-template-columns: auto auto auto auto auto;
-            }
-            .grid-container#gun-choice {
-                grid-template-columns: auto auto auto auto;
-            }
-            .grid-item {
-                background-color: rgba(255, 255, 255, 0);
-                border: 1px solid rgba(0, 0, 0, 1);
-                padding-top: 10px;
-                font-size: 20px;
-                text-align: center;
-            }
         </style>
     </head>
     <body>
-        <h1 id = "title">Demo Racer</h1>
         <div id="input-form">
-            <input type="text" id="name"value="Player Name" n/>
-            <input type = "submit" id = "connect" value = "Connect" style = "float: right"/>
-        </div>
-        <div id = "car-choice" class = "grid-container">
-            <div class = "grid-item" id = "0" style = "background-color: rgb(223, 55, 55);">
-                <h3>All-Rounder</h3>
-                <p>High top speed</p>
-            </div>
-            <div class = "grid-item" id = "1">
-                <h3>Fast</h3>
-                <p>High top speed</p>
-            </div>
-            <div class = "grid-item" id = "2">
-                <h3>Responsive</h3>
-                <p>High acceleration</p>
-            </div>
-            <div class = "grid-item" id = "3">
-                <h3>Nimble</h3>
-                <p>High handling</p>
-            </div>
-            <div class = "grid-item" id = "4">
-                <h3>Durable</h3>
-                <p>High health</p>
-            </div>
-        </div>
-        <div id = "gun-choice" class = "grid-container" name = "gun-grid">
-            <div class = "grid-item" id = "lasergun" style = "background-color: rgb(223, 55, 55);">Laser Gun</div>
-            <div class = "grid-item" id = "machinegun">Machine Gun</div>
-            <div class = "grid-item" id = "poisongun">Poison Gun</div>
-            <div class = "grid-item">Gun 4</div>
+            <input type="text" name="name" value="Player Name" n/>
+            <input type = "submit" name = "connect" value = "Connect" />
         </div>
     </body>
 </html>
