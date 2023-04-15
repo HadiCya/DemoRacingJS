@@ -6,6 +6,8 @@ import Lobby from "./Lobby.js"
 var pointer; //variable for mouse's location
 var gun; //laser gun
 var input; //mouse position for sprites
+var targetX;
+var targetY;
 
 //Rocket Launcher Vars
 // gun is Rocket Launcher
@@ -158,13 +160,16 @@ class gameScene extends Phaser.Scene {
       }
 
       if (launched == true) {
-        
+        targetX = pointer.worldX;  //for opponent just replace pointer.worldX with oppponent.x
+        targetY = pointer.worldY;  //for opponent just replace pointer.worldY with oppponent.y
 
-        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x)/1000 + rocket.x;  //for opponent just replace pointer.worldX with oppponent.x
-        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y)/1000 + rocket.y;  //for opponent just replace pointer.worldY with oppponent.y
-        console.log(time - launchedtime);
+        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x)/1000 + rocket.x;  //divided by 1000 because time is in miliseconds
+        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y)/1000 + rocket.y;
+        console.log((time - launchedtime)/1000);
+        //console.log(rocket.y);
 
-        if (time-launchedtime > launchtime) {
+        var targetBuffer = 5;
+        if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) { 
           launched = false;
           rocket.destroy();
         }
