@@ -8,9 +8,6 @@ var lastFired_mg = 0;
 var isCircleActive
 var isCooldownActive
 
-
-
-
 //Globals for LASERGUN
 var pointer; //variable for mouse's location
 var line1;
@@ -22,8 +19,10 @@ var input; //mouse position for sprites
 var point;
 var graphics
 var collisionThreshold = 40;
-var lastFired_laser = 0;
-var laserColor = 0xaa00aa;
+const cooldown = 5000; // in milliseconds
+const duration = 500; // in milliseconds
+var laserOnCooldown;
+var laserColor = 0xff0000;
 
 export const Gun = {
 
@@ -106,55 +105,88 @@ export const Gun = {
         let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
         gun.setRotation(angle);
 
-
-        if (line1)
-            graphics.destroy(line1);//deletes the line, so that they don't build up
-
-        if (lastFired_laser < time) {
-            laserColor = 0xaa00aa;
-        }
-    
-        pointer = input.activePointer; //sets pointer to user's mouse
-        laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
-        laserY = laserLength * (pointer.worldY - car.y);
-        laserX = laserLength * (pointer.worldX - car.x);
-        line1 = new Phaser.Geom.Line(car.x, car.y, laserX, laserY);
-        graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
-        graphics.strokeLineShape(line1); //draws the line
         gun.x = car.x;
         gun.y = car.y;
         car.gunrotation = gun.rotation;
 
-    
-        if (self.input.activePointer.isDown && time > lastFired_laser) {
-            let Slope = ((pointer.worldY - car.y) / (pointer.worldX - car.x));
+        if(!laserOnCooldown) {
+            if (line1)
+                graphics.destroy(line1);//deletes the line, so that they don't build up
+        
+            pointer = input.activePointer; //sets pointer to user's mouse
+            laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
+            laserY = laserLength * (pointer.worldY - car.y);
+            laserX = laserLength * (pointer.worldX - car.x);
+            line1 = new Phaser.Geom.Line(car.x, car.y, laserX, laserY);
+            graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
 
-            let CheckB = car.y - (Slope * car.x)
+        
+            if (self.input.activePointer.isDown && !this.laserOnCooldown && line1) {
+                if (!graphics)
+                    graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 }})
 
-            if (Math.abs(Slope) > 10) {
-                Slope = 'undef'
-            } 
+                graphics.strokeLineShape(line1);    
+
+                // Play laser sound
+                self.laser.play();
+
+                let Slope = ((pointer.worldY - car.y) / (pointer.worldX - car.x));
+
+                let CheckB = car.y - (Slope * car.x)
+
+                if (Math.abs(Slope) > 10) {
+                    Slope = 'undef'
+                } 
+
+                self.time.addEvent({
+                    delay: 10, // in milliseconds
+                    loop: true,
+                    callback: () => {
+                      if (self.input.activePointer && !laserOnCooldown) {
+                        laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
+                        laserY = laserLength * (pointer.worldY - car.y);
+                        laserX = laserLength * (pointer.worldX - car.x);
+                        line1.setTo(car.x, car.y, laserX, laserY);
+                        graphics.clear();
+                        graphics.strokeLineShape(line1);
+
+                        self.otherPlayers.getChildren().forEach((otherPlayer) => {
+                            if (Slope === 'undef') {
+                                if(Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
+                                    Player.inflictDamage(self, socket, otherPlayer, 0.1)
+                                    socket.emit('gunFiring')
+                                }
+                            }
+                            else if (Math.abs(((Slope * otherPlayer.x) + CheckB) - otherPlayer.y) < collisionThreshold) {
+        
+                                Player.inflictDamage(self, socket, otherPlayer, 1)
+                                socket.emit('gunFiring')
+                            }
+                        })
+
+                      }
+                    }
+                });
+
+                self.time.delayedCall(duration, () => {
+                    graphics.clear();
+                });
+
+                // Set laser on cooldown
+                laserOnCooldown = true;
+                self.time.delayedCall(cooldown, () => {
+                    laserOnCooldown = false;
+                });
+            } else {
+                if (graphics)
+                    graphics.clear();
+            }
 
             let othersHit = []
-            self.otherPlayers.getChildren().forEach((otherPlayer) => {
-                if (Slope === 'undef') {
-                    if(Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
-                        laserColor = 0x0303fc
-                        lastFired_laser = time + 2000
-                        Player.inflictDamage(self, socket, otherPlayer, 1)
-                        socket.emit('gunFiring')
-                    }
-                }
-                else if (Math.abs(((Slope * otherPlayer.x) + CheckB) - otherPlayer.y) < collisionThreshold) {
-                    laserColor = 0x0303fc
-                    lastFired_laser = time + 2000
-                    Player.inflictDamage(self, socket, otherPlayer, 1)
-                    socket.emit('gunFiring')
-                }
-            })
+                
         }
-
     },
+    
 
     machineGun(self, gun, car, input, bullets, socket, time) {
         //sets rotation of gun
@@ -205,6 +237,8 @@ export const Gun = {
     poisongun(self, gun, poisonCircle, car, input, socket, time) {
         let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
         gun.setRotation(angle);
+
+        //TODO: car.gunrotation
 
         if (car) {
             gun.x = car.x;
