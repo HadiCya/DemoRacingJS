@@ -9,16 +9,13 @@ var input; //mouse position for sprites
 var targetX;
 var targetY;
 
-//Rocket Launcher Vars
+// Rocket Launcher Vars
 // gun is Rocket Launcher
 var rocket; // rocket that gets fired
 var launched = false;
 var launchedtime = 0; // the moment in time the rocket is launched
 var cooldown = 5000; //how long the rocket has to cooldown
 var rocketDirection;
-
-// Example Missle follow mouse
-// https://blog.ourcade.co/posts/2020/make-homing-missile-seek-target-arcade-physics-phaser-3/
 
 class gameScene extends Phaser.Scene {
 
@@ -60,9 +57,6 @@ class gameScene extends Phaser.Scene {
     //adds gun sprite-image
     gun = this.add.sprite(400, 300, 'gun');
     gun.setDepth(1);
-
-    //rocket = this.add.sprite(400, 300, 'rocketAnimation');
-    //rocket.setDepth(2);
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -139,14 +133,13 @@ class gameScene extends Phaser.Scene {
         end: 8
       }),
       frameRate: 30,
-      repeat: 0
+      repeat: 5, // might effect how long its will be on screen, but not sure exaclty
+      yoyo: true, //optional
+      hideOnComplete: true
     });
-
-
   }
 
   update(time, delta) {
-
     //sets rotation of gun
     let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
     gun.setRotation(angle);
@@ -158,36 +151,41 @@ class gameScene extends Phaser.Scene {
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
 
-      // console.log("launch: " + launchedtime + " " + cooldown + " time: " + time);
-      // console.log(time - launchedtime);
-      // console.log(cooldown <= time - launchedtime);
+      // checks if mouse has been clicked and the rocket is not already launched
+      // checks for if the cooldown period has finished or if at the very beginging of the game
+      // creates and launches the rocket
       if (this.input.activePointer.isDown && launched == false && (cooldown <= time - launchedtime || (time <= cooldown && launchedtime == 0))) {
         rocket = this.add.sprite(400, 300, 'rocketAnimation');
-        rocket.setDepth(2);
-        rocket.play('animateRocket');
-        rocket.x = this.car.x;
-        rocket.y = this.car.y;
+        rocket.setDepth(2); //puts above cars
+        rocket.play('animateRocket'); // starts animation
+        rocket.x = this.car.x; // sets starting x
+        rocket.y = this.car.y; // sets starting y
         rocket = this.matter.add.gameObject(rocket);
         rocket.setSensor(true);
         rocket.label = 'firingRocket';
 
         launchedtime = time;
-        //console.log(launchedtime);
         launched = true;
+
+        //testing stationary rocket animation
+        // let rock = this.add.sprite(400, 300, 'rocketAnimation');
+        // rock.setDepth(2);
+        // rock.play('animateRocket'); // starts animation
       }
 
       if (launched == true) {
         rocket.play('animateRocket');
         targetX = pointer.worldX; //for opponent just replace pointer.worldX with oppponent.x
         targetY = pointer.worldY; //for opponent just replace pointer.worldY with oppponent.y
+
+        //sets the angle the rocket needs inorder to face target
         rocketDirection = Phaser.Math.Angle.Between(rocket.x, rocket.y, input.x, input.y);
         rocket.setRotation(rocketDirection + Math.PI / 2);
-        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 1000 + rocket.x; //divided by 1000 because time is in miliseconds
-        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 1000 + rocket.y;
-        //console.log((time - launchedtime)/1000);
-        //console.log(rocket.y);
 
-        var targetBuffer = 5;
+        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 4000 + rocket.x; //divided by 1000 to get seconds from miliseconds
+        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 4000 + rocket.y;
+
+        var targetBuffer = 5; // checks if the rocket is within a 5px radius of the target
         if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) {
           launched = false;
           rocket.destroy();
@@ -216,6 +214,7 @@ var config = { //Keep this at the bottom of the file
   parent: 'phaser-example',
   width: 1280,
   height: 720,
+  transparent: true, // makes background the color set in index.html instead of black
   physics: {
     default: "matter",
     matter: {
