@@ -152,16 +152,16 @@ class gameScene extends Phaser.Scene {
         //console.log(launchedtime);
         launched = true;
 
-        this.car.x = 500;
-        this.car.y = 300;
+        this.car.x = 500; //just a test X point, should be removed later
+        this.car.y = 300; //just a test Y point, should be removed later
 
       }
 
       if (launched == true) {
         
 
-        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x)/1000 + rocket.x;
-        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y)/1000 + rocket.y;
+        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x)/1000 + rocket.x;  //for opponent just replace pointer.worldX with oppponent.x
+        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y)/1000 + rocket.y;  //for opponent just replace pointer.worldY with oppponent.y
         console.log(time - launchedtime);
 
         if (time-launchedtime > launchtime) {
