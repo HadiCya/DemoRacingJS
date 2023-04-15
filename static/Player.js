@@ -252,6 +252,21 @@ export const Player = {
         car.health = health;
         car.healthDisplay.setText(['Health: ', String(health)])
     },
+    
+       // takeDamage(car, damage) {
+    //     console.log(`takeDamage()`)
+    //     if (!car.damageCooldown) {
+    //         car.damageCooldown = true;
+    //         car.health -= damage;
+    //         console.log(car);
+    //         setTimeout(() => {
+    //             car.damageCooldown = false;
+    //             console.log('Damage is recharged.');
+    //         }, 10000);
+    //     } else {
+    //         console.log('Damage is on cooldown.');
+    //     }
+    //   }
 
     updateOtherHealth(playerInfo, otherPlayer) {
         console.log(playerInfo, otherPlayer)
