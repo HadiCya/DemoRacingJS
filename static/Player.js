@@ -1,3 +1,5 @@
+import {cooldown} from "./game.js"
+
 var speed = 0.0;
 var accel = 0.2;
 var maxspeed = 10.0;
@@ -26,6 +28,9 @@ export const Player = {
         self.car.health = maxHealth;
 
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName);
+
+        self.car.cooldownDisplay = self.add.text(1175, 25, ["Cooldown: " , cooldown]);
+        self.car.cooldownDisplay.visible = false; 
 
         //self.car.setCollideWorldBounds(true)
         self.car.setTint(playerInfo.color)

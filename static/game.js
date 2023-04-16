@@ -14,7 +14,7 @@ var targetY;
 var rocket; // rocket that gets fired
 var launched = false;
 var launchedtime = 0; // the moment in time the rocket is launched
-var cooldown = 5000; //how long the rocket has to cooldown
+export var cooldown = 5000; //how long the rocket has to cooldown
 var rocketDirection;
 
 class gameScene extends Phaser.Scene {
@@ -151,6 +151,12 @@ class gameScene extends Phaser.Scene {
       gun.y = this.car.y;
       this.car.gunrotation = gun.rotation;
 
+      this.car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (launchedtime - time))/1000 )]);
+
+      if(cooldown + (launchedtime - time) < 0){
+        this.car.cooldownDisplay.visible = false;
+      }
+
       // checks if mouse has been clicked and the rocket is not already launched
       // checks for if the cooldown period has finished or if at the very beginging of the game
       // creates and launches the rocket
@@ -166,7 +172,7 @@ class gameScene extends Phaser.Scene {
 
         launchedtime = time;
         launched = true;
-
+        this.car.cooldownDisplay.visible = true;
         //testing stationary rocket animation
         // let rock = this.add.sprite(400, 300, 'rocketAnimation');
         // rock.setDepth(2);
