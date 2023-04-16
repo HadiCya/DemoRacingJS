@@ -74,6 +74,11 @@ class gameScene extends Phaser.Scene {
 
     //array to store other players
     this.otherPlayers = this.add.group()
+    console.log("this: ");
+    console.log(this);
+
+    console.log("other players: ");
+    console.log(this.otherPlayers);
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
@@ -113,14 +118,27 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    //update car positions when other clients move their cars
-    this.socket.on('playerMoved', function (playerInfo) {
+    // This function handles the client-side response from the server's 
+    // syncGameState() funciton call
+    // 
+    // The function updates the position of each other player
+    // and then sends back the client player's own position that 
+    // the client has calculated
+    this.socket.on('get-update', function (playerRecvObj, callback) {
+      // newOPs stores the result of unpacking the data recieved from the server
+      let newOPs = playerRecvObj.otherPlayers;
+
+      // Check through each player in the otherPlayers stored locally
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerInfo.playerId === otherPlayer.playerId) {
-          //call to Player object to update position of other cars
-          Player.updateOtherPlayerMovement(playerInfo, otherPlayer)
+        if(newOPs[otherPlayer.playerId]) { // if a player matching that id exists, then
+          // Update the position based on the new data 
+          // the client received from the server
+          Player.updateOtherPlayerMovement(newOPs[otherPlayer.playerId], otherPlayer);
         }
       })
+      // Send the posiiton data for the client's player object
+      // This is very similar to a return but for sockets
+      callback({ x: self.car.x, y: self.car.y, rotation: self.car.rotation });
     })
 
     this.socket.on('healthChanged', function (playerInfo) {
@@ -186,7 +204,6 @@ class gameScene extends Phaser.Scene {
 
 
 }
-
 
 
 var config = {

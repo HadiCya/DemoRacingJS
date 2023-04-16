@@ -75,12 +75,12 @@ export const Player = {
             .setDisplaySize(50, 50)
             .setRotation(playerInfo.rotation)
 
-        otherPlayer.playerId = playerInfo.playerId
-        otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
-        otherPlayer.setTint(playerInfo.color)
+        otherPlayer.playerId = playerInfo.playerId;
+        otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName);
+        otherPlayer.setTint(playerInfo.color);
 
         //add this car to array storing other players in game.js
-        self.otherPlayers.add(otherPlayer)
+        self.otherPlayers.add(otherPlayer);
     },
 
 
@@ -100,20 +100,20 @@ export const Player = {
         //accelerate car if below max speed
         if (speed < maxspeed) {
             if (cursors.up.isDown || wasd.W.isDown) {
-                speed = speed + (accel * (delta / 10))
+                    speed = speed + (accel * (delta / 10));
             }
         }
 
         else {
             //car is at max speed
-            speed = maxspeed
+            speed = maxspeed;
         }
 
 
         //reverse car if below max speed (in reverse)
         if (speed > -maxspeed) {
             if (cursors.down.isDown || wasd.S.isDown) {
-                speed = speed - (accel * (delta / 10))
+                    speed = speed - (accel * (delta / 10))
             }
         }
 
@@ -141,8 +141,13 @@ export const Player = {
 
         //update position of label. offset from car to position correctly 
         label.x = car.x - labelOffsetX;
-        label.y = car.y - labelOffsetY;
+        label.y = car.y- labelOffsetY;
 
+
+        var x = car.x;
+        var y = car.y;
+        var r = car.rotation;        
+        
         var x = car.x
         var y = car.y
         var r = car.rotation
@@ -157,7 +162,6 @@ export const Player = {
             y: car.y,
             rotation: car.rotation
         }
-
     },
 
     updateCarMovementWithDrift(car, cursors, wasd, delta) {
@@ -232,6 +236,13 @@ export const Player = {
         }
         car.oldHealth = car.health;
     },
+    
+    //Get method to access speed in game.js
+    GetSpeed()
+    {
+        return speed
+    },
+
 
     updateOtherPlayerHealth(playerInfo, otherPlayer) {
         otherPlayer.health = playerInfo.health;
