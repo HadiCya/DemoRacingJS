@@ -9,7 +9,6 @@ var oversteer = 4
 
 var decay = 0.05;
 var oldTime = new Date().getTime();
-var active = true
 
 var maxHealth = 10
 
@@ -18,6 +17,7 @@ var labelOffsetX = -20
 var labelOffsetY = -40
 var connectedposition
 var start = true
+
 
 //Object stores functions which are called in game.js
 
@@ -46,6 +46,7 @@ export const Player = {
 
         self.car.health = maxHealth;
 
+        self.car.disabled = false;
 
         self.car.body.label = "player"; //player's car's collsion box label;
 
@@ -56,6 +57,9 @@ export const Player = {
 
         Gun.addGun(self, self.gunSelection)
 
+        self.car.explosion = self.add.sprite(playerInfo.x, playerInfo.y, 'explosion');
+        self.car.explosion.visible = false;
+        self.car.explosion.setDepth(2)
 
         //self.car.setCollideWorldBounds(true)
         self.car.setTint(playerInfo.color);
@@ -139,6 +143,7 @@ export const Player = {
 
         Gun.addOtherGun(self, otherPlayer, playerInfo.gunSelection)
        
+        otherPlayer.disabled = false
 
         otherPlayer.playerId = playerInfo.playerId
         otherPlayer.body.label = "otherPlayer";
@@ -146,6 +151,9 @@ export const Player = {
         otherPlayer.health = playerInfo.health
         otherPlayer.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]);
 
+        otherPlayer.explosion = self.add.sprite(playerInfo.x, playerInfo.y, 'explosion');
+        otherPlayer.explosion.visible = false;
+        otherPlayer.explosion.setDepth(2)
 
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
         otherPlayer.setTint(playerInfo.color)
@@ -159,47 +167,41 @@ export const Player = {
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
     drive(car, label, cursors, delta, socket, wasd) {
 
-// changes the starting position of the car to just be down a bit, it has an added buffer because the cars will collide with anything
-//in the intial spawn location so we need that to be empty, we could change this to a switch statement with specific locations 
-//down the road if we want designated locations for where each car starts
-        // if(start){
-        //     car.setY(75*connectedposition +100)
-        //     //console.log(connectedposition)
-        // start = false
-        // }
+        if(!car.disabled) {
 
-        //accelerate car if below max speed
-        if (speed < maxspeed) {
-            if (cursors.up.isDown || wasd.W.isDown) {
-                speed = speed + (accel * (delta / 10))
+            //accelerate car if below max speed
+            if (speed < maxspeed) {
+                if (cursors.up.isDown || wasd.W.isDown) {
+                    speed = speed + (accel * (delta / 10))
+                }
             }
-        }
 
-        else {
-            //car is at max speed
-            speed = maxspeed
-        }
-
-
-        //reverse car if below max speed (in reverse)
-        if (speed > -maxspeed) {
-            if (cursors.down.isDown || wasd.S.isDown) {
-                speed = speed - (accel * (delta / 10))
+            else {
+                //car is at max speed
+                speed = maxspeed
             }
-        }
 
-        else {
-            //car is at max speed in reverse
-            speed = -maxspeed
-        }
 
-        if (speed > 0) {
-            speed = speed - decay * (delta / 10)
-        }
-        else {
-            speed = speed + decay * (delta / 10)
-        }
+            //reverse car if below max speed (in reverse)
+            if (speed > -maxspeed) {
+                if (cursors.down.isDown || wasd.S.isDown) {
+                    speed = speed - (accel * (delta / 10))
+                }
+            }
 
+            else {
+                //car is at max speed in reverse
+                speed = -maxspeed
+            }
+
+            if (speed > 0) {
+                speed = speed - decay * (delta / 10)
+            }
+            else {
+                speed = speed + decay * (delta / 10)
+            }
+
+        }
 
         //move car based on new speed and rotation 
         //delta factor makes movement frame rate independent
@@ -216,6 +218,9 @@ export const Player = {
 
         car.healthDisplay.x = car.x - labelOffsetX;
         car.healthDisplay.y = car.y - labelOffsetY + 30;
+
+        car.explosion.x = car.x
+        car.explosion.y = car.y
 
         var x = car.x
         var y = car.y
@@ -302,6 +307,8 @@ export const Player = {
         otherPlayer.healthDisplay.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY + 30)
         otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
+        otherPlayer.explosion.x = playerInfo.x
+        otherPlayer.explosion.y = playerInfo.y
         
 
         if(otherPlayer.poisonCircle)
@@ -342,36 +349,53 @@ export const Player = {
                 }, 1000)
             }
         } 
-        else {
+        else if (!otherPlayer.disabled){
             console.log("inflictDamage")
             socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
         }
     },
 
-    updateHealth(car, health) {
+    disable(car) {
+        car.disabled = true;
+        car.explosion.visible = true
+        car.explosion.play('explode');
+
+        console.log(car.explosion)
+        
+        setTimeout(() => {
+            car.disabled = false;
+            car.explosion.visible = false;
+        }, 5000)
+
+    },
+
+    
+    updateHealth(car, health, socket) {
         console.log('updateHealth')
         car.health = health;
         car.healthDisplay.setText(['Health: ', String(health)])
+
+        if(car.health <= 0 && !car.disabled) {
+            this.disable(car);
+            setTimeout(() => {
+                socket.emit('resetHealth', maxHealth)
+            }, 5000)
+        }
     },
     
-       // takeDamage(car, damage) {
-    //     console.log(`takeDamage()`)
-    //     if (!car.damageCooldown) {
-    //         car.damageCooldown = true;
-    //         car.health -= damage;
-    //         console.log(car);
-    //         setTimeout(() => {
-    //             car.damageCooldown = false;
-    //             console.log('Damage is recharged.');
-    //         }, 10000);
-    //     } else {
-    //         console.log('Damage is on cooldown.');
-    //     }
-    //   }
 
     updateOtherHealth(playerInfo, otherPlayer) {
         console.log(playerInfo, otherPlayer)
         otherPlayer.health = playerInfo.health;
         otherPlayer.healthDisplay.setText(['Health: ', String(otherPlayer.health)])
-    }
+
+        if(otherPlayer.health <= 0 && !otherPlayer.disabled) {
+            this.disable(otherPlayer)
+        }
+    },
+
+
+    setSpeed(newSpeed) {
+        speed = newSpeed
+    },
 }

@@ -93,6 +93,11 @@ amountplayers++
     players[hitInfo.playerId].health -= hitInfo.damage
     io.emit('reportHit', players[hitInfo.playerId])
   })
+
+  socket.on('resetHealth', function (health) {
+    players[socket.id].health = health
+    io.emit('reportHit', players[socket.id])
+  })
   
   socket.on('gunFiring', function() {
     socket.broadcast.emit('gunFired', players[socket.id])

@@ -57,6 +57,11 @@ class gameScene extends Phaser.Scene {
       frameHeight: 34
     });
 
+    this.load.spritesheet('explosion', 'static/assets/explosion-sheet.png', {
+      frameWidth: 64,
+      frameHeight: 64,
+    })
+
     this.load.image('tiles', 'static/assets/roads2w.png')
     this.load.image('roadTiles', 'static/assets/track_tilemap_demo.png')
     this.load.image('checkpointTiles', 'static/assets/checkpoint-reference.png')
@@ -73,8 +78,6 @@ class gameScene extends Phaser.Scene {
 
     this.socket = io()
 
-
-
     Checkpoints.initializeMap(self);
 
     this.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
@@ -89,10 +92,12 @@ class gameScene extends Phaser.Scene {
 
       //if car hits barrier, bounce car back. prevents car from getting stuck in barrier
       if ((bodyA.label === 'player') && (bodyB.label === 'barrier')) {
+        Player.setSpeed(0)
         this.car.setX(this.car.x - (20 * Math.cos(this.car.rotation)));
         this.car.setY(this.car.y - (20 * Math.sin(this.car.rotation)));
       }
       if ((bodyB.label === 'player') && (bodyA.label === 'barrier')) {
+        Player.setSpeed(0)
         this.car.setX(this.car.x - (20 * Math.cos(this.car.rotation)));
         this.car.setY(this.car.y - (20 * Math.sin(this.car.rotation)));
       }
@@ -189,6 +194,7 @@ class gameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1
     });
+
     this.anims.create({
       key: 'poisongun',
       frames: this.anims.generateFrameNumbers('poisongun', { start: 0, end: 0 }),
@@ -196,11 +202,18 @@ class gameScene extends Phaser.Scene {
       repeat: -1
     });
 
+    this.anims.create({
+      key: 'explode',
+      frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 7}),
+      frameRate: 10,
+      repeat: -1
+    })
+
     this.socket.on('reportHit', function (playerInfo) {
       //console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
         if (self.car) {
-          Player.updateHealth(self.car, playerInfo.health)
+          Player.updateHealth(self.car, playerInfo.health, self.socket)
         }
       } else {
           self.otherPlayers.getChildren().forEach(function (otherPlayer) {
@@ -209,7 +222,7 @@ class gameScene extends Phaser.Scene {
             }
           })
         }
-      })
+    })
 
     //multiplayer logic for shooting guns (show bullet on all clients)
     this.socket.on('gunFired', function (playerInfo) {
