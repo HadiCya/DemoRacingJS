@@ -124,7 +124,6 @@ function syncGameState() {
       if (err) {
         // If the ping returns an error, display an error notification to the console
         console.log(`Error: No response from player ${player.playerName}`);
-        console.log(err)
       } else {
         // The response data is sent back as an array with 1 element
         // We need to unpack the response from the client in order to get the 
