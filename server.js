@@ -24,14 +24,28 @@ server.listen(3000, function () {
   console.log('Starting server on port 3000')
 })
 
-// This is the master players object
-// This is the object that the server uses to synchronize 
-// all of the data for each player in the game
-let players = {}
+var players = {}
+var connected = 0
+var amountplayers = 0
+positionarray = [false, false, false, false, false, false, false, false]//the starting position array
+var position = 9
 
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
+  
+connected++
+//goes through and finds the first empty position
+for (let i = 0; i < 8; i++) {
+  if(!positionarray[i]){
+    position = i 
+    positionarray[i] = true
+    break
+  }
+}
+amountplayers++
+
+//console.log(amountplayers)
   players[socket.id] = {
     rotation: 0,
     x: 30,
@@ -39,6 +53,8 @@ io.on('connection', function (socket) {
     playerId: socket.id,
     playerName: socket.id,
     color: getRandomColor(),
+    numberconnected: position
+    
   }
 
   socket.join(socket.id);
@@ -57,8 +73,18 @@ io.on('connection', function (socket) {
  
   socket.on('disconnect', function () {
     console.log('player [' + socket.id + '] disconnected')
+    var spot = (players[socket.id].numberconnected)//which position disconnected
     delete players[socket.id]
+    //this emptys the position in the array
     io.emit('playerDisconnected', socket.id)
+    positionarray[spot] = false
+    amountplayers--
+  })
+
+  socket.on('healthChange', function (health) {
+    players[socket.id].health = health;
+
+    socket.broadcast.emit('healthChanged', players[socket.id]);
   })
 })
 
