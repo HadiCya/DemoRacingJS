@@ -16,7 +16,8 @@ var maxHealth = 10
 var isDriftStart = true
 var labelOffsetX = -20
 var labelOffsetY = -40
-
+var connectedposition
+var start = true
 
 //Object stores functions which are called in game.js
 
@@ -25,16 +26,16 @@ export const Player = {
     //function to set stat variables based on selected car
     setStats(carStats) {
         maxspeed = carStats.maxspeed,
-        accel = carStats.accel,
-        handling = carStats.handling,
-        driftHandling = carStats.driftHandling,
-        oversteer = carStats.oversteer,
-        decay = carStats.decay
+            accel = carStats.accel,
+            handling = carStats.handling,
+            driftHandling = carStats.driftHandling,
+            oversteer = carStats.oversteer,
+            decay = carStats.decay
         maxHealth = carStats.maxHealth
     },
 
-    //function to instantiate car of current player
-    addPlayer(self, playerInfo) {
+    //function to instantiate car of current player now also takes in the connected value so we know where you are in the lineup
+    addPlayer(self, playerInfo, connected, socket) {
 
         this.setStats(self.carStats)
 
@@ -57,11 +58,77 @@ export const Player = {
 
 
         //self.car.setCollideWorldBounds(true)
-        self.car.setTint(playerInfo.color)
+        self.car.setTint(playerInfo.color);
         //self.car.setDrag(1000)
 
-    },
+        self.cameras.main.setBounds(0, 0, 7680, 8640);
+        self.cameras.main.startFollow(self.car, true);
+        self.cameras.main.setZoom(1);
 
+        
+        //gives us permantent access to which position in the lineup you are? i dont remember 100%
+        connectedposition = connected
+        
+        //moves the car to their starting position
+        self.car.setY(1200)
+        self.car.setX(750)
+        self.car.setRotation(Math.PI/2)
+
+        switch(connectedposition) {
+            case 0:
+                self.car.setY(1200)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 1:
+                self.car.setY(1200)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+              case 2:
+                self.car.setY(1125)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 3:
+                self.car.setY(1125)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+              case 4:
+                self.car.setY(1050)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 5:
+                self.car.setY(1050)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+              case 6:
+                self.car.setY(975)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 7:
+                self.car.setY(975)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+            default:
+                self.car.setY(1200)
+                self.car.setX(500)
+                self.car.setRotation(0)
+          }
+        //updates position on each of other clients
+        socket.emit('playerMovement', {x: self.car.x, y: self.car.y, rotation: self.car.rotation})
+        //updates your label for everything
+        self.label.setPosition(self.car.x, self.car.y)
+        
+        
+        //car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
+        //label.y = car.y - labelOffsetY;
+    },
 
     //function to instantiate cars of other players
     addOtherPlayers(self, playerInfo) {
@@ -92,6 +159,14 @@ export const Player = {
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
     drive(car, label, cursors, delta, socket, wasd) {
 
+// changes the starting position of the car to just be down a bit, it has an added buffer because the cars will collide with anything
+//in the intial spawn location so we need that to be empty, we could change this to a switch statement with specific locations 
+//down the road if we want designated locations for where each car starts
+        // if(start){
+        //     car.setY(75*connectedposition +100)
+        //     //console.log(connectedposition)
+        // start = false
+        // }
 
         //accelerate car if below max speed
         if (speed < maxspeed) {
@@ -120,7 +195,7 @@ export const Player = {
 
         if (speed > 0) {
             speed = speed - decay * (delta / 10)
-        } 
+        }
         else {
             speed = speed + decay * (delta / 10)
         }
@@ -130,7 +205,7 @@ export const Player = {
         //delta factor makes movement frame rate independent
         //car.setX(car.x + (speed * Math.cos(car.rotation) * (delta / 10)))
         //car.setY(car.y + (speed * Math.sin(car.rotation) * (delta / 10)))
-        
+
         this.updateCarMovementWithDrift(car, cursors, wasd, delta)
 
         car.setAngularVelocity(0);
@@ -164,13 +239,13 @@ export const Player = {
     updateCarMovementWithDrift(car, cursors, wasd, delta) {
 
         if (wasd.SHIFT.isDown && (cursors.right.isDown || wasd.D.isDown || cursors.left.isDown || wasd.A.isDown)) {
-            
+
             //get the direction youre facing when you start drifting
             if (isDriftStart) {
                 //console.log(car.rotation)
 
                 this.driftAngle = car.angle;
-    
+
                 isDriftStart = false
             }
 
@@ -178,7 +253,7 @@ export const Player = {
             //console.log(this.driftAngle)
 
             //turn car left or right
-            
+
             if (cursors.right.isDown || wasd.D.isDown) {
                 car.angle += oversteer * (delta / 10)
                 this.driftAngle = (this.driftAngle + driftHandling * (delta / 10)) % 360;
@@ -186,16 +261,16 @@ export const Player = {
 
             if (cursors.left.isDown || wasd.A.isDown) {
                 car.angle -= oversteer * (delta / 10)
-                this.driftAngle = (this.driftAngle - driftHandling  * (delta / 10)) % 360;
+                this.driftAngle = (this.driftAngle - driftHandling * (delta / 10)) % 360;
             }
-        
+
             //console.log((this.driftAngle - car.angle) * 0.05)
-            
-           
-            console.log(speed)
-            car.setX(car.x + (speed * (Math.cos(this.driftAngle*Math.PI/180)))  * (delta / 10))
-            car.setY(car.y + (speed * (Math.sin(this.driftAngle*Math.PI/180))) * (delta / 10))
-             
+
+
+            //console.log(speed)
+            car.setX(car.x + (speed * (Math.cos(this.driftAngle * Math.PI / 180))) * (delta / 10))
+            car.setY(car.y + (speed * (Math.sin(this.driftAngle * Math.PI / 180))) * (delta / 10))
+
         }
         else {
             isDriftStart = true

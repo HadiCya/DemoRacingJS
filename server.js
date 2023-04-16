@@ -21,11 +21,28 @@ server.listen(3000, function () {
 })
 
 var players = {}
-
+var connected = 0
+var amountplayers = 0
+positionarray = [false, false, false, false, false, false, false, false]//the starting position array
+var position = 9
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
-  players[socket.id] = { //player object prototype
+  
+connected++
+//goes through and finds the first empty position
+for (let i = 0; i < 8; i++) {
+  if(!positionarray[i]){
+    position = i 
+    positionarray[i] = true
+    break
+  }
+  else{position = 8}
+}
+amountplayers++
+
+//console.log(amountplayers)
+  players[socket.id] = {
     rotation: 0,
     x: 30,
     y: 30,
@@ -34,7 +51,9 @@ io.on('connection', function (socket) {
     health: 10,
     playerId: socket.id,
     playerName: socket.id,
-    color: getRandomColor()
+    color: getRandomColor(),
+    numberconnected: position
+    
   }
 
   //give new client list of players already in game
@@ -52,8 +71,12 @@ io.on('connection', function (socket) {
 
   socket.on('disconnect', function () {
     console.log('player [' + socket.id + '] disconnected')
+    var spot = (players[socket.id].numberconnected)//which position disconnected
     delete players[socket.id]
+    //this emptys the position in the array
     io.emit('playerDisconnected', socket.id)
+    positionarray[spot] = false
+    amountplayers--
   })
 
   socket.on('playerMovement', function (movementData) { //this function listens for socket.emit('playerMovment')
