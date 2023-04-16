@@ -25,6 +25,13 @@ var laserOnCooldown;
 var laserColor = 0xff0000;
 var lastFired_laser = 0;
 var damageCooldown_laser = 0;
+// gun is Rocket Launcher
+var rocket; // rocket that gets fired
+var launched = false;
+var launchedtime = 0; // the moment in time the rocket is launched
+var rocketDirection;
+var targetX;
+var targetY;
 
 export const Gun = {
 
@@ -63,6 +70,12 @@ export const Gun = {
             self.damageLockout = false
             self.poisonCircle.body.label = "poisonArea"
         }
+
+        if(gunChoice === 'rocketgun'){
+            self.gun = self.add.sprite(400, 300, 'rocketgun');
+            self.gun.setDepth(1);
+            
+        }
     },
 
     addOtherGun(self, otherPlayer, gunChoice) {
@@ -99,9 +112,13 @@ export const Gun = {
             otherPlayer.poisonCircle.visible = false;
 
             //otherPlayer.poisonCircle.body.label = "poisonArea"
-
-
         }
+
+        if (gunChoice === 'rocketgun') {
+            otherPlayer.gun = self.add.sprite(400, 300, 'rocketgun');
+            otherPlayer.gun.setDepth(1);
+        }
+        
     },
 
     laserGun(self, gun, car, input, socket, time) {
@@ -297,6 +314,65 @@ export const Gun = {
         }
     },
 
+    rockgun(self, gun, car, input, socket, time){
+        //sets rotation of gun
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        gun.setRotation(angle);
 
+        //Make sure car has been instantiated correctly
+        if (car) {
+            pointer = input.activePointer; //sets pointer to user's mouse
+            gun.x = car.x;
+            gun.y = car.y;
+            car.gunrotation = gun.rotation;
+
+            car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (launchedtime - time))/1000 )]);
+
+            if(cooldown + (launchedtime - time) < 0){
+                car.cooldownDisplay.visible = false;
+            }
+
+            // checks if mouse has been clicked and the rocket is not already launched
+            // checks for if the cooldown period has finished or if at the very beginging of the game
+            // creates and launches the rocket
+            if (input.activePointer.isDown && launched == false && (cooldown <= time - launchedtime || (time <= cooldown && launchedtime == 0))) {
+                rocket = self.add.sprite(400, 300, 'rocketAnimation');
+                rocket.setDepth(2); //puts above cars
+                rocket.play('animateRocket'); // starts animation
+                rocket.x = car.x; // sets starting x
+                rocket.y = car.y; // sets starting y
+                rocket = self.matter.add.gameObject(rocket);
+                rocket.setSensor(true);
+                rocket.label = 'firingRocket';
+
+                launchedtime = time;
+                launched = true;
+                car.cooldownDisplay.visible = true;
+
+                socket.emit('gunFiring');
+            }
+
+            if (launched == true) {
+                rocket.play('animateRocket');
+                targetX = pointer.worldX; //for opponent just replace pointer.worldX with oppponent.x
+                targetY = pointer.worldY; //for opponent just replace pointer.worldY with oppponent.y
+
+                //sets the angle the rocket needs inorder to face target
+                rocketDirection = Phaser.Math.Angle.Between(rocket.x, rocket.y, input.x, input.y);
+                rocket.setRotation(rocketDirection + Math.PI / 2);
+
+                rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 4000 + rocket.x; //divided by 1000 to get seconds from miliseconds
+                rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 4000 + rocket.y;
+
+                var targetBuffer = 5; // checks if the rocket is within a 5px radius of the target
+                if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) {
+                    launched = false;
+                    rocket.destroy();
+                }
+            }
+
+        }
+
+    }
 }
 

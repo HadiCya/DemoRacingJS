@@ -251,7 +251,7 @@ export const Player = {
 
     inflictDamage(self, socket, otherPlayer, damage) {
         if (self.gunSelection == "poisongun" ) {
-            console.log(self.poisonCircle.visible, self.damageLockout)
+           // console.log(self.poisonCircle.visible, self.damageLockout)
 
             if (self.poisonCircle.visible == true && self.damageLockout == false) {
                 console.log("inflictDamage")

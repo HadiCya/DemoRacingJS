@@ -47,6 +47,12 @@ class gameScene extends Phaser.Scene {
       frameHeight: 34
     });
 
+    this.load.image('rocketgun', 'static/assets/rocketLauncher.png')
+    this.load.spritesheet('rocketAnimation', 'static/assets/rocket_animation.png', {
+      frameWidth: 17,
+      frameHeight: 80
+    });
+
     this.load.image('tiles', 'static/assets/roads2w.png')
     this.load.tilemapTiledJSON('tilemap', 'static/assets/tilemap_new.json', 32, 32)
 
@@ -157,6 +163,15 @@ class gameScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers('poisongun', { start: 0, end: 0 }),
       frameRate: 10,
       repeat: -1
+    });
+
+    this.anims.create({
+      key: 'animateRocket',
+      frames: this.anims.generateFrameNumbers('rocketAnimation', { start: 0, end: 8 }),
+      frameRate: 30,
+      repeat: 5, // might effect how long its will be on screen, but not sure exaclty
+      yoyo: true, //optional
+      hideOnComplete: true
     });
 
     this.socket.on('reportHit', function (playerInfo) {
@@ -311,6 +326,9 @@ class gameScene extends Phaser.Scene {
 
       if (this.gunSelection === 'poisongun') {
         Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
+      }
+      if(this.gunSelection == 'rocketgun'){
+        Gun.rockgun(this, this.gun, this.car, this.input, this.socket, time)
       }
     }
 
