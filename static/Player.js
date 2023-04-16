@@ -56,8 +56,56 @@ export const Player = {
         connectedposition = connected
         
         //moves the car to their starting position
-        self.car.setY(75*connectedposition + 100)
-        
+        self.car.setY(1200)
+        self.car.setX(750)
+        self.car.setRotation(Math.PI/2)
+
+        switch(connectedposition) {
+            case 0:
+                self.car.setY(1200)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 1:
+                self.car.setY(1200)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+              case 2:
+                self.car.setY(1125)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 3:
+                self.car.setY(1125)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+              case 4:
+                self.car.setY(1050)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 5:
+                self.car.setY(1050)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+              case 6:
+                self.car.setY(975)
+                self.car.setX(750)
+                self.car.setRotation(Math.PI/2)
+              break;
+            case 7:
+                self.car.setY(975)
+                self.car.setX(875)
+                self.car.setRotation(Math.PI/2)
+              break;
+            default:
+                self.car.setY(1200)
+                self.car.setX(500)
+                self.car.setRotation(0)
+          }
         //updates position on each of other clients
         socket.emit('playerMovement', {x: self.car.x, y: self.car.y, rotation: self.car.rotation})
         //updates your label for everything
