@@ -1,3 +1,6 @@
+export var musicVolume = 0.0;
+export var effectsVolume = 1;
+
 export default class Lobby extends Phaser.Scene {
     constructor() {
         super('Lobby')
@@ -5,7 +8,7 @@ export default class Lobby extends Phaser.Scene {
 
     preload() {
         this.load.html('form', 'static/assets/input-form.html');
-        this.load.image('car', 'static/assets/car.png');
+        this.load.audio('menuTheme', 'static/assets/menuTheme.mp3');
     }
 
     create() {
@@ -63,13 +66,19 @@ export default class Lobby extends Phaser.Scene {
                 decay: 0.05,
                 maxHealth: 10
             },
-        ] 
+        ]
+
+        var menuSong = this.sound.add('menuTheme');
+        menuSong.loop = true;
+        menuSong.play();
+        menuSong.setVolume(musicVolume);
 
         var carChoice = carChoices.at(0)
+        var gunChoice = "lasergun"
 
         //reference html form
         var element = this.add.dom(640, 325).createFromCache('form');
-        
+
 
         element.addListener('click')
 
@@ -79,17 +88,29 @@ export default class Lobby extends Phaser.Scene {
 
             //new Car was picked
             if (event.target.parentElement.id == 'car-choice') {
-                 //set car stats, determine which car from id of element clicked 
-                 carChoice = carChoices.at(Number(event.target.id))
+                //set car stats, determine which car from id of element clicked 
+                carChoice = carChoices.at(Number(event.target.id))
 
-                 //reset color of previous elements
-                 for (let i = 0; i < event.target.parentElement.children.length; i++) {
+                //reset color of previous elements
+                for (let i = 0; i < event.target.parentElement.children.length; i++) {
                     event.target.parentElement.children[i].style.backgroundColor = "rgba(255, 255, 255, 0)"
-                 }
+                }
 
-                 //change color of this element to signal selection to user
-                 event.target.style.backgroundColor = "rgb(223, 55, 55)"
-            }   
+                //change color of this element to signal selection to user
+                event.target.style.backgroundColor = "rgb(223, 55, 55)"
+            }
+
+            if (event.target.parentElement.id == 'gun-choice') {
+                gunChoice = event.target.id
+
+                //reset color of previous elements
+                for (let i = 0; i < event.target.parentElement.children.length; i++) {
+                    event.target.parentElement.children[i].style.backgroundColor = "rgba(255, 255, 255, 0)"
+                }
+
+                //change color of this element to signal selection to user
+                event.target.style.backgroundColor = "rgb(223, 55, 55)"
+            }
 
             if (event.target.id === 'connect') {
                 //find textbox so that we can get it's value later
@@ -99,8 +120,9 @@ export default class Lobby extends Phaser.Scene {
                 element.removeListener('click');
 
                 var enteredName = textInput.value
-                
-                this.scene.start('gameScene', {playerName: enteredName, carStats: carChoice})
+
+                this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice})
+                menuSong.stop();
             }
         }, this)
     }
