@@ -33,20 +33,20 @@ var position = 9
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
-  
-connected++
-//goes through and finds the first empty position
-for (let i = 0; i < 8; i++) {
-  if(!positionarray[i]){
-    position = i 
-    positionarray[i] = true
-    break
-  }
-  else{position = 8}
-}
-amountplayers++
 
-//console.log(amountplayers)
+  connected++
+  //goes through and finds the first empty position
+  for (let i = 0; i < 8; i++) {
+    if (!positionarray[i]) {
+      position = i
+      positionarray[i] = true
+      break
+    }
+    else { position = 8 }
+  }
+  amountplayers++
+
+  //console.log(amountplayers)
   players[socket.id] = {
     rotation: 0,
     x: 30,
@@ -55,7 +55,7 @@ amountplayers++
     playerName: socket.id,
     color: getRandomColor(),
     numberconnected: position
-    
+
   }
 
   socket.join(socket.id);
@@ -71,7 +71,7 @@ amountplayers++
     //tell clients already connected that a new player has joined
     socket.broadcast.emit('newPlayer', players[socket.id])
   })
- 
+
   socket.on('disconnect', function () {
     console.log('player [' + socket.id + '] disconnected')
     var spot = (players[socket.id].numberconnected)//which position disconnected
@@ -120,11 +120,12 @@ function syncGameState() {
     delete otherPlayers[id];
 
     // This funciton call sends the data to the player and handles the value returned
-    io.to(id).timeout(500).emit('get-update', {otherPlayers}, function (err, response) {
+    io.to(id).timeout(500).emit('get-update', { otherPlayers }, function (err, response) {
       if (err) {
         // If the ping returns an error, display an error notification to the console
         console.log(`Error: No response from player ${player.playerName}`);
-      } else { 
+        console.log(err)
+      } else {
         // The response data is sent back as an array with 1 element
         // We need to unpack the response from the client in order to get the 
         // data from the client
@@ -136,6 +137,6 @@ function syncGameState() {
         players[id].y = movementData.y;
         players[id].rotation = movementData.rotation;
       }
-    }) 
-  }) 
+    })
+  })
 }

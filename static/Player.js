@@ -51,67 +51,67 @@ export const Player = {
         self.cameras.main.startFollow(self.car, true);
         self.cameras.main.setZoom(1);
 
-        
+
         //gives us permantent access to which position in the lineup you are? i dont remember 100%
         connectedposition = connected
-        
+
         //moves the car to their starting position
         self.car.setY(1200)
         self.car.setX(750)
-        self.car.setRotation(Math.PI/2)
+        self.car.setRotation(Math.PI / 2)
 
-        switch(connectedposition) {
+        switch (connectedposition) {
             case 0:
                 self.car.setY(1200)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 1:
                 self.car.setY(1200)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
-              case 2:
+                self.car.setRotation(Math.PI / 2)
+                break;
+            case 2:
                 self.car.setY(1125)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 3:
                 self.car.setY(1125)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
-              case 4:
+                self.car.setRotation(Math.PI / 2)
+                break;
+            case 4:
                 self.car.setY(1050)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 5:
                 self.car.setY(1050)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
-              case 6:
+                self.car.setRotation(Math.PI / 2)
+                break;
+            case 6:
                 self.car.setY(975)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 7:
                 self.car.setY(975)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             default:
                 self.car.setY(1200)
                 self.car.setX(500)
                 self.car.setRotation(0)
-          }
+        }
         //updates position on each of other clients
-        socket.emit('playerMovement', {x: self.car.x, y: self.car.y, rotation: self.car.rotation})
+        socket.emit('playerMovement', { x: self.car.x, y: self.car.y, rotation: self.car.rotation })
         //updates your label for everything
         self.label.setPosition(self.car.x, self.car.y)
-        
-        
+
+
         //car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
         //label.y = car.y - labelOffsetY;
     },
@@ -136,9 +136,9 @@ export const Player = {
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
     drive(car, label, cursors, delta, socket, wasd) {
 
-// changes the starting position of the car to just be down a bit, it has an added buffer because the cars will collide with anything
-//in the intial spawn location so we need that to be empty, we could change this to a switch statement with specific locations 
-//down the road if we want designated locations for where each car starts
+        // changes the starting position of the car to just be down a bit, it has an added buffer because the cars will collide with anything
+        //in the intial spawn location so we need that to be empty, we could change this to a switch statement with specific locations 
+        //down the road if we want designated locations for where each car starts
         // if(start){
         //     car.setY(75*connectedposition +100)
         //     //console.log(connectedposition)
@@ -148,7 +148,7 @@ export const Player = {
         //accelerate car if below max speed
         if (speed < maxspeed) {
             if (cursors.up.isDown || wasd.W.isDown) {
-                    speed = speed + (accel * (delta / 10));
+                speed = speed + (accel * (delta / 10));
             }
         }
 
@@ -161,7 +161,7 @@ export const Player = {
         //reverse car if below max speed (in reverse)
         if (speed > -maxspeed) {
             if (cursors.down.isDown || wasd.S.isDown) {
-                    speed = speed - (accel * (delta / 10))
+                speed = speed - (accel * (delta / 10))
             }
         }
 
@@ -189,13 +189,13 @@ export const Player = {
 
         //update position of label. offset from car to position correctly 
         label.x = car.x - labelOffsetX;
-        label.y = car.y- labelOffsetY;
+        label.y = car.y - labelOffsetY;
 
 
         var x = car.x;
         var y = car.y;
-        var r = car.rotation;        
-        
+        var r = car.rotation;
+
         var x = car.x
         var y = car.y
         var r = car.rotation
@@ -284,18 +284,21 @@ export const Player = {
         }
         car.oldHealth = car.health;
     },
-    
+
     //Get method to access speed in game.js
-    GetSpeed()
-    {
+    GetSpeed() {
         return speed
+    },
+
+    SetSpeed(newSpeed) {
+        speed = newSpeed
     },
 
 
     updateOtherPlayerHealth(playerInfo, otherPlayer) {
         otherPlayer.health = playerInfo.health;
     },
-    
+
 
     //decrement health of car by damage amount
     //will automatically be communicated over server
