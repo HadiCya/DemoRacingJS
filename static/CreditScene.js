@@ -6,9 +6,16 @@ export default class CreditScene extends Phaser.Scene {
     preload() {
         this.load.html('form2', 'static/assets/creditscene-form.html');
         this.load.image('car', 'static/assets/car.png');
+        this.load.audio('Theme', 'static/assets/credit-theme.wav');
     }
 
     create() {
+
+        let soundSample = this.sound.add('Theme')
+        soundSample.play();
+        console.log(soundSample.loop)
+        soundSample.loop = true
+        console.log(soundSample.loop)
 
         //car choices (array of stats, each car is one entry)
         //order of entries matches index used to select car choice in click event
@@ -86,6 +93,8 @@ export default class CreditScene extends Phaser.Scene {
                 element.removeListener('click');
 
                 var enteredName = textInput.value
+                
+                soundSample.stop();
                 
                 this.scene.start('Lobby', {playerName: enteredName, carStats: carChoice})
             }
