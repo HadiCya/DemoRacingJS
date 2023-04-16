@@ -58,10 +58,12 @@ class gameScene extends Phaser.Scene {
 
       //if car hits barrier, bounce car back. prevents car from getting stuck in barrier
       if ((bodyA.label === 'player') && (bodyB.label === 'barrier')) {
+        Player.SetSpeed(0)
         this.car.setX(this.car.x - (20 * Math.cos(this.car.rotation)));
         this.car.setY(this.car.y - (20 * Math.sin(this.car.rotation)));
       }
       if ((bodyB.label === 'player') && (bodyA.label === 'barrier')) {
+        Player.SetSpeed(0)
         this.car.setX(this.car.x - (20 * Math.cos(this.car.rotation)));
         this.car.setY(this.car.y - (20 * Math.sin(this.car.rotation)));
       }
@@ -130,7 +132,8 @@ class gameScene extends Phaser.Scene {
 
       // Check through each player in the otherPlayers stored locally
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if(newOPs[otherPlayer.playerId]) { // if a player matching that id exists, then
+        if (newOPs[otherPlayer.playerId]) { // if a player matching that id exists, then
+          console.log(newOPs.length)
           // Update the position based on the new data 
           // the client received from the server
           Player.updateOtherPlayerMovement(newOPs[otherPlayer.playerId], otherPlayer);
