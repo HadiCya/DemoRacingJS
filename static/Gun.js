@@ -49,7 +49,6 @@ export const Gun = {
             // //adds gun sprite-image
             self.gun = self.add.sprite(400, 300, 'poisongun');
             self.gun.setDepth(1);
-        
 
             self.poisonCircle = self.matter.add.image(400, 300, 'circle')
             self.poisonCircle.setScale(9);
@@ -116,7 +115,7 @@ export const Gun = {
 
         pointer = input.activePointer; //sets pointer to user's mouse
 
-        car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (lastFired_laser - time - 500)) )]);
+        car.cooldownDisplay.setText(['Cooldown: ', String( (Math.trunc(cooldown + (lastFired_laser - time - 500)))/1000 )]);
 
         if(!laserOnCooldown) {
             if (line1)
@@ -251,11 +250,11 @@ export const Gun = {
 
     poisongun(self, gun, poisonCircle, car, input, socket, time) {
         let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
-        gun.setRotation(angle);
+        gun.setRotation(angle + Math.PI/2);
 
         //TODO: car.gunrotation
 
-        car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(10000 + (lastFired_laser - time)) )]);
+        car.cooldownDisplay.setText(['Cooldown: ', String( (Math.trunc(10000 + (lastFired_laser - time)))/1000 )]);
         
         if (car) {
             gun.x = car.x;
@@ -271,21 +270,27 @@ export const Gun = {
         if (self.input.activePointer.isDown) {
 
             if (!isCooldownActive) {
+                self.gun.stop();
+                self.gun.play('poisongunActive');
+                self.stem.play();
+
                 lastFired_laser = time;
                 poisonCircle.visible = true;
                 car.cooldownDisplay.visible = true;
+                isCooldownActive = true;
                 socket.emit('gunFiring')
     
                 //turn circle off after 5 seconds
                 setTimeout(() => {
                     poisonCircle.visible = false;
-                    isCooldownActive = true;
-    
+                    self.stem.stop();
+                    self.gun.stop();
+                    self.gun.play('poisongun');
                     //end cooldown after 10 seconds
                     setTimeout(() => {
                         isCooldownActive = false
-                    }, 10000); 
-
+                        car.cooldownDisplay.visible = false;
+                    }, 5000);
                 }, 5000); // 5 seconds active
             }
         }

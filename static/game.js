@@ -26,7 +26,11 @@ class gameScene extends Phaser.Scene {
   preload() {
     this.load.image('car', 'static/assets/car.png')
 
-    this.load.image('poisongun', 'static/assets/posiongun.png')
+    this.load.spritesheet('poisongun', 'static/assets/poisongun.png', {
+       frameWidth: 30, 
+       frameHeight: 54, 
+       endframe:9
+    });
     this.load.image('circle', 'static/assets/circle.png')
 
     this.load.image('lasergun', 'static/assets/gun.png')
@@ -36,6 +40,7 @@ class gameScene extends Phaser.Scene {
 
     this.load.audio('bang', 'static/assets/bang.wav')
     this.load.audio('laser', 'static/assets/laser.mp3');
+    this.load.audio('stem', ['static/assets/Caustic_stem.mp3']);
     this.load.audio('gameTheme', 'static/assets/Issa.is.a.pizza.mp3')
     this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
       frameWidth: 82,
@@ -64,6 +69,7 @@ class gameScene extends Phaser.Scene {
     this.bulletSound = this.sound.add('bang');
     //add laser sound
     this.laser = this.sound.add('laser');
+    this.stem = this.sound.add('stem');
 
     gameSong = this.sound.add('gameTheme');
     gameSong.loop = true;
@@ -138,6 +144,19 @@ class gameScene extends Phaser.Scene {
       }),
       frameRate: 30,
       repeat: 0
+    });
+
+    this.anims.create({
+      key: 'poisongunActive',
+      frames: this.anims.generateFrameNumbers('poisongun', { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'poisongun',
+      frames: this.anims.generateFrameNumbers('poisongun', { start: 0, end: 0 }),
+      frameRate: 10,
+      repeat: -1
     });
 
     this.socket.on('reportHit', function (playerInfo) {
