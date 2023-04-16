@@ -273,6 +273,7 @@ export const Gun = {
                 self.gun.stop();
                 self.gun.play('poisongunActive');
                 self.stem.play();
+                self.stem.setVolume(effectsVolume);
 
                 lastFired_laser = time;
                 poisonCircle.visible = true;
