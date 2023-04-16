@@ -106,7 +106,7 @@ export const Gun = {
 
     laserGun(self, gun, car, input, socket, time) {
         //sets rotation of laser gun
-        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
         gun.setRotation(angle);
 
         gun.x = car.x;
@@ -202,7 +202,7 @@ export const Gun = {
 
     machineGun(self, gun, car, input, bullets, socket, time) {
         //sets rotation of gun
-        let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
         gun.setRotation(angle);
         gun.muzzle.setRotation(angle);
 
@@ -231,7 +231,7 @@ export const Gun = {
                 bullet.body.shooterIdentifier = socket.id; //used to turn off bullet despawning when colliding with car that shot bullet
                 bullet.setSensor(true);
                 bullet.setRotation(angle);
-                bullet.setDepth(-1);
+                bullet.setDepth(1);
                 bullet.setActive(true);
                 bullet.setVisible(true);
                 //console.log(bullet);
@@ -249,7 +249,7 @@ export const Gun = {
     },
 
     poisongun(self, gun, poisonCircle, car, input, socket, time) {
-        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
         gun.setRotation(angle + Math.PI/2);
 
         //TODO: car.gunrotation
