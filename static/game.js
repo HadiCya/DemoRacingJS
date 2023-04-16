@@ -41,7 +41,9 @@ class gameScene extends Phaser.Scene {
     this.load.audio('bang', 'static/assets/bang.wav')
     this.load.audio('laser', 'static/assets/laser.mp3');
     this.load.audio('stem', ['static/assets/Caustic_stem.mp3']);
+    this.load.audio('rocketSound', 'static/assets/rocketSound.wav');
     this.load.audio('gameTheme', 'static/assets/Issa.is.a.pizza.mp3')
+
     this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
       frameWidth: 82,
       frameHeight: 34
@@ -75,7 +77,9 @@ class gameScene extends Phaser.Scene {
     this.bulletSound = this.sound.add('bang');
     //add laser sound
     this.laser = this.sound.add('laser');
+
     this.stem = this.sound.add('stem');
+    this.rocketSound = this.sound.add('rocketSound');
 
     gameSong = this.sound.add('gameTheme');
     gameSong.loop = true;

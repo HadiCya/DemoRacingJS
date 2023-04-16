@@ -349,6 +349,9 @@ export const Gun = {
                 launched = true;
                 car.cooldownDisplay.visible = true;
 
+                self.rocketSound.play();
+                self.rocketSound.setVolume(effectsVolume);
+
                 socket.emit('gunFiring');
             }
 
@@ -368,6 +371,7 @@ export const Gun = {
                 if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) {
                     launched = false;
                     rocket.destroy();
+                    self.rocketSound.stop();
                 }
             }
 
