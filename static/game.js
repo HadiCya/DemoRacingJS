@@ -1,6 +1,7 @@
 import { Player } from "./Player.js"
 import Lobby from "./Lobby.js"
 import { Checkpoints } from "./Checkpoints.js"
+import CreditScene from "./CreditScene.js"
 
 var graphics
 var line
@@ -211,7 +212,7 @@ var config = {
   dom: {
     createContainer: true
   },
-  scene: [Lobby, gameScene]
+  scene: [Lobby, CreditScene, gameScene]
 }
 
 var game = new Phaser.Game(config)

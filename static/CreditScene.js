@@ -1,10 +1,10 @@
-export default class Lobby extends Phaser.Scene {
+export default class CreditScene extends Phaser.Scene {
     constructor() {
-        super('Lobby')
+        super('CreditScene')
     }
 
     preload() {
-        this.load.html('form', 'static/assets/input-form.html');
+        this.load.html('form2', 'static/assets/creditscene-form.html');
         this.load.image('car', 'static/assets/car.png');
     }
 
@@ -68,7 +68,7 @@ export default class Lobby extends Phaser.Scene {
         var carChoice = carChoices.at(0)
 
         //reference html form
-        var element = this.add.dom(640, 325).createFromCache('form');
+        var element = this.add.dom(640, 325).createFromCache('form2');
         
 
         element.addListener('click')
@@ -78,18 +78,17 @@ export default class Lobby extends Phaser.Scene {
             console.log(event.target.parentElement);
 
             //new Car was picked
-            if (event.target.parentElement.id == 'car-choice') {
-                 //set car stats, determine which car from id of element clicked 
-                 carChoice = carChoices.at(Number(event.target.id))
+            if (event.target.id === 'back') {
+                //find textbox so that we can get it's value later
+                var textInput = element.getChildByID('name')
 
-                 //reset color of previous elements
-                 for (let i = 0; i < event.target.parentElement.children.length; i++) {
-                    event.target.parentElement.children[i].style.backgroundColor = "rgba(255, 255, 255, 0)"
-                 }
+                //remove click event since we are done with it
+                element.removeListener('click');
 
-                 //change color of this element to signal selection to user
-                 event.target.style.backgroundColor = "rgb(223, 55, 55)"
-            }   
+                var enteredName = textInput.value
+                
+                this.scene.start('Lobby', {playerName: enteredName, carStats: carChoice})
+            }
 
             if (event.target.id === 'connect') {
                 //find textbox so that we can get it's value later
@@ -100,21 +99,8 @@ export default class Lobby extends Phaser.Scene {
 
                 var enteredName = textInput.value
                 
-                this.scene.start('gameScene', {playerName: enteredName, carStats: carChoice})
+                this.scene.start('Lobby', {playerName: enteredName, carStats: carChoice})
             }
-
-            if (event.target.id === 'credit') {
-                
-
-                //remove click event since we are done with it
-                element.removeListener('click');
-
-                
-                
-                this.scene.start('CreditScene',)
-            }
-
-
         }, this)
     }
 
