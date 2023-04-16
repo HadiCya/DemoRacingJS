@@ -1,4 +1,4 @@
-import {Gun, cooldown} from "./Gun.js"
+import { Gun, cooldown } from "./Gun.js"
 
 var speed = 0.0;
 var accel = 0.2;
@@ -51,9 +51,9 @@ export const Player = {
         self.car.body.label = "player"; //player's car's collsion box label;
 
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
-        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]); 
-        self.car.cooldownDisplay = self.add.text(1175, 25, ["Cooldown: " , cooldown]);
-        self.car.cooldownDisplay.visible = false; 
+        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: ", playerInfo.health]);
+        self.car.cooldownDisplay = self.add.text(1175, 25, ["Cooldown: ", cooldown]);
+        self.car.cooldownDisplay.visible = false;
 
 
         //self.car.setCollideWorldBounds(true)
@@ -121,9 +121,9 @@ export const Player = {
         }
 
         Gun.addGun(self, self.gunSelection)
-        
-        //updates position on each of other clients
-        socket.emit('playerMovement', { x: self.car.x, y: self.car.y, rotation: self.car.rotation })
+
+        // //updates position on each of other clients
+        // socket.emit('playerMovement', { x: self.car.x, y: self.car.y, rotation: self.car.rotation })
         //updates your label for everything
         self.label.setPosition(self.car.x, self.car.y)
 
@@ -140,13 +140,13 @@ export const Player = {
             .setRotation(playerInfo.rotation)
 
         Gun.addOtherGun(self, otherPlayer, playerInfo.gunSelection)
-       
+
 
         otherPlayer.playerId = playerInfo.playerId
         otherPlayer.body.label = "otherPlayer";
 
         otherPlayer.health = playerInfo.health
-        otherPlayer.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]);
+        otherPlayer.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: ", playerInfo.health]);
 
 
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
@@ -224,17 +224,17 @@ export const Player = {
         var r = car.rotation
         var gr = car.gunrotation
 
-        if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation || gr !== car.oldPosition.gunrotation)) {
-            socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation, gunrotation: car.gunrotation })
-            //console.log("moving")
-        }
+        // if (car.oldPosition && (x !== car.oldPosition.x || y !== car.oldPosition.y || r !== car.oldPosition.rotation || gr !== car.oldPosition.gunrotation)) {
+        //     socket.emit('playerMovement', { x: car.x, y: car.y, rotation: car.rotation, gunrotation: car.gunrotation })
+        //     //console.log("moving")
+        // }
 
-        car.oldPosition = {
-            x: car.x,
-            y: car.y,
-            rotation: car.rotation,
-            gunrotation: car.gunrotation
-        }
+        // car.oldPosition = {
+        //     x: car.x,
+        //     y: car.y,
+        //     rotation: car.rotation,
+        //     gunrotation: car.gunrotation
+        // }
     },
 
     updateCarMovementWithDrift(car, cursors, wasd, delta) {
@@ -303,12 +303,12 @@ export const Player = {
         otherPlayer.healthDisplay.setPosition(playerInfo.x - labelOffsetX, playerInfo.y - labelOffsetY + 30)
         otherPlayer.gun.setPosition(playerInfo.x, playerInfo.y)
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
-        
 
-        if(otherPlayer.poisonCircle)
+
+        if (otherPlayer.poisonCircle)
             otherPlayer.poisonCircle.setPosition(playerInfo.x, playerInfo.y)
 
-        if(otherPlayer.laserActive) {
+        if (otherPlayer.laserActive) {
             if (otherPlayer.laserLine)
                 otherPlayer.graphics.destroy(otherPlayer.laserLine)
 
@@ -316,7 +316,7 @@ export const Player = {
             otherPlayer.laserLine = new Phaser.Geom.Line(300, 300, 300, 300)
             Phaser.Geom.Line.SetToAngle(otherPlayer.laserLine, playerInfo.x, playerInfo.y, playerInfo.gunrotation, 3000)
             otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
-        } else if (otherPlayer.laserLine){
+        } else if (otherPlayer.laserLine) {
             otherPlayer.graphics.destroy(otherPlayer.laserLine)
         }
         //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
@@ -335,7 +335,7 @@ export const Player = {
 
 
     inflictDamage(self, socket, otherPlayer, damage) {
-        if (self.gunSelection == "poisongun" ) {
+        if (self.gunSelection == "poisongun") {
             console.log(self.poisonCircle.visible, self.damageLockout)
 
             if (self.poisonCircle.visible == true && self.damageLockout == false) {
@@ -344,14 +344,14 @@ export const Player = {
 
                 //after dealing damage, prevent further until lockout ends
                 //setTimeout to allow for all players hit to get a chance to call inflictDamage()
-                setTimeout(() => {self.damageLockout = true}, 0.1)
+                setTimeout(() => { self.damageLockout = true }, 0.1)
 
                 //reset lockout so another tick of damage can be applied
                 setTimeout(() => {
                     self.damageLockout = false
                 }, 1000)
             }
-        } 
+        }
         else {
             console.log("inflictDamage")
             socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
@@ -363,7 +363,7 @@ export const Player = {
         car.health = health;
         car.healthDisplay.setText(['Health: ', String(health)])
     },
-    
+
     updateOtherHealth(playerInfo, otherPlayer) {
         console.log(playerInfo, otherPlayer)
         otherPlayer.health = playerInfo.health;

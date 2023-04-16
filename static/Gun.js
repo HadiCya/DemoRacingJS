@@ -1,4 +1,4 @@
-import {Player} from "./Player.js"
+import { Player } from "./Player.js"
 import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 
 //Globals for MACHINEGUN:
@@ -53,11 +53,11 @@ export const Gun = {
             self.poisonCircle = self.matter.add.image(400, 300, 'circle')
             self.poisonCircle.setScale(9);
             self.poisonCircle.setBody({
-            type: 'circle',
-            radius: 100
+                type: 'circle',
+                radius: 100
             });
 
-            
+
             self.poisonCircle.setSensor(true)
             self.poisonCircle.visible = false
             self.damageLockout = false
@@ -89,11 +89,11 @@ export const Gun = {
         if (gunChoice === 'poisongun') {
             //  //adds gun sprite-image
             otherPlayer.gun = self.add.sprite(400, 300, 'poisongun')
-            .setDepth(1)
+                .setDepth(1)
 
             otherPlayer.poisonCircle = self.add.sprite(400, 300, 'circle')
-            .setOrigin(0.5, 0.5)
-            .setDisplaySize(50, 50)
+                .setOrigin(0.5, 0.5)
+                .setDisplaySize(50, 50)
 
             otherPlayer.poisonCircle.setScale(9);
             otherPlayer.poisonCircle.visible = false;
@@ -106,7 +106,8 @@ export const Gun = {
 
     laserGun(self, gun, car, input, socket, time) {
         //sets rotation of laser gun
-        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
+        console.log(input)
         gun.setRotation(angle);
 
         gun.x = car.x;
@@ -115,24 +116,24 @@ export const Gun = {
 
         pointer = input.activePointer; //sets pointer to user's mouse
 
-        car.cooldownDisplay.setText(['Cooldown: ', String( (Math.trunc(cooldown + (lastFired_laser - time - 500)))/1000 )]);
+        car.cooldownDisplay.setText(['Cooldown: ', String((Math.trunc(cooldown + (lastFired_laser - time - 500))) / 1000)]);
 
-        if(!laserOnCooldown) {
+        if (!laserOnCooldown) {
             if (line1)
                 graphics.destroy(line1);//deletes the line, so that they don't build up
-        
+
             laserLength = Math.sqrt((pointer.worldY - car.y) ** 2 + (pointer.worldX - car.x) ** 2);
             laserY = laserLength * (pointer.worldY - car.y);
             laserX = laserLength * (pointer.worldX - car.x);
             line1 = new Phaser.Geom.Line(car.x, car.y, laserX, laserY);
             graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
 
-            
+
             if (self.input.activePointer.isDown && !this.laserOnCooldown && line1) {
                 if (!graphics)
-                    graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 }})
+                    graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xff0000 } })
 
-                graphics.strokeLineShape(line1);    
+                graphics.strokeLineShape(line1);
 
                 car.cooldownDisplay.visible = true;
 
@@ -176,13 +177,13 @@ export const Gun = {
 
             if (Math.abs(Slope) > 10) {
                 Slope = 'undef'
-            } 
+            }
 
 
-            if(time > damageCooldown_laser) {
+            if (time > damageCooldown_laser) {
                 self.otherPlayers.getChildren().forEach((otherPlayer) => {
                     if (Slope === 'undef') {
-                        if(Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
+                        if (Math.abs(otherPlayer.x - car.x) < collisionThreshold) {
                             Player.inflictDamage(self, socket, otherPlayer, 1)
                         }
                     }
@@ -193,16 +194,16 @@ export const Gun = {
                 damageCooldown_laser = time + 100
             }
 
-          }
+        }
 
         let othersHit = []
-            
+
     },
-    
+
 
     machineGun(self, gun, car, input, bullets, socket, time) {
         //sets rotation of gun
-        let angle=Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
         gun.setRotation(angle);
         gun.muzzle.setRotation(angle);
 
@@ -211,13 +212,13 @@ export const Gun = {
             gun.x = car.x;
             gun.y = car.y;
             car.gunrotation = gun.rotation;
-            
+
 
             self.gun.muzzle.x = car.x;
             self.gun.muzzle.y = car.y;
-            
+
         }
-        
+
         // Shooting
         if (self.input.activePointer.isDown && time > lastFired_mg) {
             let bullet = bullets.get(car.x, car.y)
@@ -226,12 +227,12 @@ export const Gun = {
 
                 //triggers collision code but doesn't actually collide
                 //basically isTrigger from Unity
-                bullet.setRectangle(20,20);
+                bullet.setRectangle(20, 20);
                 bullet.body.label = "shootingBullet";
                 bullet.body.shooterIdentifier = socket.id; //used to turn off bullet despawning when colliding with car that shot bullet
                 bullet.setSensor(true);
                 bullet.setRotation(angle);
-                bullet.setDepth(-1);
+                bullet.setDepth(1);
                 bullet.setActive(true);
                 bullet.setVisible(true);
                 //console.log(bullet);
@@ -249,13 +250,13 @@ export const Gun = {
     },
 
     poisongun(self, gun, poisonCircle, car, input, socket, time) {
-        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
-        gun.setRotation(angle + Math.PI/2);
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
+        gun.setRotation(angle + Math.PI / 2);
 
         //TODO: car.gunrotation
 
-        car.cooldownDisplay.setText(['Cooldown: ', String( (Math.trunc(10000 + (lastFired_laser - time)))/1000 )]);
-        
+        car.cooldownDisplay.setText(['Cooldown: ', String((Math.trunc(10000 + (lastFired_laser - time))) / 1000)]);
+
         if (car) {
             gun.x = car.x;
             gun.y = car.y;
@@ -263,7 +264,7 @@ export const Gun = {
             poisonCircle.y = car.y;
         }
 
-        if(isCooldownActive && (10000 + (lastFired_laser - time)) < 0){
+        if (isCooldownActive && (10000 + (lastFired_laser - time)) < 0) {
             car.cooldownDisplay.visible = false;
         }
         //trigger poison area on click
@@ -280,7 +281,7 @@ export const Gun = {
                 car.cooldownDisplay.visible = true;
                 isCooldownActive = true;
                 socket.emit('gunFiring')
-    
+
                 //turn circle off after 5 seconds
                 setTimeout(() => {
                     poisonCircle.visible = false;

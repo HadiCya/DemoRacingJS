@@ -36,9 +36,9 @@ class gameScene extends Phaser.Scene {
     this.load.image('car', 'static/assets/car.png')
 
     this.load.spritesheet('poisongun', 'static/assets/poisongun.png', {
-       frameWidth: 30, 
-       frameHeight: 54, 
-       endframe:9
+      frameWidth: 30,
+      frameHeight: 54,
+      endframe: 9
     });
     this.load.image('circle', 'static/assets/circle.png')
 
@@ -116,7 +116,7 @@ class gameScene extends Phaser.Scene {
     gameSong.setVolume(musicVolume);
 
     //sends the enetered player name of this client to server so that it can be stored in array
-    self.socket.emit('updateOptions', {playerName: self.playerName, gunSelection: self.gunSelection})
+    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection })
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -227,19 +227,19 @@ class gameScene extends Phaser.Scene {
           Player.updateHealth(self.car, playerInfo.health)
         }
       } else {
-          self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-            if (playerInfo.playerId === otherPlayer.playerId) {
-               Player.updateOtherHealth(playerInfo, otherPlayer)
-            }
-          })
-        }
-      })
+        self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+          if (playerInfo.playerId === otherPlayer.playerId) {
+            Player.updateOtherHealth(playerInfo, otherPlayer)
+          }
+        })
+      }
+    })
 
     //multiplayer logic for shooting guns (show bullet on all clients)
     this.socket.on('gunFired', function (playerInfo) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerInfo.playerId === otherPlayer.playerId) {
-          
+
           //Determine WHICH gun is being fired and then excecute corrseponding logic:
           if (playerInfo.gunSelection == 'lasergun') {
             otherPlayer.laserActive = true
@@ -256,7 +256,7 @@ class gameScene extends Phaser.Scene {
 
               //triggers collision code but doesn't actually collide
               //basically isTrigger from Unity
-              bullet.setRectangle(20,20);
+              bullet.setRectangle(20, 20);
               bullet.body.label = "shotBullet"; //shotBullet is bullet shot by another player. this avoids bullet deleting itself when hitting other car 
               bullet.body.shooterIdentifier = otherPlayer.playerId; //used to turn off bullet despawning when colliding with car that shot bullet
               bullet.setSensor(true);
@@ -267,18 +267,18 @@ class gameScene extends Phaser.Scene {
               //console.log(bullet);
               bullet.thrust(.03);
               self.bulletSound.play();
-              
-              bullet.x = otherPlayer.x 
+
+              bullet.x = otherPlayer.x
               bullet.y = otherPlayer.y
               console.log(otherPlayer.x, otherPlayer.y)
             }
           }
 
-          if(playerInfo.gunSelection == 'poisongun') {
-              otherPlayer.poisonCircle.visible = true;
-  
-              //turn circle off after 5 seconds
-              setTimeout(() => {otherPlayer.poisonCircle.visible = false}, 5000); 
+          if (playerInfo.gunSelection == 'poisongun') {
+            otherPlayer.poisonCircle.visible = true;
+
+            //turn circle off after 5 seconds
+            setTimeout(() => { otherPlayer.poisonCircle.visible = false }, 5000);
           }
         }
         //console.log(`Compare: ${playerInfo}, ${otherPlayer.playerId}`)
@@ -320,7 +320,7 @@ class gameScene extends Phaser.Scene {
         if (!(bodyA.label == 'otherPlayer' && bodyB.shooterIdentifier === bodyA.gameObject.playerId)) {
           const rootBodyB = getRootBody(bodyB)
           rootBodyB.gameObject.destroy()
-        } 
+        }
       }
 
       if ((bodyA.label == 'shotBullet' && bodyB.label != 'poisonArea')) {
@@ -328,26 +328,26 @@ class gameScene extends Phaser.Scene {
         if (!(bodyB.label == 'otherPlayer' && bodyA.shooterIdentifier === bodyB.gameObject.playerId)) {
           const rootBodyA = getRootBody(bodyA)
           rootBodyA.gameObject.destroy()
-        } 
+        }
       }
 
-      
-     });
 
-     //listeners for guns which are objects that are active continiously
-     this.matter.world.on('collisionactive', function (event) {
+    });
+
+    //listeners for guns which are objects that are active continiously
+    this.matter.world.on('collisionactive', function (event) {
       event.pairs.forEach((pair) => {
         if (pair.bodyA.label == "otherPlayer" && pair.bodyB.label == "poisonArea") {
           Player.inflictDamage(self, self.socket, pair.bodyA.gameObject, 1)
         }
-  
+
         if (pair.bodyB.label == "otherPlayer" && pair.bodyA.label == "poisonArea") {
-          
+
           Player.inflictDamage(self, self.socket, pair.bodyB.gameObject, 1)
         }
-      }) 
-      
-     })
+      })
+
+    })
   }
 
 
@@ -393,7 +393,7 @@ class gameScene extends Phaser.Scene {
       if (this.otherPlayers.getChildren().length >= 0) {
         Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
       }
-      
+
       if (this.gunSelection == 'lasergun') {
         Gun.laserGun(this, this.gun, this.car, this.input, this.socket, time)
       }
