@@ -50,7 +50,7 @@ class gameScene extends Phaser.Scene {
     });
     this.load.image('circle', 'static/assets/circle.png')
 
-    this.load.image('lasergun', 'static/assets/gun.png')
+    this.load.image('lasergun', 'static/assets/ray_gun.png')
     this.load.image('machinegun', 'static/assets/machine_gun.png')//from machince gun
     this.load.image('gun', 'static/assets/gun.png')
     this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
@@ -318,6 +318,7 @@ class gameScene extends Phaser.Scene {
 
     this.socket.on('winnerDeclared', function (playerName) {
       if (gameEnd == false) {
+        gameSong.stop();
         console.log(self.car.position)
         if (!self.winnerText)
           self.winnerText = self.add.text(self.car.x, self.car.y, `${playerName} has won the race!`, { fontSize: 48 })
