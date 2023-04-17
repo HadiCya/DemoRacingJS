@@ -131,6 +131,19 @@ export default class Lobby extends Phaser.Scene {
                 menuSong.setVolume(0)
                 this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice })
             }
+
+            if (event.target.id === 'credit') {
+                
+
+                //remove click event since we are done with it
+                element.removeListener('click');
+
+                
+                menuSong.setVolume(0)
+                this.scene.start('CreditScene',)
+            }
+
+
         }, this)
     }
 

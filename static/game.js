@@ -2,6 +2,7 @@ import { Player } from "./Player.js"
 import { Gun } from "./Gun.js"
 import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 import { Checkpoints } from "./Checkpoints.js"
+import CreditScene from "./CreditScene.js"
 
 
 var gameSong
@@ -514,7 +515,7 @@ class gameScene extends Phaser.Scene {
     if (this.car && this.car.body) {
 
       //force game to begin with less than 8 players if P is pressed
-      if (this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7 && raceActive == false) {
+      if ((this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7) && raceActive == false) {
         this.socket.emit('startRace')
       }
 
@@ -582,7 +583,7 @@ var config = { //Keep this at the bottom of the file
   dom: {
     createContainer: true
   },
-  scene: [Lobby, gameScene]
+  scene: [Lobby, CreditScene, gameScene]
 }
 
 var game = new Phaser.Game(config) //Keep this at the bottom of the file

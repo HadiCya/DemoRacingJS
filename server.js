@@ -130,7 +130,6 @@ io.on('connection', function (socket) {
   socket.on('declareWinner', function () {
     if (raceActive == true) {
       console.log("winnerDeclared")
-      raceStarting = false;
       raceActive = false;
       io.emit('winnerDeclared', players[socket.id].playerName)
     }
