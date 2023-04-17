@@ -2,12 +2,14 @@ let lastCheckpointPassed = 0;
 let lapNumber = 0;
 
 const checkpointsPerLap = 28;
-const lapsPerRace = 1;
+const lapsPerRace = 3;
 
 var graphics
 var line
 var threshold
 var collisionThreshold
+
+var hasFinished = false
 
 
 export const Checkpoints = {
@@ -15,6 +17,7 @@ export const Checkpoints = {
         //reset globals
         lastCheckpointPassed = 0;
         lapNumber = 0;
+        hasFinished = false
 
         //Create map from tileset
         self.map = self.make.tilemap({ key: 'tilemap' });
@@ -89,6 +92,9 @@ export const Checkpoints = {
     },
 
     declareFinished(socket) {
-        socket.emit('declareWinner')
+        if (hasFinished == false) {
+            socket.emit('declareWinner')
+            hasFinished = true
+        }
     }
 }

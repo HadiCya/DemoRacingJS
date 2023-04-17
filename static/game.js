@@ -2,10 +2,9 @@ import { Player } from "./Player.js"
 import { Gun } from "./Gun.js"
 import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 import { Checkpoints } from "./Checkpoints.js"
+import CreditScene from "./CreditScene.js"
 
-var poisongun;
-var input; //mouse position for sprites
-var circle;
+
 var gameSong
 
 
@@ -32,7 +31,7 @@ class gameScene extends Phaser.Scene {
     this.playerName = data.playerName
     this.gunSelection = data.gunSelection
     this.carStats = data.carStats
-    //console.log(this.carStats)
+    console.log(this.carStats)
   }
 
   //image preloads for car and gun
@@ -52,6 +51,8 @@ class gameScene extends Phaser.Scene {
 
     this.load.image('lasergun', 'static/assets/ray_gun.png')
     this.load.image('machinegun', 'static/assets/machine_gun.png')//from machince gun
+    this.load.image('rocketgun', 'static/assets/rocketLauncher.png')
+    this.load.image('rocket', 'static/assets/rocket_trans.png')
     this.load.image('gun', 'static/assets/gun.png')
     this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
 
@@ -62,6 +63,11 @@ class gameScene extends Phaser.Scene {
     this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
       frameWidth: 82,
       frameHeight: 34
+    });
+
+    this.load.spritesheet('rocketAnimation', 'static/assets/rocket_animation.png', {
+      frameWidth: 17,
+      frameHeight: 80
     });
 
     this.load.spritesheet('explosion', 'static/assets/explosion-sheet.png', {
@@ -126,7 +132,7 @@ class gameScene extends Phaser.Scene {
     raceActive = false
 
     //sends the enetered player name of this client to server so that it can be stored in array
-    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection, carSelection: self.carStats.carSelection })
+    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection, carSelection: self.carStats.carSelection, health: self.carStats.maxHealth })
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -137,6 +143,10 @@ class gameScene extends Phaser.Scene {
 
     this.socket.on('raceStatus', function (isRaceActive) {
       raceActive = isRaceActive
+
+      if (isRaceActive) {
+        gameSong.setVolume(musicVolume)
+      }
     })
 
     //check list of players connected and identify us from other players
@@ -223,6 +233,17 @@ class gameScene extends Phaser.Scene {
       repeat: -1
     })
 
+    //rocket animation
+    this.anims.create({
+      key: 'animateRocket',
+      frames: this.anims.generateFrameNumbers('rocketAnimation', {start: 0, end: 8}),
+      frameRate: 30,
+      repeat: 5, // might effect how long its will be on screen, but not sure exaclty
+      yoyo: true, //optional
+      //hideOnComplete: true
+    });
+
+
     this.socket.on('reportHit', function (playerInfo) {
       //console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
@@ -297,7 +318,7 @@ class gameScene extends Phaser.Scene {
               bullet.setActive(true);
               bullet.setVisible(true);
               //console.log(bullet);
-              bullet.thrust(.03);
+              bullet.thrust(.04);
               self.bulletSound.play();
 
               bullet.x = otherPlayer.x
@@ -312,19 +333,53 @@ class gameScene extends Phaser.Scene {
             //turn circle off after 5 seconds
             setTimeout(() => { otherPlayer.poisonCircle.visible = false }, 5000);
           }
+
+          if (playerInfo.gunSelection == 'rocketgun') {
+            otherPlayer.gun.rocket = self.add.sprite(otherPlayer.x, otherPlayer.y, 'rocketAnimation');
+            otherPlayer.gun.rocket.setDepth(2); //puts above cars
+            otherPlayer.gun.rocket.play('animateRocket'); // starts animation
+            console.log(otherPlayer.gun.rocket)
+          }
         }
       })
     })
 
+    this.socket.on('rocketMoved', function(movementInfo) {
+      self.otherPlayers.getChildren().forEach((otherPlayer) => {
+        if (otherPlayer.playerId == movementInfo.otherPlayerId && otherPlayer.gun.rocket) {
+          otherPlayer.gun.rocket.x = movementInfo.x;
+          otherPlayer.gun.rocket.y = movementInfo.y;
+          otherPlayer.gun.rocket.rotation = movementInfo.rotation + Math.PI / 2
+        }
+      })
+    })
+
+    this.socket.on('rocketExpired', function(playerId) {
+
+      self.otherPlayers.getChildren().forEach((otherPlayer) => {
+        if ((otherPlayer.playerId == playerId) && otherPlayer.gun.rocket) {
+          console.log(otherPlayer.gun.rocket)
+          //TODO: actually delete the rocket
+          otherPlayer.gun.rocket.visible = false
+          otherPlayer.gun.rocket.active = false
+          otherPlayer.gun.rocket = null
+        }
+      })
+    })
+
+
     this.socket.on('winnerDeclared', function (playerName) {
       if (gameEnd == false) {
-        gameSong.stop();
+        gameSong.setVolume(0);
         console.log(self.car.position)
-        if (!self.winnerText)
-          self.winnerText = self.add.text(self.car.x, self.car.y, `${playerName} has won the race!`, { fontSize: 48 })
-        gameEnd == true
+
+        self.winnerText = self.add.text(self.car.x, self.car.y, `${playerName} has won the race!`, { fontSize: 48 })
+        console.log(self.winnerText)
+
+        gameEnd = true
 
         setTimeout(() => {
+          self.winnerText.destroy();
           self.socket.disconnect();
           self.scene.start('Lobby');
         }, 5000)
@@ -377,6 +432,32 @@ class gameScene extends Phaser.Scene {
         }
       }
 
+      if ((bodyA.label != 'player' && bodyA.label != 'poisonArea' && bodyA.label != 'checkpoint') && (bodyB.label == 'firingRocket')) {
+        if (bodyA.label == 'otherPlayer') {
+          Player.inflictDamage(self, self.socket, bodyA.gameObject, 5);
+        }
+       
+        console.log(bodyB);
+
+        self.socket.emit('rocketExpiring')
+
+        const rootBodyB = getRootBody(bodyB)
+        rootBodyB.gameObject.destroy()
+        
+      }
+
+      if ((bodyA.label == 'firingRocket') && (bodyB.label != 'player' && bodyB.label != 'poisonArea' && bodyB.label != 'checkpoint')) {
+        if (bodyB.label == 'otherPlayer') {
+          Player.inflictDamage(self, self.socket, bodyB.gameObject, 5);
+        }
+
+        self.socket.emit('rocketExpiring')
+
+        const rootBodyA = getRootBody(bodyA)
+        rootBodyA.gameObject.destroy();
+       
+      }
+
 
     });
 
@@ -426,11 +507,15 @@ class gameScene extends Phaser.Scene {
       this.winnerText.y = this.car.y - 100
     }
 
+        // //sets rotation of gun
+    // let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+    // gun.setRotation(angle);
+
     //Make sure car has been instantiated correctly
     if (this.car && this.car.body) {
 
       //force game to begin with less than 8 players if P is pressed
-      if (this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7 && raceActive == false) {
+      if ((this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7) && raceActive == false) {
         this.socket.emit('startRace')
       }
 
@@ -439,8 +524,6 @@ class gameScene extends Phaser.Scene {
 
 
       this.input.activePointer.updateWorldPoint(cam)
-
-
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
@@ -459,21 +542,31 @@ class gameScene extends Phaser.Scene {
         if (this.gunSelection === 'poisongun') {
           Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
         }
-      }
-    }
 
+        if (this.gunSelection === 'rocketgun') {
+          Gun.rocketGun(this, this.gun, this.car, this.input, this.socket, time);
+        }
+
+      }
+    
+    }
+  
   }
 
-
-
 }
+
+
+
+
+
+
 
 var config = { //Keep this at the bottom of the file
   type: Phaser.AUTO,
   parent: 'phaser-example',
   width: 1280,
   height: 720,
-  transparent: true,
+  transparent: true, // makes background the color set in index.html instead of black
   physics: {
     default: "matter",
     matter: {
@@ -490,7 +583,7 @@ var config = { //Keep this at the bottom of the file
   dom: {
     createContainer: true
   },
-  scene: [Lobby, gameScene]
+  scene: [Lobby, CreditScene, gameScene]
 }
 
 var game = new Phaser.Game(config) //Keep this at the bottom of the file

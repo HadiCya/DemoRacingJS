@@ -1,6 +1,7 @@
 export var musicVolume = 0.1;
 export var effectsVolume = 0.1;
 
+
 export default class Lobby extends Phaser.Scene {
     constructor() {
         super('Lobby')
@@ -20,28 +21,28 @@ export default class Lobby extends Phaser.Scene {
             {
                 maxspeed: 10.0,
                 accel: 0.2,
-                handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                handling: 1.5,
+                driftHandling: 2.5,
+                oversteer: 3.5,
                 decay: 0.05,
-                maxHealth: 10,
+                maxHealth: 15,
                 carSelection: 'allRounder'
             },
             //High Top Speed
             {
-                maxspeed: 10.0,
+                maxspeed: 13.0,
                 accel: 0.2,
-                handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                handling: 1,
+                driftHandling: 2,
+                oversteer: 3,
                 decay: 0.05,
-                maxHealth: 10,
+                maxHealth: 8,
                 carSelection: 'fast'
             },
             //High Acceleration
             {
-                maxspeed: 10.0,
-                accel: 0.2,
+                maxspeed: 8.0,
+                accel: 0.5,
                 handling: 2,
                 driftHandling: 3,
                 oversteer: 4,
@@ -51,29 +52,30 @@ export default class Lobby extends Phaser.Scene {
             },
             //High Handling
             {
-                maxspeed: 10.0,
+                maxspeed: 9.0,
                 accel: 0.2,
-                handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                handling: 3,
+                driftHandling: 4,
+                oversteer: 5,
                 decay: 0.05,
                 maxHealth: 10,
                 carSelection: 'nimble'
             },
             //High Health
             {
-                maxspeed: 10.0,
+                maxspeed: 7.0,
                 accel: 0.2,
                 handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                driftHandling: 2.5,
+                oversteer: 3.5,
                 decay: 0.05,
-                maxHealth: 10,
+                maxHealth: 20,
                 carSelection: 'tank'
             },
         ]
 
         var menuSong = this.sound.add('menuTheme');
+
         menuSong.loop = true;
         menuSong.play();
         menuSong.setVolume(musicVolume);
@@ -126,9 +128,22 @@ export default class Lobby extends Phaser.Scene {
 
                 var enteredName = textInput.value
 
+                menuSong.setVolume(0)
                 this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice })
-                menuSong.stop();
             }
+
+            if (event.target.id === 'credit') {
+                
+
+                //remove click event since we are done with it
+                element.removeListener('click');
+
+                
+                menuSong.setVolume(0)
+                this.scene.start('CreditScene',)
+            }
+
+
         }, this)
     }
 
