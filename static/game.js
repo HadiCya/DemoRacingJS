@@ -120,7 +120,7 @@ class gameScene extends Phaser.Scene {
     gameSong = this.sound.add('gameTheme');
     gameSong.loop = true;
     gameSong.play();
-    gameSong.setVolume(musicVolume);
+    gameSong.setVolume(0);
 
     gameEnd = false
     raceActive = false
@@ -240,6 +240,8 @@ class gameScene extends Phaser.Scene {
 
     //start the race (trigger countdown and allow player to move)
     this.socket.on('raceStarted', function () {
+      gameSong.setVolume(musicVolume)
+
       let countdown = self.add.text(self.car.x - 350, self.car.y - 100, 'Race Starting', { fontSize: 48 })
 
       //TODO: rewrite using time and delta in update

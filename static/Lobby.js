@@ -1,4 +1,4 @@
-export var musicVolume = 0.0;
+export var musicVolume = 1;
 export var effectsVolume = 1;
 
 export default class Lobby extends Phaser.Scene {
