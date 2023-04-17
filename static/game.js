@@ -484,7 +484,7 @@ var config = { //Keep this at the bottom of the file
         width: 7680,
         height: 7680
       },
-      debug: true,
+      debug: false,
     }
   },
   dom: {
