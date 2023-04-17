@@ -260,7 +260,7 @@ export const Gun = {
                 bullet.setActive(true);
                 bullet.setVisible(true);
                 //console.log(bullet);
-                bullet.thrust(.04);
+                bullet.thrust(.06);
 
                 self.bulletSound.play();
                 self.bulletSound.setVolume(effectsVolume);
@@ -324,7 +324,7 @@ export const Gun = {
 
     rocketGun(self, gun, car, input, socket, time) {
         //sets rotation of gun
-        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX,  input.activePointer.worldY);
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX, input.activePointer.worldY);
         gun.setRotation(angle);
 
         pointer = input.activePointer; //sets pointer to user's mouse
@@ -332,9 +332,9 @@ export const Gun = {
         gun.y = car.y;
         car.gunrotation = gun.rotation;
 
-        car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (launchedtime - time))/1000 )]);
-        
-        if(cooldown + (launchedtime - time) < 0){
+        car.cooldownDisplay.setText(['Cooldown: ', String(Math.trunc(cooldown + (launchedtime - time)) / 1000)]);
+
+        if (cooldown + (launchedtime - time) < 0) {
             car.cooldownDisplay.visible = false;
         }
 
@@ -376,7 +376,7 @@ export const Gun = {
                 rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 4000 + rocket.x; //divided by 1000 to get seconds from miliseconds
                 rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 4000 + rocket.y;
 
-                socket.emit('rocketMoving', {x: rocket.x, y: rocket.y, rotation: rocketDirection})
+                socket.emit('rocketMoving', { x: rocket.x, y: rocket.y, rotation: rocketDirection })
 
                 if (time >= endTime) {
                     console.log("expired")
@@ -384,14 +384,14 @@ export const Gun = {
                     socket.emit('rocketExpiring')
                     launched = false
                 }
-            } 
-            else {   
+            }
+            else {
                 launched = false; //rocket hit something and was destroyed so we can launch another one
             }
         }
 
 
-   
+
     }
 
 
