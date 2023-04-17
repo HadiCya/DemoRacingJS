@@ -9,9 +9,16 @@ var line
 var threshold
 var collisionThreshold
 
+var hasFinished = false
+
 
 export const Checkpoints = {
     initializeMap(self) {
+        //reset globals
+        lastCheckpointPassed = 0;
+        lapNumber = 0;
+        hasFinished = false
+
         //Create map from tileset
         self.map = self.make.tilemap({ key: 'tilemap' });
         self.roadTileset = self.map.addTilesetImage('track_tilemap_demo', 'roadTiles');
@@ -68,9 +75,8 @@ export const Checkpoints = {
 
     },
 
-    detectLap(car) {
+    detectLap(car, socket) {
         const collisionThreshold = threshold / 2 + 25; // 25 for half the car length, and threshold is calculated on creation, its the length of the line 
-
         // checks if the car is withith the threshold from the center of the line
         if ((Math.abs((car.y) - ((line.y1 + line.y2) / 2)) < collisionThreshold) && (Math.abs((car.x) - ((line.x1 + line.x2) / 2)) < collisionThreshold)) {
             if (lastCheckpointPassed == checkpointsPerLap) {
@@ -80,12 +86,15 @@ export const Checkpoints = {
             }
 
             if (lapNumber > lapsPerRace) {
-                this.declareFinished()
+                this.declareFinished(socket)
             }
         }
     },
 
-    declareFinished() {
-        console.log("finished")
+    declareFinished(socket) {
+        if (hasFinished == false) {
+            socket.emit('declareWinner')
+            hasFinished = true
+        }
     }
 }

@@ -25,46 +25,59 @@ var connected = 0
 var amountplayers = 0
 positionarray = [false, false, false, false, false, false, false, false]//the starting position array
 var position = 9
+
+var raceStarting = false //so that start message is only sent once
+var raceActive = false
+
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
-  
-connected++
-//goes through and finds the first empty position
-for (let i = 0; i < 8; i++) {
-  if(!positionarray[i]){
-    position = i 
-    positionarray[i] = true
-    break
-  }
-  else{position = 8}
-}
-amountplayers++
 
-//console.log(amountplayers)
+  connected++
+  //goes through and finds the first empty position
+  for (let i = 0; i < 8; i++) {
+    if (!positionarray[i]) {
+      position = i
+      positionarray[i] = true
+      break
+    }
+    else { position = 8 }
+  }
+  amountplayers++
+
+  //console.log(amountplayers)
   players[socket.id] = {
     rotation: 0,
     x: 30,
     y: 30,
+    gunrotation: 0,
+    gunSelection: 'machinegun',
+    carSelection: 'allRounder',
+    health: 10,
     playerId: socket.id,
     playerName: socket.id,
     color: getRandomColor(),
     numberconnected: position
-    
+
   }
 
   //give new client list of players already in game
   socket.emit('currentPlayers', players)
 
-  //new client has updated their playerName
-  socket.on('updateName', function (playerName) {
+  socket.emit('raceStatus', raceActive)
+
+  //only adds new player to other clients once the connecting client's options (playerName and gunSelection) have been updated correctly
+  socket.on('updateOptions', function (options) {
     //store new playerName
-    players[socket.id].playerName = playerName
+    players[socket.id].playerName = options.playerName
+    players[socket.id].gunSelection = options.gunSelection
+    players[socket.id].carSelection = options.carSelection
+    players[socket.id].health = options.health
 
     //tell clients already connected that a new player has joined
     socket.broadcast.emit('newPlayer', players[socket.id])
   })
- 
+
   socket.on('disconnect', function () {
     console.log('player [' + socket.id + '] disconnected')
     var spot = (players[socket.id].numberconnected)//which position disconnected
@@ -75,20 +88,55 @@ amountplayers++
     amountplayers--
   })
 
-  socket.on('playerMovement', function (movementData) {
-
+  socket.on('playerMovement', function (movementData) { //this function listens for socket.emit('playerMovment')
+    //update server values to match client movement
     players[socket.id].x = movementData.x
     players[socket.id].y = movementData.y
     players[socket.id].rotation = movementData.rotation
-
+    players[socket.id].gunrotation = movementData.gunrotation
+    //let other clients know change
     socket.broadcast.emit('playerMoved', players[socket.id])
   })
 
-  socket.on('healthChange', function (health) {
-    players[socket.id].health = health;
-
-    socket.broadcast.emit('healthChanged', players[socket.id]);
+  socket.on('startRace', function () {
+    if (raceActive == false) {
+      raceActive = true
+      io.emit('raceStarted')
+    }
   })
+
+  socket.on('hitOpponent', function (hitInfo) {
+    players[hitInfo.playerId].health -= hitInfo.damage
+    io.emit('reportHit', players[hitInfo.playerId])
+  })
+
+  socket.on('resetHealth', function (health) {
+    players[socket.id].health = health
+    io.emit('reportHit', players[socket.id])
+  })
+
+  socket.on('gunFiring', function () {
+    socket.broadcast.emit('gunFired', players[socket.id])
+  })
+
+  socket.on('rocketMoving', function(rocketPosition) {
+    socket.broadcast.emit('rocketMoved', {x: rocketPosition.x, y: rocketPosition.y, rotation: rocketPosition.rotation, otherPlayerId: socket.id})
+  })
+
+  socket.on('rocketExpiring', function() {
+    socket.broadcast.emit('rocketExpired', socket.id)
+  })
+
+  socket.on('declareWinner', function () {
+    if (raceActive == true) {
+      console.log("winnerDeclared")
+      raceStarting = false;
+      raceActive = false;
+      io.emit('winnerDeclared', players[socket.id].playerName)
+    }
+  })
+
+
 })
 
 function getRandomColor() {
