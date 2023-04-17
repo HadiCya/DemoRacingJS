@@ -33,24 +33,24 @@ export const Gun = {
 
         if (gunChoice === 'lasergun') {
             //adds gun sprite-image
-            self.gun = self.add.sprite(400, 300, 'lasergun');
+            self.gun = self.add.sprite(self.car.x, self.car.y, 'lasergun');
             self.gun.setDepth(1);
         }
 
         if (gunChoice === 'machinegun') {
-            self.gun = self.add.sprite(400, 300, 'machinegun');
+            self.gun = self.add.sprite(self.car.x, self.car.y, 'machinegun');
             self.gun.setDepth(1);
             //adds gun animation
-            self.gun.muzzle = self.add.sprite(400, 300, 'bulletAnimation');
+            self.gun.muzzle = self.add.sprite(self.car.x, self.car.y, 'bulletAnimation');
             self.gun.muzzle.setDepth(2);
         }
 
         if (gunChoice === 'poisongun') {
             // //adds gun sprite-image
-            self.gun = self.add.sprite(400, 300, 'poisongun');
+            self.gun = self.add.sprite(self.car.x, self.car.y, 'poisongun');
             self.gun.setDepth(1);
 
-            self.poisonCircle = self.matter.add.image(400, 300, 'circle')
+            self.poisonCircle = self.matter.add.image(self.car.x, self.car.y, 'circle')
             self.poisonCircle.setScale(9);
             self.poisonCircle.setBody({
                 type: 'circle',
@@ -70,28 +70,28 @@ export const Gun = {
 
         if (gunChoice === 'lasergun') {
             //adds gun sprite-image
-            otherPlayer.gun = self.add.sprite(400, 300, 'lasergun');
+            otherPlayer.gun = self.add.sprite(otherPlayer.x, otherPlayer.y, 'lasergun');
             otherPlayer.gun.setDepth(1);
 
-            otherPlayer.laserLine = new Phaser.Geom.Line(400, 300, 400, 300);
+            otherPlayer.laserLine = new Phaser.Geom.Line(otherPlayer.x, otherPlayer.y, 400, 300);
             otherPlayer.laserActive = false
             otherPlayer.laserDuration = duration
             otherPlayer.graphics = self.add.graphics({ lineStyle: { width: 4, color: laserColor } });
-            otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
+            // otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
 
         }
 
         if (gunChoice === 'machinegun') {
-            otherPlayer.gun = self.add.sprite(400, 300, 'machinegun');
+            otherPlayer.gun = self.add.sprite(otherPlayer.x, otherPlayer.y, 'machinegun');
             otherPlayer.gun.setDepth(1);
         }
 
         if (gunChoice === 'poisongun') {
             //  //adds gun sprite-image
-            otherPlayer.gun = self.add.sprite(400, 300, 'poisongun')
+            otherPlayer.gun = self.add.sprite(otherPlayer.x, otherPlayer.y, 'poisongun')
                 .setDepth(1)
 
-            otherPlayer.poisonCircle = self.add.sprite(400, 300, 'circle')
+            otherPlayer.poisonCircle = self.add.sprite(otherPlayer.x, otherPlayer.y, 'circle')
                 .setOrigin(0.5, 0.5)
                 .setDisplaySize(50, 50)
 

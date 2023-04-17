@@ -17,6 +17,7 @@ var threshold2
 var istrue = true
 var startspawn = 0
 
+var raceActive
 var gameEnd = false //ends game once winner is determined
 
 class gameScene extends Phaser.Scene {
@@ -37,6 +38,10 @@ class gameScene extends Phaser.Scene {
   //image preloads for car and gun
   preload() {
     this.load.image('car', 'static/assets/car.png')
+    this.load.image('ferrari', 'static/assets/ferrari.png')
+    this.load.image('scifi', 'static/assets/sci-fi-car.png')
+    this.load.image('monsterTruck', 'static/assets/monster-truck.png')
+    this.load.image('tank', 'static/assets/tank.png')
 
     this.load.spritesheet('poisongun', 'static/assets/poisongun.png', {
       frameWidth: 30,
@@ -118,16 +123,21 @@ class gameScene extends Phaser.Scene {
     gameSong.setVolume(musicVolume);
 
     gameEnd = false
+    raceActive = false
 
     //sends the enetered player name of this client to server so that it can be stored in array
-    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection })
+    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection, carSelection: self.carStats.carSelection })
 
     //array to store other players
     this.otherPlayers = this.add.group()
 
     //input system for player control (CursorKeys is arrow keys)
     this.cursors = this.input.keyboard.createCursorKeys()
-    this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT')
+    this.wasd = this.input.keyboard.addKeys('W,S,A,D,SHIFT,P')
+
+    this.socket.on('raceStatus', function (isRaceActive) {
+      raceActive = isRaceActive
+    })
 
     //check list of players connected and identify us from other players
     this.socket.on('currentPlayers', function (players) {
@@ -208,7 +218,7 @@ class gameScene extends Phaser.Scene {
 
     this.anims.create({
       key: 'explode',
-      frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 7 }),
+      frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 12 }),
       frameRate: 10,
       repeat: -1
     })
@@ -227,6 +237,33 @@ class gameScene extends Phaser.Scene {
         })
       }
     })
+
+    //start the race (trigger countdown and allow player to move)
+    this.socket.on('raceStarted', function () {
+      let countdown = self.add.text(self.car.x - 350, self.car.y - 100, 'Race Starting', { fontSize: 48 })
+
+      //TODO: rewrite using time and delta in update
+      countdown.setText(3)
+
+      setTimeout(() => {
+        countdown.setText(2)
+
+        setTimeout(() => {
+          countdown.setText(1)
+
+          setTimeout(() => {
+            countdown.setText('Go!')
+            raceActive = true
+
+            setTimeout(() => {
+              countdown.destroy()
+            }, 3000)
+          }, 1000)
+        }, 1000)
+      }, 1000)
+
+    })
+
 
     //multiplayer logic for shooting guns (show bullet on all clients)
     this.socket.on('gunFired', function (playerInfo) {
@@ -388,30 +425,37 @@ class gameScene extends Phaser.Scene {
 
     //Make sure car has been instantiated correctly
     if (this.car && this.car.body) {
+
+      //force game to begin with less than 8 players if P is pressed
+      if (this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7 && raceActive == false) {
+        this.socket.emit('startRace')
+      }
+
       //check if car has passed lap line
       Checkpoints.detectLap(this.car, this.socket);
+
+
+      this.input.activePointer.updateWorldPoint(cam)
+
+
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
-      Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
-
-      this.input.activePointer.updateWorldPoint(cam)
-
-      if (this.gunSelection == 'lasergun') {
-        Gun.laserGun(this, this.gun, this.car, this.input, this.socket, time)
-      }
-
-      if (this.gunSelection == 'machinegun') {
-        Gun.machineGun(this, this.gun, this.car, this.input, this.bullets, this.socket, time)
-      }
-
-      if (this.gunSelection === 'poisongun') {
-        Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
-      }
-
-      if (this.otherPlayers.getChildren().length >= 7) {
+      if (raceActive) {
         Player.drive(this.car, this.label, this.cursors, delta, this.socket, this.wasd)
+
+        if (this.gunSelection == 'lasergun') {
+          Gun.laserGun(this, this.gun, this.car, this.input, this.socket, time)
+        }
+
+        if (this.gunSelection == 'machinegun') {
+          Gun.machineGun(this, this.gun, this.car, this.input, this.bullets, this.socket, time)
+        }
+
+        if (this.gunSelection === 'poisongun') {
+          Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
+        }
       }
     }
 

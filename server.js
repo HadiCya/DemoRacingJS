@@ -25,6 +25,10 @@ var connected = 0
 var amountplayers = 0
 positionarray = [false, false, false, false, false, false, false, false]//the starting position array
 var position = 9
+
+var raceStarting = false //so that start message is only sent once
+var raceActive = false
+
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
@@ -48,6 +52,7 @@ io.on('connection', function (socket) {
     y: 30,
     gunrotation: 0,
     gunSelection: 'machinegun',
+    carSelection: 'allRounder',
     health: 10,
     playerId: socket.id,
     playerName: socket.id,
@@ -59,11 +64,14 @@ io.on('connection', function (socket) {
   //give new client list of players already in game
   socket.emit('currentPlayers', players)
 
+  socket.emit('raceStatus', raceActive)
+
   //only adds new player to other clients once the connecting client's options (playerName and gunSelection) have been updated correctly
   socket.on('updateOptions', function (options) {
     //store new playerName
     players[socket.id].playerName = options.playerName
     players[socket.id].gunSelection = options.gunSelection
+    players[socket.id].carSelection = options.carSelection
 
     //tell clients already connected that a new player has joined
     socket.broadcast.emit('newPlayer', players[socket.id])
@@ -89,6 +97,13 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id])
   })
 
+  socket.on('startRace', function () {
+    if (raceActive == false) {
+      raceActive = true
+      io.emit('raceStarted')
+    }
+  })
+
   socket.on('hitOpponent', function (hitInfo) {
     players[hitInfo.playerId].health -= hitInfo.damage
     io.emit('reportHit', players[hitInfo.playerId])
@@ -104,6 +119,8 @@ io.on('connection', function (socket) {
   })
 
   socket.on('declareWinner', function () {
+    raceStarting = false;
+    raceActive = false;
     io.emit('winnerDeclared', players[socket.id].playerName)
   })
 

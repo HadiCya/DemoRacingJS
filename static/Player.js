@@ -36,15 +36,49 @@ export const Player = {
         isDriftStart = true;
     },
 
+    //create car model based on car selection
+    createCar(self, playerInfo, carSelection) {
+        let car;
+
+        if (carSelection === 'allRounder') {
+            car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
+                .setOrigin(0.5, 0.5)
+                .setDisplaySize(60, 40)
+                .setRotation(playerInfo.rotation)
+            car.setTint(0x9a4ce3);
+        } else if (carSelection === 'fast') {
+            car = self.matter.add.image(playerInfo.x, playerInfo.y, 'ferrari')
+                .setOrigin(0.5, 0.5)
+                .setDisplaySize(70, 37)
+                .setRotation(playerInfo.rotation)
+        } else if (carSelection === 'accelerator') {
+            car = self.matter.add.image(playerInfo.x, playerInfo.y, 'scifi')
+                .setOrigin(0.5, 0.5)
+                .setDisplaySize(56, 40)
+                .setRotation(playerInfo.rotation)
+        } else if (carSelection === 'nimble') {
+            car = self.matter.add.image(playerInfo.x, playerInfo.y, 'monsterTruck')
+                .setOrigin(0.5, 0.5)
+                .setDisplaySize(50, 50)
+                .setRotation(playerInfo.rotation)
+        } else if (carSelection === 'tank') {
+            car = self.matter.add.image(playerInfo.x, playerInfo.y, 'tank')
+                .setOrigin(0.5, 0.5)
+                .setDisplaySize(90, 46)
+                .setRotation(playerInfo.rotation)
+        }
+
+        return car
+    },
+
     //function to instantiate car of current player now also takes in the connected value so we know where you are in the lineup
     addPlayer(self, playerInfo, connected, socket) {
 
         this.setStats(self.carStats)
 
-        //self.car = matter.add.existing(new Car(this, playerInfo))
-        self.car = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
-            .setOrigin(0.5, 0.5)
-            .setDisplaySize(50, 50)
+        console.log(playerInfo)
+
+        self.car = this.createCar(self, playerInfo, self.carStats.carSelection)
 
         self.car.health = maxHealth;
 
@@ -57,15 +91,11 @@ export const Player = {
         self.car.cooldownDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Cooldown: ", cooldown]);
         self.car.cooldownDisplay.visible = false;
 
-        Gun.addGun(self, self.gunSelection)
 
         self.car.explosion = self.add.sprite(playerInfo.x, playerInfo.y, 'explosion');
         self.car.explosion.visible = false;
         self.car.explosion.setDepth(2)
 
-        //self.car.setCollideWorldBounds(true)
-        self.car.setTint(playerInfo.color);
-        //self.car.setDrag(1000)
 
         self.cameras.main.setBounds(0, 0, 7680, 8640);
         self.cameras.main.startFollow(self.car, true);
@@ -75,10 +105,10 @@ export const Player = {
         //gives us permantent access to which position in the lineup you are? i dont remember 100%
         connectedposition = connected
 
-        //moves the car to their starting position
-        self.car.setY(1200)
-        self.car.setX(750)
-        self.car.setRotation(Math.PI / 2)
+        // //moves the car to their starting position
+        // self.car.setY(1200)
+        // self.car.setX(750)
+        // self.car.setRotation(Math.PI / 2)
 
         switch (connectedposition) {
             case 0:
@@ -124,13 +154,15 @@ export const Player = {
             default:
                 self.car.setY(1200)
                 self.car.setX(500)
-                self.car.setRotation(0)
+                self.car.setRotation(Math.PI / 2)
         }
+
+        Gun.addGun(self, self.gunSelection)
+
         //updates position on each of other clients
         socket.emit('playerMovement', { x: self.car.x, y: self.car.y, rotation: self.car.rotation })
         //updates your label for everything
         self.label.setPosition(self.car.x, self.car.y)
-
 
         //car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
         //label.y = car.y - labelOffsetY;
@@ -138,10 +170,15 @@ export const Player = {
 
     //function to instantiate cars of other players
     addOtherPlayers(self, playerInfo) {
-        const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
-            .setOrigin(0.5, 0.5)
-            .setDisplaySize(50, 50)
-            .setRotation(playerInfo.rotation)
+
+        console.log(playerInfo)
+
+        // const otherPlayer = self.matter.add.image(playerInfo.x, playerInfo.y, 'car')
+        //     .setOrigin(0.5, 0.5)
+        //     .setDisplaySize(50, 50)
+        //     .setRotation(playerInfo.rotation)
+
+        const otherPlayer = this.createCar(self, playerInfo, playerInfo.carSelection)
 
         Gun.addOtherGun(self, otherPlayer, playerInfo.gunSelection)
 

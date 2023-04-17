@@ -24,7 +24,8 @@ export default class Lobby extends Phaser.Scene {
                 driftHandling: 3,
                 oversteer: 4,
                 decay: 0.05,
-                maxHealth: 10
+                maxHealth: 10,
+                carSelection: 'allRounder'
             },
             //High Top Speed
             {
@@ -34,7 +35,8 @@ export default class Lobby extends Phaser.Scene {
                 driftHandling: 3,
                 oversteer: 4,
                 decay: 0.05,
-                maxHealth: 10
+                maxHealth: 10,
+                carSelection: 'fast'
             },
             //High Acceleration
             {
@@ -44,7 +46,8 @@ export default class Lobby extends Phaser.Scene {
                 driftHandling: 3,
                 oversteer: 4,
                 decay: 0.05,
-                maxHealth: 10
+                maxHealth: 10,
+                carSelection: 'accelerator'
             },
             //High Handling
             {
@@ -54,7 +57,8 @@ export default class Lobby extends Phaser.Scene {
                 driftHandling: 3,
                 oversteer: 4,
                 decay: 0.05,
-                maxHealth: 10
+                maxHealth: 10,
+                carSelection: 'nimble'
             },
             //High Health
             {
@@ -64,7 +68,8 @@ export default class Lobby extends Phaser.Scene {
                 driftHandling: 3,
                 oversteer: 4,
                 decay: 0.05,
-                maxHealth: 10
+                maxHealth: 10,
+                carSelection: 'tank'
             },
         ]
 
@@ -121,7 +126,7 @@ export default class Lobby extends Phaser.Scene {
 
                 var enteredName = textInput.value
 
-                this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice})
+                this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice })
                 menuSong.stop();
             }
         }, this)
