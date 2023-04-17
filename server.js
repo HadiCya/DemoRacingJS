@@ -72,6 +72,7 @@ io.on('connection', function (socket) {
     players[socket.id].playerName = options.playerName
     players[socket.id].gunSelection = options.gunSelection
     players[socket.id].carSelection = options.carSelection
+    players[socket.id].health = options.health
 
     //tell clients already connected that a new player has joined
     socket.broadcast.emit('newPlayer', players[socket.id])
@@ -116,6 +117,14 @@ io.on('connection', function (socket) {
 
   socket.on('gunFiring', function () {
     socket.broadcast.emit('gunFired', players[socket.id])
+  })
+
+  socket.on('rocketMoving', function(rocketPosition) {
+    socket.broadcast.emit('rocketMoved', {x: rocketPosition.x, y: rocketPosition.y, rotation: rocketPosition.rotation, otherPlayerId: socket.id})
+  })
+
+  socket.on('rocketExpiring', function() {
+    socket.broadcast.emit('rocketExpired', socket.id)
   })
 
   socket.on('declareWinner', function () {
