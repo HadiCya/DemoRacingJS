@@ -1,6 +1,7 @@
 export var musicVolume = 0.1;
 export var effectsVolume = 0.1;
 
+
 export default class Lobby extends Phaser.Scene {
     constructor() {
         super('Lobby')
@@ -74,6 +75,7 @@ export default class Lobby extends Phaser.Scene {
         ]
 
         var menuSong = this.sound.add('menuTheme');
+
         menuSong.loop = true;
         menuSong.play();
         menuSong.setVolume(musicVolume);
@@ -126,8 +128,8 @@ export default class Lobby extends Phaser.Scene {
 
                 var enteredName = textInput.value
 
+                menuSong.setVolume(0)
                 this.scene.start('gameScene', { playerName: enteredName, carStats: carChoice, gunSelection: gunChoice })
-                menuSong.stop();
             }
         }, this)
     }

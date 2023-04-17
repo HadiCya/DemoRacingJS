@@ -9,12 +9,15 @@ var line
 var threshold
 var collisionThreshold
 
+var hasFinished = false
+
 
 export const Checkpoints = {
     initializeMap(self) {
         //reset globals
         lastCheckpointPassed = 0;
         lapNumber = 0;
+        hasFinished = false
 
         //Create map from tileset
         self.map = self.make.tilemap({ key: 'tilemap' });
@@ -89,6 +92,9 @@ export const Checkpoints = {
     },
 
     declareFinished(socket) {
-        socket.emit('declareWinner')
+        if (hasFinished == false) {
+            socket.emit('declareWinner')
+            hasFinished = true
+        }
     }
 }

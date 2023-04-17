@@ -119,9 +119,12 @@ io.on('connection', function (socket) {
   })
 
   socket.on('declareWinner', function () {
-    raceStarting = false;
-    raceActive = false;
-    io.emit('winnerDeclared', players[socket.id].playerName)
+    if (raceActive == true) {
+      console.log("winnerDeclared")
+      raceStarting = false;
+      raceActive = false;
+      io.emit('winnerDeclared', players[socket.id].playerName)
+    }
   })
 
 

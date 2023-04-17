@@ -137,6 +137,10 @@ class gameScene extends Phaser.Scene {
 
     this.socket.on('raceStatus', function (isRaceActive) {
       raceActive = isRaceActive
+
+      if (isRaceActive) {
+        gameSong.setVolume(musicVolume)
+      }
     })
 
     //check list of players connected and identify us from other players
@@ -318,13 +322,16 @@ class gameScene extends Phaser.Scene {
 
     this.socket.on('winnerDeclared', function (playerName) {
       if (gameEnd == false) {
-        gameSong.stop();
+        gameSong.setVolume(0);
         console.log(self.car.position)
-        if (!self.winnerText)
-          self.winnerText = self.add.text(self.car.x, self.car.y, `${playerName} has won the race!`, { fontSize: 48 })
-        gameEnd == true
+
+        self.winnerText = self.add.text(self.car.x, self.car.y, `${playerName} has won the race!`, { fontSize: 48 })
+        console.log(self.winnerText)
+
+        gameEnd = true
 
         setTimeout(() => {
+          self.winnerText.destroy();
           self.socket.disconnect();
           self.scene.start('Lobby');
         }, 5000)
