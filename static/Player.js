@@ -195,7 +195,6 @@ export const Player = {
         otherPlayer.explosion.setDepth(2)
 
         otherPlayer.label = self.add.text(playerInfo.x, playerInfo.y, playerInfo.playerName)
-        otherPlayer.setTint(playerInfo.color)
 
         //add this car to array storing other players in game.js
         self.otherPlayers.add(otherPlayer)
