@@ -28,20 +28,20 @@ var position = 9
 io.on('connection', function (socket) {
   console.log('player [' + socket.id + '] connected')
 
-  
-connected++
-//goes through and finds the first empty position
-for (let i = 0; i < 8; i++) {
-  if(!positionarray[i]){
-    position = i 
-    positionarray[i] = true
-    break
-  }
-  else{position = 8}
-}
-amountplayers++
 
-//console.log(amountplayers)
+  connected++
+  //goes through and finds the first empty position
+  for (let i = 0; i < 8; i++) {
+    if (!positionarray[i]) {
+      position = i
+      positionarray[i] = true
+      break
+    }
+    else { position = 8 }
+  }
+  amountplayers++
+
+  //console.log(amountplayers)
   players[socket.id] = {
     rotation: 0,
     x: 30,
@@ -53,7 +53,7 @@ amountplayers++
     playerName: socket.id,
     color: getRandomColor(),
     numberconnected: position
-    
+
   }
 
   //give new client list of players already in game
@@ -98,9 +98,13 @@ amountplayers++
     players[socket.id].health = health
     io.emit('reportHit', players[socket.id])
   })
-  
-  socket.on('gunFiring', function() {
+
+  socket.on('gunFiring', function () {
     socket.broadcast.emit('gunFired', players[socket.id])
+  })
+
+  socket.on('declareWinner', function () {
+    io.emit('winnerDeclared', players[socket.id].playerName)
   })
 
 

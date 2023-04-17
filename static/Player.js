@@ -1,4 +1,4 @@
-import {Gun, cooldown} from "./Gun.js"
+import { Gun, cooldown } from "./Gun.js"
 
 var speed = 0.0;
 var accel = 0.2;
@@ -25,13 +25,15 @@ export const Player = {
 
     //function to set stat variables based on selected car
     setStats(carStats) {
-        maxspeed = carStats.maxspeed,
-            accel = carStats.accel,
-            handling = carStats.handling,
-            driftHandling = carStats.driftHandling,
-            oversteer = carStats.oversteer,
-            decay = carStats.decay
-        maxHealth = carStats.maxHealth
+        maxspeed = carStats.maxspeed;
+        accel = carStats.accel;
+        handling = carStats.handling;
+        driftHandling = carStats.driftHandling;
+        oversteer = carStats.oversteer;
+        decay = carStats.decay;
+        maxHealth = carStats.maxHealth;
+        speed = 0;
+        isDriftStart = true;
     },
 
     //function to instantiate car of current player now also takes in the connected value so we know where you are in the lineup
@@ -51,9 +53,9 @@ export const Player = {
         self.car.body.label = "player"; //player's car's collsion box label;
 
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
-        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]); 
-        self.car.cooldownDisplay = self.add.text(1175, 25, ["Cooldown: " , cooldown]);
-        self.car.cooldownDisplay.visible = false; 
+        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: ", playerInfo.health]);
+        self.car.cooldownDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Cooldown: ", cooldown]);
+        self.car.cooldownDisplay.visible = false;
 
         Gun.addGun(self, self.gunSelection)
 
@@ -69,67 +71,67 @@ export const Player = {
         self.cameras.main.startFollow(self.car, true);
         self.cameras.main.setZoom(1);
 
-        
+
         //gives us permantent access to which position in the lineup you are? i dont remember 100%
         connectedposition = connected
-        
+
         //moves the car to their starting position
         self.car.setY(1200)
         self.car.setX(750)
-        self.car.setRotation(Math.PI/2)
+        self.car.setRotation(Math.PI / 2)
 
-        switch(connectedposition) {
+        switch (connectedposition) {
             case 0:
                 self.car.setY(1200)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 1:
                 self.car.setY(1200)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
-              case 2:
+                self.car.setRotation(Math.PI / 2)
+                break;
+            case 2:
                 self.car.setY(1125)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 3:
                 self.car.setY(1125)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
-              case 4:
+                self.car.setRotation(Math.PI / 2)
+                break;
+            case 4:
                 self.car.setY(1050)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 5:
                 self.car.setY(1050)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
-              case 6:
+                self.car.setRotation(Math.PI / 2)
+                break;
+            case 6:
                 self.car.setY(975)
                 self.car.setX(750)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             case 7:
                 self.car.setY(975)
                 self.car.setX(875)
-                self.car.setRotation(Math.PI/2)
-              break;
+                self.car.setRotation(Math.PI / 2)
+                break;
             default:
                 self.car.setY(1200)
                 self.car.setX(500)
                 self.car.setRotation(0)
-          }
+        }
         //updates position on each of other clients
-        socket.emit('playerMovement', {x: self.car.x, y: self.car.y, rotation: self.car.rotation})
+        socket.emit('playerMovement', { x: self.car.x, y: self.car.y, rotation: self.car.rotation })
         //updates your label for everything
         self.label.setPosition(self.car.x, self.car.y)
-        
-        
+
+
         //car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
         //label.y = car.y - labelOffsetY;
     },
@@ -142,14 +144,14 @@ export const Player = {
             .setRotation(playerInfo.rotation)
 
         Gun.addOtherGun(self, otherPlayer, playerInfo.gunSelection)
-       
+
         otherPlayer.disabled = false
 
         otherPlayer.playerId = playerInfo.playerId
         otherPlayer.body.label = "otherPlayer";
 
         otherPlayer.health = playerInfo.health
-        otherPlayer.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: " , playerInfo.health]);
+        otherPlayer.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: ", playerInfo.health]);
 
         otherPlayer.explosion = self.add.sprite(playerInfo.x, playerInfo.y, 'explosion');
         otherPlayer.explosion.visible = false;
@@ -167,7 +169,7 @@ export const Player = {
     //all changes to movement variables (speed, accel, angle) are scaled by delta factor, which yields frame independent movement
     drive(car, label, cursors, delta, socket, wasd) {
 
-        if(!car.disabled) {
+        if (!car.disabled) {
 
             //accelerate car if below max speed
             if (speed < maxspeed) {
@@ -218,6 +220,9 @@ export const Player = {
 
         car.healthDisplay.x = car.x - labelOffsetX;
         car.healthDisplay.y = car.y - labelOffsetY + 30;
+
+        car.cooldownDisplay.x = car.x + 500
+        car.cooldownDisplay.y = car.y - 300
 
         car.explosion.x = car.x
         car.explosion.y = car.y
@@ -290,8 +295,8 @@ export const Player = {
 
             //console.log(car.angle + 180)
             //console.log(speed)
-            car.setX(car.x + (speed * Math.cos(car.angle*Math.PI/180) * (delta / 10)))
-            car.setY(car.y + (speed * Math.sin(car.angle*Math.PI/180) * (delta / 10)))
+            car.setX(car.x + (speed * Math.cos(car.angle * Math.PI / 180) * (delta / 10)))
+            car.setY(car.y + (speed * Math.sin(car.angle * Math.PI / 180) * (delta / 10)))
             // console.log(speed)
         }
 
@@ -309,12 +314,12 @@ export const Player = {
         otherPlayer.gun.setRotation(playerInfo.gunrotation)
         otherPlayer.explosion.x = playerInfo.x
         otherPlayer.explosion.y = playerInfo.y
-        
 
-        if(otherPlayer.poisonCircle)
+
+        if (otherPlayer.poisonCircle)
             otherPlayer.poisonCircle.setPosition(playerInfo.x, playerInfo.y)
 
-        if(otherPlayer.laserActive) {
+        if (otherPlayer.laserActive) {
             if (otherPlayer.laserLine)
                 otherPlayer.graphics.destroy(otherPlayer.laserLine)
 
@@ -322,7 +327,7 @@ export const Player = {
             otherPlayer.laserLine = new Phaser.Geom.Line(300, 300, 300, 300)
             Phaser.Geom.Line.SetToAngle(otherPlayer.laserLine, playerInfo.x, playerInfo.y, playerInfo.gunrotation, 3000)
             otherPlayer.graphics.strokeLineShape(otherPlayer.laserLine); //draws the line
-        } else if (otherPlayer.laserLine){
+        } else if (otherPlayer.laserLine) {
             otherPlayer.graphics.destroy(otherPlayer.laserLine)
         }
         //let angle=Phaser.Math.Angle.Between(gun.x,gun.y,input.x,input.y);
@@ -332,7 +337,7 @@ export const Player = {
 
 
     inflictDamage(self, socket, otherPlayer, damage) {
-        if (self.gunSelection == "poisongun" ) {
+        if (self.gunSelection == "poisongun") {
             console.log(self.poisonCircle.visible, self.damageLockout)
 
             if (self.poisonCircle.visible == true && self.damageLockout == false) {
@@ -341,15 +346,15 @@ export const Player = {
 
                 //after dealing damage, prevent further until lockout ends
                 //setTimeout to allow for all players hit to get a chance to call inflictDamage()
-                setTimeout(() => {self.damageLockout = true}, 0.1)
+                setTimeout(() => { self.damageLockout = true }, 0.1)
 
                 //reset lockout so another tick of damage can be applied
                 setTimeout(() => {
                     self.damageLockout = false
                 }, 1000)
             }
-        } 
-        else if (!otherPlayer.disabled){
+        }
+        else if (!otherPlayer.disabled) {
             console.log("inflictDamage")
             socket.emit('hitOpponent', { playerId: otherPlayer.playerId, damage: damage });
         }
@@ -361,7 +366,7 @@ export const Player = {
         car.explosion.play('explode');
 
         console.log(car.explosion)
-        
+
         setTimeout(() => {
             car.disabled = false;
             car.explosion.visible = false;
@@ -369,27 +374,27 @@ export const Player = {
 
     },
 
-    
+
     updateHealth(car, health, socket) {
         console.log('updateHealth')
         car.health = health;
         car.healthDisplay.setText(['Health: ', String(health)])
 
-        if(car.health <= 0 && !car.disabled) {
+        if (car.health <= 0 && !car.disabled) {
             this.disable(car);
             setTimeout(() => {
                 socket.emit('resetHealth', maxHealth)
             }, 5000)
         }
     },
-    
+
 
     updateOtherHealth(playerInfo, otherPlayer) {
         console.log(playerInfo, otherPlayer)
         otherPlayer.health = playerInfo.health;
         otherPlayer.healthDisplay.setText(['Health: ', String(otherPlayer.health)])
 
-        if(otherPlayer.health <= 0 && !otherPlayer.disabled) {
+        if (otherPlayer.health <= 0 && !otherPlayer.disabled) {
             this.disable(otherPlayer)
         }
     },
