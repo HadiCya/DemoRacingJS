@@ -21,28 +21,28 @@ export default class Lobby extends Phaser.Scene {
             {
                 maxspeed: 10.0,
                 accel: 0.2,
-                handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                handling: 1.5,
+                driftHandling: 2.5,
+                oversteer: 3.5,
                 decay: 0.05,
-                maxHealth: 10,
+                maxHealth: 15,
                 carSelection: 'allRounder'
             },
             //High Top Speed
             {
-                maxspeed: 10.0,
+                maxspeed: 13.0,
                 accel: 0.2,
-                handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                handling: 1,
+                driftHandling: 2,
+                oversteer: 3,
                 decay: 0.05,
-                maxHealth: 10,
+                maxHealth: 8,
                 carSelection: 'fast'
             },
             //High Acceleration
             {
-                maxspeed: 10.0,
-                accel: 0.2,
+                maxspeed: 8.0,
+                accel: 0.5,
                 handling: 2,
                 driftHandling: 3,
                 oversteer: 4,
@@ -52,24 +52,24 @@ export default class Lobby extends Phaser.Scene {
             },
             //High Handling
             {
-                maxspeed: 10.0,
+                maxspeed: 9.0,
                 accel: 0.2,
-                handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                handling: 3,
+                driftHandling: 4,
+                oversteer: 5,
                 decay: 0.05,
                 maxHealth: 10,
                 carSelection: 'nimble'
             },
             //High Health
             {
-                maxspeed: 10.0,
+                maxspeed: 7.0,
                 accel: 0.2,
                 handling: 2,
-                driftHandling: 3,
-                oversteer: 4,
+                driftHandling: 2.5,
+                oversteer: 3.5,
                 decay: 0.05,
-                maxHealth: 10,
+                maxHealth: 20,
                 carSelection: 'tank'
             },
         ]

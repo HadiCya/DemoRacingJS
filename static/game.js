@@ -3,21 +3,8 @@ import { Gun } from "./Gun.js"
 import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 import { Checkpoints } from "./Checkpoints.js"
 
-var poisongun;
-var input; //mouse position for sprites
-var circle;
+
 var gameSong
-
-var targetX;
-var targetY;
-
-// Rocket Launcher Vars
-// gun is Rocket Launcher
-var rocket; // rocket that gets fired
-var launched = false;
-var launchedtime = 0; // the moment in time the rocket is launched
-export var cooldown = 5000; //how long the rocket has to cooldown
-var rocketDirection;
 
 
 var graphics
@@ -43,7 +30,7 @@ class gameScene extends Phaser.Scene {
     this.playerName = data.playerName
     this.gunSelection = data.gunSelection
     this.carStats = data.carStats
-    //console.log(this.carStats)
+    console.log(this.carStats)
   }
 
   //image preloads for car and gun
@@ -144,7 +131,7 @@ class gameScene extends Phaser.Scene {
     raceActive = false
 
     //sends the enetered player name of this client to server so that it can be stored in array
-    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection, carSelection: self.carStats.carSelection })
+    self.socket.emit('updateOptions', { playerName: self.playerName, gunSelection: self.gunSelection, carSelection: self.carStats.carSelection, health: self.carStats.maxHealth })
 
     //array to store other players
     this.otherPlayers = this.add.group()
@@ -245,6 +232,17 @@ class gameScene extends Phaser.Scene {
       repeat: -1
     })
 
+    //rocket animation
+    this.anims.create({
+      key: 'animateRocket',
+      frames: this.anims.generateFrameNumbers('rocketAnimation', {start: 0, end: 8}),
+      frameRate: 30,
+      repeat: 5, // might effect how long its will be on screen, but not sure exaclty
+      yoyo: true, //optional
+      //hideOnComplete: true
+    });
+
+
     this.socket.on('reportHit', function (playerInfo) {
       //console.log(playerInfo)
       if (self.socket.id === playerInfo.playerId) {
@@ -319,7 +317,7 @@ class gameScene extends Phaser.Scene {
               bullet.setActive(true);
               bullet.setVisible(true);
               //console.log(bullet);
-              bullet.thrust(.03);
+              bullet.thrust(.04);
               self.bulletSound.play();
 
               bullet.x = otherPlayer.x
@@ -334,23 +332,39 @@ class gameScene extends Phaser.Scene {
             //turn circle off after 5 seconds
             setTimeout(() => { otherPlayer.poisonCircle.visible = false }, 5000);
           }
+
+          if (playerInfo.gunSelection == 'rocketgun') {
+            otherPlayer.gun.rocket = self.add.sprite(otherPlayer.x, otherPlayer.y, 'rocketAnimation');
+            otherPlayer.gun.rocket.setDepth(2); //puts above cars
+            otherPlayer.gun.rocket.play('animateRocket'); // starts animation
+            console.log(otherPlayer.gun.rocket)
+          }
         }
       })
     })
 
-   
-    //rocket animation
-    this.anims.create({
-      key: 'animateRocket',
-      frames: this.anims.generateFrameNumbers('rocketAnimation', {
-        start: 0,
-        end: 8
-      }),
-      frameRate: 30,
-      repeat: 5, // might effect how long its will be on screen, but not sure exaclty
-      yoyo: true, //optional
-      hideOnComplete: true
-    });
+    this.socket.on('rocketMoved', function(movementInfo) {
+      self.otherPlayers.getChildren().forEach((otherPlayer) => {
+        if (otherPlayer.playerId == movementInfo.otherPlayerId && otherPlayer.gun.rocket) {
+          otherPlayer.gun.rocket.x = movementInfo.x;
+          otherPlayer.gun.rocket.y = movementInfo.y;
+          otherPlayer.gun.rocket.rotation = movementInfo.rotation + Math.PI / 2
+        }
+      })
+    })
+
+    this.socket.on('rocketExpired', function(playerId) {
+
+      self.otherPlayers.getChildren().forEach((otherPlayer) => {
+        if ((otherPlayer.playerId == playerId) && otherPlayer.gun.rocket) {
+          console.log(otherPlayer.gun.rocket)
+          //TODO: actually delete the rocket
+          otherPlayer.gun.rocket.visible = false
+          otherPlayer.gun.rocket.active = false
+          otherPlayer.gun.rocket = null
+        }
+      })
+    })
 
 
     this.socket.on('winnerDeclared', function (playerName) {
@@ -417,13 +431,30 @@ class gameScene extends Phaser.Scene {
         }
       }
 
-      if ((bodyA.label != 'player') && (bodyB.label == 'shootingRocket')) {
+      if ((bodyA.label != 'player' && bodyA.label != 'poisonArea' && bodyA.label != 'checkpoint') && (bodyB.label == 'firingRocket')) {
+        if (bodyA.label == 'otherPlayer') {
+          Player.inflictDamage(self, self.socket, bodyA.gameObject, 5);
+        }
+       
         console.log(bodyB);
-        rocket.gameObject.destroy();
+
+        self.socket.emit('rocketExpiring')
+
+        const rootBodyB = getRootBody(bodyB)
+        rootBodyB.gameObject.destroy()
+        
       }
-      if ((bodyA.label == 'shootingRocket') && (bodyB.label != 'player')) {
-        console.log(bodyA);
-        rocket.destroy();
+
+      if ((bodyA.label == 'firingRocket') && (bodyB.label != 'player' && bodyB.label != 'poisonArea' && bodyB.label != 'checkpoint')) {
+        if (bodyB.label == 'otherPlayer') {
+          Player.inflictDamage(self, self.socket, bodyB.gameObject, 5);
+        }
+
+        self.socket.emit('rocketExpiring')
+
+        const rootBodyA = getRootBody(bodyA)
+        rootBodyA.gameObject.destroy();
+       
       }
 
 
@@ -493,65 +524,6 @@ class gameScene extends Phaser.Scene {
 
       this.input.activePointer.updateWorldPoint(cam)
 
-    // //sets rotation of gun
-    // let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
-    // gun.setRotation(angle);
-
-    // //Make sure car has been instantiated correctly
-    // if (this.car) {
-    //   pointer = this.input.activePointer; //sets pointer to user's mouse
-    //   gun.x = this.car.x;
-    //   gun.y = this.car.y;
-    //   this.car.gunrotation = gun.rotation;
-
-    //   this.car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (launchedtime - time))/1000 )]);
-
-    //   if(cooldown + (launchedtime - time) < 0){
-    //     this.car.cooldownDisplay.visible = false;
-    //   }
-
-    //   // checks if mouse has been clicked and the rocket is not already launched
-    //   // checks for if the cooldown period has finished or if at the very beginging of the game
-    //   // creates and launches the rocket
-    //   if (this.input.activePointer.isDown && launched == false && (cooldown <= time - launchedtime || (time <= cooldown && launchedtime == 0))) {
-    //     rocket = this.add.sprite(400, 300, 'rocketAnimation');
-    //     rocket.setDepth(2); //puts above cars
-    //     rocket.play('animateRocket'); // starts animation
-    //     rocket.x = this.car.x; // sets starting x
-    //     rocket.y = this.car.y; // sets starting y
-    //     rocket = this.matter.add.gameObject(rocket);
-    //     rocket.setSensor(true);
-    //     rocket.label = 'firingRocket';
-
-    //     launchedtime = time;
-    //     launched = true;
-    //     this.car.cooldownDisplay.visible = true;
-    //     //testing stationary rocket animation
-    //     // let rock = this.add.sprite(400, 300, 'rocketAnimation');
-    //     // rock.setDepth(2);
-    //     // rock.play('animateRocket'); // starts animation
-    //   }
-
-    //   if (launched == true) {
-    //     rocket.play('animateRocket');
-    //     targetX = pointer.worldX; //for opponent just replace pointer.worldX with oppponent.x
-    //     targetY = pointer.worldY; //for opponent just replace pointer.worldY with oppponent.y
-
-    //     //sets the angle the rocket needs inorder to face target
-    //     rocketDirection = Phaser.Math.Angle.Between(rocket.x, rocket.y, input.x, input.y);
-    //     rocket.setRotation(rocketDirection + Math.PI / 2);
-
-
-        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 4000 + rocket.x; //divided by 1000 to get seconds from miliseconds
-        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 4000 + rocket.y;
-
-        var targetBuffer = 5; // checks if the rocket is within a 5px radius of the target
-        if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) {
-          launched = false;
-          rocket.destroy();
-        }
-      }
-
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
       //objects passed in are all defined in create()
@@ -569,10 +541,21 @@ class gameScene extends Phaser.Scene {
         if (this.gunSelection === 'poisongun') {
           Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
         }
+
+        if (this.gunSelection === 'rocketgun') {
+          Gun.rocketGun(this, this.gun, this.car, this.input, this.socket, time);
+        }
+
       }
+    
+    }
+  
   }
 
 }
+
+
+
 
 
 

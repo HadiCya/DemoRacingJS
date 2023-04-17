@@ -1,6 +1,8 @@
 import { Player } from "./Player.js"
 import Lobby, { musicVolume, effectsVolume } from "./Lobby.js"
 
+export const cooldown = 5000; // in milliseconds
+
 //Globals for MACHINEGUN:
 var lastFired_mg = 0;
 
@@ -19,12 +21,25 @@ var input; //mouse position for sprites
 var point;
 var graphics
 var collisionThreshold = 40;
-export const cooldown = 5000; // in milliseconds
+
 const duration = 500; // in milliseconds
 var laserOnCooldown;
 var laserColor = 0xff0000;
 var lastFired_laser = 0;
 var damageCooldown_laser = 0;
+
+
+//Globals for ROCKETGUN:
+var targetX;
+var targetY;
+
+// Rocket Launcher Vars
+// gun is Rocket Launcher
+var rocket; // rocket that gets fired
+var launched = false;
+var launchedtime = 0; // the moment in time the rocket is launched
+var endTime = 0;
+var rocketDirection;
 
 export const Gun = {
 
@@ -62,6 +77,12 @@ export const Gun = {
             self.poisonCircle.visible = false
             self.damageLockout = false
             self.poisonCircle.body.label = "poisonArea"
+        }
+
+        if (gunChoice === 'rocketgun') {
+            //adds gun sprite-image
+            self.gun = self.add.sprite(self.car.x, self.car.y, 'rocketgun');
+            self.gun.setDepth(1);
         }
     },
 
@@ -101,6 +122,11 @@ export const Gun = {
             //otherPlayer.poisonCircle.body.label = "poisonArea"
 
 
+        }
+
+        if (gunChoice === 'rocketgun') {
+            otherPlayer.gun = self.add.sprite(otherPlayer.x, otherPlayer.y, 'rocketgun');
+            otherPlayer.gun.setDepth(1)
         }
     },
 
@@ -234,7 +260,7 @@ export const Gun = {
                 bullet.setActive(true);
                 bullet.setVisible(true);
                 //console.log(bullet);
-                bullet.thrust(.03);
+                bullet.thrust(.04);
 
                 self.bulletSound.play();
                 self.bulletSound.setVolume(effectsVolume);
@@ -295,6 +321,78 @@ export const Gun = {
             }
         }
     },
+
+    rocketGun(self, gun, car, input, socket, time) {
+        //sets rotation of gun
+        let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.activePointer.worldX,  input.activePointer.worldY);
+        gun.setRotation(angle);
+
+        pointer = input.activePointer; //sets pointer to user's mouse
+        gun.x = car.x;
+        gun.y = car.y;
+        car.gunrotation = gun.rotation;
+
+        car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (launchedtime - time))/1000 )]);
+        
+        if(cooldown + (launchedtime - time) < 0){
+            car.cooldownDisplay.visible = false;
+        }
+
+        // checks if mouse has been clicked and the rocket is not already launched
+        // checks for if the cooldown period has finished or if at the very beginging of the game
+        // creates and launches the rocket
+        if (input.activePointer.isDown && launched == false && (cooldown <= time - launchedtime || (time <= cooldown && launchedtime == 0))) {
+            rocket = self.add.sprite(400, 300, 'rocketAnimation');
+            rocket.setDepth(2); //puts above cars
+            rocket.play('animateRocket'); // starts animation
+            rocket.x = car.x; // sets starting x
+            rocket.y = car.y; // sets starting y
+            rocket = self.matter.add.gameObject(rocket);
+            rocket.setSensor(true);
+            rocket.body.label = 'firingRocket';
+
+            launchedtime = time;
+            endTime = time + 2000;
+            launched = true;
+            car.cooldownDisplay.visible = true;
+            //testing stationary rocket animation
+            // let rock = this.add.sprite(400, 300, 'rocketAnimation');
+            // rock.setDepth(2);
+            // rock.play('animateRocket'); // starts animation
+
+            socket.emit('gunFiring')
+        }
+
+        if (launched == true) {
+            if (rocket.body) {
+                rocket.play('animateRocket')
+
+
+                //sets the angle the rocket needs inorder to face target
+                rocketDirection = Phaser.Math.Angle.Between(rocket.x, rocket.y, input.activePointer.worldX, input.activePointer.worldY);
+                rocket.setRotation(rocketDirection + Math.PI / 2);
+
+
+                rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 4000 + rocket.x; //divided by 1000 to get seconds from miliseconds
+                rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 4000 + rocket.y;
+
+                socket.emit('rocketMoving', {x: rocket.x, y: rocket.y, rotation: rocketDirection})
+
+                if (time >= endTime) {
+                    console.log("expired")
+                    rocket.destroy()
+                    socket.emit('rocketExpiring')
+                    launched = false
+                }
+            } 
+            else {   
+                launched = false; //rocket hit something and was destroyed so we can launch another one
+            }
+        }
+
+
+   
+    }
 
 
 }

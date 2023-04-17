@@ -27,6 +27,7 @@ export const Player = {
 
     //function to set stat variables based on selected car
     setStats(carStats) {
+        console.log(carStats)
         maxspeed = carStats.maxspeed;
         accel = carStats.accel;
         handling = carStats.handling;
@@ -89,7 +90,7 @@ export const Player = {
         self.car.body.label = "player"; //player's car's collsion box label;
 
         self.label = self.add.text(playerInfo.x, playerInfo.y, self.playerName); //text on the car
-        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: ", playerInfo.health]);
+        self.car.healthDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Health: ", self.car.health]);
         self.car.cooldownDisplay = self.add.text(playerInfo.x, playerInfo.y, ["Cooldown: ", cooldown]);
         self.car.cooldownDisplay.visible = false;
 
@@ -375,8 +376,9 @@ export const Player = {
 
 
     inflictDamage(self, socket, otherPlayer, damage) {
+        //console.log(otherPlayer)
         if (self.gunSelection == "poisongun") {
-            console.log(self.poisonCircle.visible, self.damageLockout)
+            //console.log(self.poisonCircle.visible, self.damageLockout)
 
             if (self.poisonCircle.visible == true && self.damageLockout == false) {
                 console.log("inflictDamage")
