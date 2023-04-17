@@ -139,7 +139,7 @@ export default class Lobby extends Phaser.Scene {
                 element.removeListener('click');
 
                 
-                
+                menuSong.setVolume(0)
                 this.scene.start('CreditScene',)
             }
 

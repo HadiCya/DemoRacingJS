@@ -13,6 +13,7 @@ export default class CreditScene extends Phaser.Scene {
 
         let soundSample = this.sound.add('Theme')
         soundSample.play();
+        soundSample.setVolume(0.1);
         console.log(soundSample.loop)
         soundSample.loop = true
         console.log(soundSample.loop)

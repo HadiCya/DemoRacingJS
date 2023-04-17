@@ -515,7 +515,7 @@ class gameScene extends Phaser.Scene {
     if (this.car && this.car.body) {
 
       //force game to begin with less than 8 players if P is pressed
-      if (this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7 && raceActive == false) {
+      if ((this.wasd.P.isDown || this.otherPlayers.getChildren().length >= 7) && raceActive == false) {
         this.socket.emit('startRace')
       }
 
