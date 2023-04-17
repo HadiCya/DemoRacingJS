@@ -1,4 +1,6 @@
+
 import { Gun, cooldown } from "./Gun.js"
+
 
 var speed = 0.0;
 var accel = 0.2;

@@ -8,6 +8,17 @@ var input; //mouse position for sprites
 var circle;
 var gameSong
 
+var targetX;
+var targetY;
+
+// Rocket Launcher Vars
+// gun is Rocket Launcher
+var rocket; // rocket that gets fired
+var launched = false;
+var launchedtime = 0; // the moment in time the rocket is launched
+export var cooldown = 5000; //how long the rocket has to cooldown
+var rocketDirection;
+
 
 var graphics
 var line
@@ -52,6 +63,8 @@ class gameScene extends Phaser.Scene {
 
     this.load.image('lasergun', 'static/assets/ray_gun.png')
     this.load.image('machinegun', 'static/assets/machine_gun.png')//from machince gun
+    this.load.image('rocketgun', 'static/assets/rocketLauncher.png')
+    this.load.image('rocket', 'static/assets/rocket_trans.png')
     this.load.image('gun', 'static/assets/gun.png')
     this.load.image('bullet', 'static/assets/machine_gun_bullet.png')
 
@@ -62,6 +75,11 @@ class gameScene extends Phaser.Scene {
     this.load.spritesheet('bulletAnimation', 'static/assets/machine_gun_animation.png', {
       frameWidth: 82,
       frameHeight: 34
+    });
+
+    this.load.spritesheet('rocketAnimation', 'static/assets/rocket_animation.png', {
+      frameWidth: 17,
+      frameHeight: 80
     });
 
     this.load.spritesheet('explosion', 'static/assets/explosion-sheet.png', {
@@ -320,6 +338,21 @@ class gameScene extends Phaser.Scene {
       })
     })
 
+   
+    //rocket animation
+    this.anims.create({
+      key: 'animateRocket',
+      frames: this.anims.generateFrameNumbers('rocketAnimation', {
+        start: 0,
+        end: 8
+      }),
+      frameRate: 30,
+      repeat: 5, // might effect how long its will be on screen, but not sure exaclty
+      yoyo: true, //optional
+      hideOnComplete: true
+    });
+
+
     this.socket.on('winnerDeclared', function (playerName) {
       if (gameEnd == false) {
         gameSong.setVolume(0);
@@ -384,6 +417,15 @@ class gameScene extends Phaser.Scene {
         }
       }
 
+      if ((bodyA.label != 'player') && (bodyB.label == 'shootingRocket')) {
+        console.log(bodyB);
+        rocket.gameObject.destroy();
+      }
+      if ((bodyA.label == 'shootingRocket') && (bodyB.label != 'player')) {
+        console.log(bodyA);
+        rocket.destroy();
+      }
+
 
     });
 
@@ -433,6 +475,10 @@ class gameScene extends Phaser.Scene {
       this.winnerText.y = this.car.y - 100
     }
 
+        // //sets rotation of gun
+    // let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+    // gun.setRotation(angle);
+
     //Make sure car has been instantiated correctly
     if (this.car && this.car.body) {
 
@@ -447,7 +493,64 @@ class gameScene extends Phaser.Scene {
 
       this.input.activePointer.updateWorldPoint(cam)
 
+    // //sets rotation of gun
+    // let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
+    // gun.setRotation(angle);
 
+    // //Make sure car has been instantiated correctly
+    // if (this.car) {
+    //   pointer = this.input.activePointer; //sets pointer to user's mouse
+    //   gun.x = this.car.x;
+    //   gun.y = this.car.y;
+    //   this.car.gunrotation = gun.rotation;
+
+    //   this.car.cooldownDisplay.setText(['Cooldown: ', String( Math.trunc(cooldown + (launchedtime - time))/1000 )]);
+
+    //   if(cooldown + (launchedtime - time) < 0){
+    //     this.car.cooldownDisplay.visible = false;
+    //   }
+
+    //   // checks if mouse has been clicked and the rocket is not already launched
+    //   // checks for if the cooldown period has finished or if at the very beginging of the game
+    //   // creates and launches the rocket
+    //   if (this.input.activePointer.isDown && launched == false && (cooldown <= time - launchedtime || (time <= cooldown && launchedtime == 0))) {
+    //     rocket = this.add.sprite(400, 300, 'rocketAnimation');
+    //     rocket.setDepth(2); //puts above cars
+    //     rocket.play('animateRocket'); // starts animation
+    //     rocket.x = this.car.x; // sets starting x
+    //     rocket.y = this.car.y; // sets starting y
+    //     rocket = this.matter.add.gameObject(rocket);
+    //     rocket.setSensor(true);
+    //     rocket.label = 'firingRocket';
+
+    //     launchedtime = time;
+    //     launched = true;
+    //     this.car.cooldownDisplay.visible = true;
+    //     //testing stationary rocket animation
+    //     // let rock = this.add.sprite(400, 300, 'rocketAnimation');
+    //     // rock.setDepth(2);
+    //     // rock.play('animateRocket'); // starts animation
+    //   }
+
+    //   if (launched == true) {
+    //     rocket.play('animateRocket');
+    //     targetX = pointer.worldX; //for opponent just replace pointer.worldX with oppponent.x
+    //     targetY = pointer.worldY; //for opponent just replace pointer.worldY with oppponent.y
+
+    //     //sets the angle the rocket needs inorder to face target
+    //     rocketDirection = Phaser.Math.Angle.Between(rocket.x, rocket.y, input.x, input.y);
+    //     rocket.setRotation(rocketDirection + Math.PI / 2);
+
+
+        rocket.x = (time - launchedtime) * (pointer.worldX - rocket.x) / 4000 + rocket.x; //divided by 1000 to get seconds from miliseconds
+        rocket.y = (time - launchedtime) * (pointer.worldY - rocket.y) / 4000 + rocket.y;
+
+        var targetBuffer = 5; // checks if the rocket is within a 5px radius of the target
+        if (targetX - targetBuffer <= rocket.x && rocket.x <= targetX + targetBuffer && targetY - targetBuffer <= rocket.y && rocket.y <= targetY + targetBuffer) {
+          launched = false;
+          rocket.destroy();
+        }
+      }
 
       //Drive according to logic in player object
       //function takes: car object, label object, input system, time delta, and socket object
@@ -467,20 +570,19 @@ class gameScene extends Phaser.Scene {
           Gun.poisongun(this, this.gun, this.poisonCircle, this.car, this.input, this.socket, time)
         }
       }
-    }
-
   }
 
-
-
 }
+
+
+
 
 var config = { //Keep this at the bottom of the file
   type: Phaser.AUTO,
   parent: 'phaser-example',
   width: 1280,
   height: 720,
-  transparent: true,
+  transparent: true, // makes background the color set in index.html instead of black
   physics: {
     default: "matter",
     matter: {
