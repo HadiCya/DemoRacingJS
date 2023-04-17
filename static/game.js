@@ -465,12 +465,12 @@ class gameScene extends Phaser.Scene {
     this.matter.world.on('collisionactive', function (event) {
       event.pairs.forEach((pair) => {
         if (pair.bodyA.label == "otherPlayer" && pair.bodyB.label == "poisonArea") {
-          Player.inflictDamage(self, self.socket, pair.bodyA.gameObject, 1)
+          Player.inflictDamage(self, self.socket, pair.bodyA.gameObject, 2)
         }
 
         if (pair.bodyB.label == "otherPlayer" && pair.bodyA.label == "poisonArea") {
 
-          Player.inflictDamage(self, self.socket, pair.bodyB.gameObject, 1)
+          Player.inflictDamage(self, self.socket, pair.bodyB.gameObject, 2)
         }
       })
 
