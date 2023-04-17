@@ -236,7 +236,7 @@ class gameScene extends Phaser.Scene {
     //rocket animation
     this.anims.create({
       key: 'animateRocket',
-      frames: this.anims.generateFrameNumbers('rocketAnimation', {start: 0, end: 8}),
+      frames: this.anims.generateFrameNumbers('rocketAnimation', { start: 0, end: 8 }),
       frameRate: 30,
       repeat: 5, // might effect how long its will be on screen, but not sure exaclty
       yoyo: true, //optional
@@ -318,7 +318,7 @@ class gameScene extends Phaser.Scene {
               bullet.setActive(true);
               bullet.setVisible(true);
               //console.log(bullet);
-              bullet.thrust(.04);
+              bullet.thrust(.06);
               self.bulletSound.play();
 
               bullet.x = otherPlayer.x
@@ -344,7 +344,7 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    this.socket.on('rocketMoved', function(movementInfo) {
+    this.socket.on('rocketMoved', function (movementInfo) {
       self.otherPlayers.getChildren().forEach((otherPlayer) => {
         if (otherPlayer.playerId == movementInfo.otherPlayerId && otherPlayer.gun.rocket) {
           otherPlayer.gun.rocket.x = movementInfo.x;
@@ -354,7 +354,7 @@ class gameScene extends Phaser.Scene {
       })
     })
 
-    this.socket.on('rocketExpired', function(playerId) {
+    this.socket.on('rocketExpired', function (playerId) {
 
       self.otherPlayers.getChildren().forEach((otherPlayer) => {
         if ((otherPlayer.playerId == playerId) && otherPlayer.gun.rocket) {
@@ -436,14 +436,14 @@ class gameScene extends Phaser.Scene {
         if (bodyA.label == 'otherPlayer') {
           Player.inflictDamage(self, self.socket, bodyA.gameObject, 5);
         }
-       
+
         console.log(bodyB);
 
         self.socket.emit('rocketExpiring')
 
         const rootBodyB = getRootBody(bodyB)
         rootBodyB.gameObject.destroy()
-        
+
       }
 
       if ((bodyA.label == 'firingRocket') && (bodyB.label != 'player' && bodyB.label != 'poisonArea' && bodyB.label != 'checkpoint')) {
@@ -455,7 +455,7 @@ class gameScene extends Phaser.Scene {
 
         const rootBodyA = getRootBody(bodyA)
         rootBodyA.gameObject.destroy();
-       
+
       }
 
 
@@ -507,7 +507,7 @@ class gameScene extends Phaser.Scene {
       this.winnerText.y = this.car.y - 100
     }
 
-        // //sets rotation of gun
+    // //sets rotation of gun
     // let angle = Phaser.Math.Angle.Between(gun.x, gun.y, input.x, input.y);
     // gun.setRotation(angle);
 
@@ -548,9 +548,9 @@ class gameScene extends Phaser.Scene {
         }
 
       }
-    
+
     }
-  
+
   }
 
 }
