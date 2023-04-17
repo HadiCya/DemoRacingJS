@@ -2,7 +2,7 @@ let lastCheckpointPassed = 0;
 let lapNumber = 0;
 
 const checkpointsPerLap = 28;
-const lapsPerRace = 4;
+const lapsPerRace = 3;
 
 var graphics
 var line
