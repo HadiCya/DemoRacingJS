@@ -401,11 +401,13 @@ export const Player = {
     },
 
     disable(car) {
+        speed = 0.0;
         car.disabled = true;
         car.explosion.visible = true
         car.explosion.play('explode');
 
         console.log(car.explosion)
+
 
         setTimeout(() => {
             car.disabled = false;
