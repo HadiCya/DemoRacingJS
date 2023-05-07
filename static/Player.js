@@ -407,6 +407,7 @@ export const Player = {
 
         console.log(car.explosion)
 
+
         setTimeout(() => {
             car.disabled = false;
             car.explosion.visible = false;
@@ -421,6 +422,7 @@ export const Player = {
         car.healthDisplay.setText(['Health: ', String(health)])
 
         if (car.health <= 0 && !car.disabled) {
+            speed = 0.0
             this.disable(car);
             setTimeout(() => {
                 socket.emit('resetHealth', maxHealth)
